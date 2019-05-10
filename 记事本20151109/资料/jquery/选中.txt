@@ -1,0 +1,13 @@
+﻿选中从左端到右端
+$("#add").click(function(){
+$("#second").append($("#first option:selected"))
+});
+
+全选
+$("#add_all").click(function(){
+$("#second").append($("#first option"))
+});
+双击从左端到右端
+$("#first").dbclick(function(){
+$("second").append($("first option:selected"));
+});

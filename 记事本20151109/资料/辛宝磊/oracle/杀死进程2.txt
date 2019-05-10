@@ -1,0 +1,58 @@
+﻿oracle死锁时杀进程的方法
+ 
+第一步：尝试在sqlplus中通过sql命令进行删除，如果能够删除成功，则万事大吉！但通常情况下，出现死锁时，想通过命令行或者通过oracle的管理工具删除有死锁的session，oracle只会将该session标记为killed，但无法清除掉，往往需要通过第二步在操作系统层级进行删除！
+ 
+Connected to Oracle9i Enterprise Edition Release 9.2.0.1.0 
+Connected as quik
+  www.2cto.com  
+SQL>
+ 	select xidusn, object_id, session_id, locked_mode from v$locked_object;
+	 --查死锁的对象，获取其SESSION_ID
+ 
+    XIDUSN OBJECT_ID SESSION_ID LOCKED_MODE
+---------- ---------- ---------- -----------
+        10      30724         29           3
+        10      30649         29           3
+ 
+SQL> 
+	select username,sid,serial# from v$session where sid=29; 
+	--根据上步获取到的sid查看其serial#号
+ 
+USERNAME                              SID    SERIAL#
+------------------------------ ---------- -------- --
+QUIK                                   29      57107
+ 
+SQL>
+	 alter system kill session '29,57107';-------------
+	 EXEC sys.kill_session('11','1337');------------------
+	 SELECT   SID,JOB   FROM   DBA_JOBS_RUNNING;
+ 	 --删除进程，如已经删除过，则会报ora-00031的错误；否则oracle会将该session标记为killed状态，等待一段时间看能否会自动消失，如长时间消失不掉，则需要做后续步骤
+ 
+一些ORACLE中的进程被杀掉后，状态被置为"killed"，但是锁定的资源很长时间不释放，有时实在没办法，只好重启数据库。现在提供一种方法解决这种问题，那就是在ORACLE中杀不掉的，在OS一级再杀。 
+  www.2cto.com  
+1.下面的语句用来查询哪些对象被锁： 
+ 
+select object_name,machine,s.sid,s.serial# 
+from v$locked_object l,dba_objects o ,v$session s 
+where l.object_id　=　o.object_id and l.session_id=s.sid; 
+ 
+2.下面的语句用来杀死一个进程： 
+alter system kill session '24,111'; (其中24,111分别是上面查询出的sid,serial#) 
+ 
+【注】以上两步，可以通过Oracle的管理控制台来执行。 
+ 
+3.如果利用上面的命令杀死一个进程后，进程状态被置为"killed"，但是锁定的资源很长时间没有被释放，那么可以在os一级再杀死相应的进程（线程），首先执行下面的语句获得进程（线程）号： 
+select spid, osuser, s.program 
+from v$session s,v$process p 
+where s.paddr=p.addr and s.sid=24 （24是上面的sid） 
+  www.2cto.com  
+4.在OS上杀死这个进程（线程）： 
+1)在unix上，用root身份执行命令: 
+#kill -9 12345（即第3步查询出的spid） 
+2)在windows（unix也适用）用orakill杀死线程，orakill是oracle提供的一个可执行命令，语法为： 
+orakill sid thread 
+ 
+其中： 
+sid：表示要杀死的进程属于的实例名 
+thread：是要杀掉的线程号，即第3步查询出的spid。 
+例：c:>orakill orcl 12345

@@ -1,0 +1,29 @@
+﻿由于ActiveMQ是一个独立的jms provider，所以我们不需要其他任何第三方服务器就可以马上做我们的测试了.编译example目录下面的程序 ProducerTool/ConsumerTool 是JMS参考里面提到的典型应用，Producer产生消息，Consumer消费消息，而且这个例子还可以加入参数帮助你测试刚才启动的本地 ActiveMQ或者是远程的ActiveMQ
+ProducerTool broker的地址，默认的是tcp://localhost:61616
+[true|flase] 是否使用topic，默认是false
+[subject] subject的名字，默认是TOOL.DEFAULT
+[durabl] 是否持久化消息，默认是false
+[messagecount] 发送消息数量，默认是10
+[messagesize] 消息长度，默认是255
+[clientID] durable为true的时候，需要配置clientID
+[timeToLive] 消息存活时间
+[sleepTime] 发送消息中间的休眠时间
+[transacte] 是否采用事务
+ConsumerTool broker的地址，默认的是tcp://localhost:61616
+[true|flase] 是否使用topic，默认是false
+[subject] subject的名字，默认是TOOL.DEFAULT
+[durabl] 是否持久化消息，默认是false
+[maxiumMessages] 接受最大消息数量，0表示不限制
+[clientID] durable为true的时候，需要配置clientID
+[transacte] 是否采用事务
+[sleepTime] 接受消息中间的休眠时间，默认是0,onMeesage方法不休眠
+[receiveTimeOut] 接受超时
+我们可以这样使用：
+先启动activeMQ，再打开两个命令窗口，都进入D:\activemq\example，一个运行：ant consumer，一个运行：ant producer，如果成功发送/接收了消息就OK了。
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+D:\etlvp\apache-activemq-5.9.0\conf\activemq.xml
+        <managementContext>
+            <managementContext createConnector="true" connectorPort="11099"/>
+        </managementContext>

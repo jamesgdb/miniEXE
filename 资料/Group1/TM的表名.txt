@@ -1,0 +1,94 @@
+﻿acspuseraccount, 
+billing_transactions, 
+bindings, 
+bind_del_candidates, 
+callercredentials, 
+categories, 
+categoryimages, 
+categoryname, 
+categorytree, 
+client_defined_event_types, 
+configdefinition, 无数据
+configgroups, 无数据
+configspace, 无数据
+configtree, 无数据
+configvalidator, 无数据
+configvalue, 无数据
+contacts, 无数据
+db_version, 
+desktops, ---------------------------------------------------------
+efn_local_data, 出现 ip
+efn_local_metadata, 
+entity_aggregations, 
+event_log, 
+event_notification, 
+fact_meta_data, 
+gen_alert, 无数据
+gen_config_param, 
+gen_config_param_value, 
+groups, 
+hc_challenge_rate, 
+hc_event_distribution, 
+hc_normalization, 
+images, 无数据
+ma_alerts, 无数据
+ma_alerts_message_values, 无数据
+migration_log, 
+msg_code_keys, 
+msg_code_key_default, 
+notification, 
+orgs, 
+pm_condition, 
+pm_create_case_for_action, 
+pm_expression,  存有ip
+pm_list_comment, 
+pm_list_element,  存有ip
+pm_policy, 
+pm_policy_list, 可能有用
+pm_rule, 存储的规则描述
+pm_rule_auth_methods, 
+pm_rule_comment, 
+pm_rule_event_types, 存储的事件类型
+pm_rule_triggered_statistics,  无数据
+rba_bs_buckets, 无
+rba_bs_buckets_static, 无
+rba_bs_category_bucket_stat, 无
+rba_bs_cat_field_trnsl, 无
+rba_currency, 无
+rba_entity_profiling, 无数据
+rba_list_data, 无
+rba_score_extrapolation, 无
+rba_score_normalize_stat, 无数据
+reot_bucket_aggr_status, 
+reot_conf_category_group, 
+reot_event_dynamic_buckets, 无
+reot_event_dyn_buckets_keep, 无数据
+reot_event_extra_data, 无
+reot_event_extra_data_keep, 无 
+reot_iot_migration_log, 无数据
+reot_partition_key_days_calc, 无数据
+reot_procs_log, 无数据
+reot_temp_bucket_aggr,无数据 
+re_bucket_user_counter, 无数据
+re_configuration,  无数据
+re_error_code, 无
+re_global_params,无 
+re_hints, 无
+re_map_strings_to_ids, 无数据
+re_map_strings_to_ids_temp,  无数据
+re_profile_facts, 无
+re_task_status, 无
+rsasession, 无
+rsatransaction,无 
+rsa_rac_support, 无
+sessionacsp, 无
+sys_export_schema_01, 无
+sys_export_schema_02, 无
+sys_export_schema_03, 无
+sys_export_schema_04, 无
+sys_export_schema_05, 无
+tab_map, 无数据
+temptab,  无数据
+userchangehistory,  无 
+users,    无
+user_favorites   无数据 

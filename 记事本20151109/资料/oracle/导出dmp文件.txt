@@ -1,0 +1,14 @@
+﻿C:\Documents and Settings\Administrator>imp tmrpt/tmrpt@22.11.103.12:1521/bocReport file=c:\yuCheng\event_log_realtime.d
+mp tables=(event_log_realtime);
+
+
+imp tmrpt/tmrpt@22.11.103.12:1521/bocReport file=c:\yuCheng\event_log_realtime.d
+mp tables=(event_log_realtime);
+
+
+imp vpetl_hhbank/vpetl_hhbank@192.168.6.58:1521/orcl file=/home/oracle/vp_etl.dmp ;
+
+etladmin
+
+C:\Documents and Settings\Administrator>imp etladmin/etladmin@192.168.6.200:1521/orcl file=c:\yuCheng\event_log_realtime.d
+mp tables=(event_log_realtime);

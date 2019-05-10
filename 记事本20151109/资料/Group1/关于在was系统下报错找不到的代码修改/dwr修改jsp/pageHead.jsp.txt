@@ -1,0 +1,1 @@
+﻿<SCRIPT type="text/javascript" src="${ctx}/resources/system/js/system.js"></SCRIPT>

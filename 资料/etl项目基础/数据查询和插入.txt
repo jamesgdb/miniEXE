@@ -1,0 +1,15 @@
+﻿select count(*)  from VPDM_BL_BILL_DISCOUNT_b t where t.as_of_date=to_date('2014-3-13','yyyy-mm-dd');
+insert into Vpdm_Bl_Reverse_Repo  select *  from Vpdm_Bl_Reverse_Repo_b t;
+select as_of_date,count(1)  from Vpdm_Bl_Reverse_Repo_b t   group by t.as_of_date;
+
+select as_of_date,count(1)  from Vpdm_Bl_Reverse_Repo t   group by t.as_of_date
+
+
+
+--------------------------------------------------
+select  as_of_date,count(1)   from  vpdm_bl_bill_discount_clear t group  by t.as_of_date 
+;
+update vpdm_bl_bill_discount_clear t  set t.as_of_date = to_date('2014-03-10','yyyy-mm-dd') where   t.as_of_date = to_date('2014-03-13','yyyy-mm-dd')
+
+;
+insert into  vpdm_bl_bill_discount_clear  select * from vpdm_bl_bill_discount t where t.as_of_date = to_date('2014-03-13','yyyy-mm-dd')

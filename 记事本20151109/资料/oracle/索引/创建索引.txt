@@ -1,0 +1,112 @@
+﻿全局索引
+============
+CREATE INDEX month_ix ON sales(sales_month)
+
+本地索引
+============
+CREATE INDEX loc_dept_ix ON dept(deptno) LOCAL;
+
+全局分区索引
+============
+CREATE INDEX month_ix ON sales(sales_month)
+   GLOBAL PARTITION BY RANGE(sales_month)
+      (PARTITION pm1_ix VALUES LESS THAN (2)
+       PARTITION pm2_ix VALUES LESS THAN (3)
+       PARTITION pm3_ix VALUES LESS THAN (4)
+       PARTITION pm4_ix VALUES LESS THAN (5)
+       PARTITION pm5_ix VALUES LESS THAN (6)
+       PARTITION pm6_ix VALUES LESS THAN (7)
+       PARTITION pm7_ix VALUES LESS THAN (8)
+       PARTITION pm8_ix VALUES LESS THAN (9)
+       PARTITION pm9_ix VALUES LESS THAN (10)
+       PARTITION pm10_ix VALUES LESS THAN (11)
+       PARTITION pm11_ix VALUES LESS THAN (12)
+       PARTITION pm12_ix VALUES LESS THAN (MAXVALUE));
+分区表和一般表一样可以建立索引，分区表可以创建局部索引和全局索引。当分区中出现许多事务并且要保证所有分区中的数据记录的唯一性时采用全局索引。
+3.1     局部索引分区的建立：
+SQL> create index dinya_idx_t on dinya_test(item_id)
+  2  local
+  3  (
+  4     partition idx_1 tablespace dinya_space01,
+  5     partition idx_2 tablespace dinya_space02,
+  6     partition idx_3 tablespace dinya_space03
+  7  );
+
+Index created.
+
+SQL> 
+
+
+看查询的执行计划，从下面的执行计划可以看出，系统已经使用了索引：
+SQL> select * from dinya_test partition(part_01) t where t.item_id=12;
+
+Execution Plan
+----------------------------------------------------------
+   0      SELECT STATEMENT Optimizer=CHOOSE (Cost=2 Card=1 Bytes=187)
+   1    0   TABLE ACCESS (BY LOCAL INDEX ROWID) OF 'DINYA_TEST' (Cost=
+          2 Card=1 Bytes=187)
+   2    1     INDEX (RANGE SCAN) OF 'DINYA_IDX_T' (NON-UNIQUE) (Cost=1
+           Card=1)
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+          4  consistent gets
+          0  physical reads
+          0  redo size
+        334  bytes sent via SQL*Net to client
+        309  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          1  sorts (memory)
+          0  sorts (disk)
+          2  rows processed
+
+SQL>
+
+3.2     全局索引分区的建立。
+全局索引建立时global 子句允许指定索引的范围值，这个范围值为索引字段的范围值：
+SQL> create index dinya_idx_t on dinya_test(item_id)
+  2  global partition by range(item_id)
+  3  (
+  4     partition idx_1 values less than (1000) tablespace dinya_space01,
+  5     partition idx_2 values less than (10000) tablespace dinya_space02,
+  6     partition idx_3 values less than (maxvalue) tablespace dinya_space03
+  7  );
+
+Index created.
+
+SQL> 
+
+
+        本例中对表的item_id字段建立索引分区，当然也可以不指定索引分区名直接对整个表建立索引，如：
+SQL> create index dinya_idx_t on dinya_test(item_id);
+
+Index created.
+
+SQL> 
+
+
+        同样的，对全局索引根据执行计划可以看出索引已经可以使用：
+SQL> select * from dinya_test t where t.item_id=12;
+
+Execution Plan
+----------------------------------------------------------
+   0      SELECT STATEMENT Optimizer=CHOOSE (Cost=2 Card=3 Bytes=561)
+   1    0   TABLE ACCESS (BY GLOBAL INDEX ROWID) OF 'DINYA_TEST' (Cost
+          =2 Card=3 Bytes=561)
+
+   2    1     INDEX (RANGE SCAN) OF 'DINYA_IDX_T' (NON-UNIQUE) (Cost=1
+           Card=3)
+Statistics
+----------------------------------------------------------
+          5  recursive calls
+          0  db block gets
+         10  consistent gets
+          0  physical reads
+          0  redo size
+        420  bytes sent via SQL*Net to client
+        309  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          3  sorts (memory)
+          0  sorts (disk)
+          5  rows processed

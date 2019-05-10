@@ -1,0 +1,420 @@
+﻿1、通过本机从windows下可以操作AIX及oracle
+2、先CMD到命令窗口模式（即DOS模式）
+3、telnet 数据库服务器IP
+4、显示连接信息(login:)要求输入用户,一般AIX用户名为root相当于windows下的administrator一样。
+5、输入密码（问客户）
+6、连接进入后。常用操作命令为
+	ls	列目录。相当于dos下的dir命令
+	cd	进入目录。同于DOS
+	sh	执行批处理命令文件。以.sh结尾的文件。相当于windows下的.bat文件。
+7、（连接oracle）需要先切换到oracle用户。（必须的，root用户不能操作oracle数据库）
+	su  -  oracle
+8、lsnrctl start     （启动监听。一般是启动的，可以看到提示信息中有）
+9、sqlplus  / nolog	进入SQL模式。
+10、sqlplus 'sys' as sysdba;	以管理员身份登录oracle
+11、shutdown immediate;  快速关闭oracle
+12、如果因故不能正常关闭（超过30分钟还未关闭的）。先执行以下命令。
+	 startup force;
+	稍等后，可以看到相关提示信息。再次出现命令提示符，说明完成。
+13、再执行。shutdown immediate;   根据提示信息可以看到，已经正常关闭了。再次出现命令提示符，说明完成。
+14、正常关闭后，再执行startup;启动oracle.   看到mounted 表明已启动。
+15、如果正常启动就可以了。关闭退出。结束。退出一直用exit直到退回到你的windows命令窗口即结束
+
+
+cd ..
+quit
+高德宝 17:29:44
+1232
+辛宝磊 17:30:17
+1. 常用命令操作
+ #prtconf  --AIX服务器物理结构信息
+ #lscfg -l hdisk0 --列出设备信息
+ #uname -a  --主机基本安装信息
+ #oslevel -s  --查看操作系统版本
+ #lspv    --查看磁盘信息
+ #bootlist -m normal -0 --查看系统启动盘设定
+ #bootlist -m normal hdisk1 --修改启动顺序（以hdisk1启动）
+ #lssrc -g[s/t] tcpip  --查看服务（TCP/IP相关）
+ #startsrc -g nfs  --开启nfs组服务
+ #stopsrc -s inetd  --关闭网络服务
+ #refresh -s inetd  --刷新服务
+ #cat /etc/services  --查看服务端口
+ #cat /etc/.init.state --查看系统运行级别
+ #lsitab init   --查看系统默认启动级别
+ #shutdown -Fr  --F强制关机，r重启
+ #uptime    --系统启动时间
+ #ipcs -ma   --查看共享内存信息
+ #ps -fu oracle  --查看用户进程信息
+ #smitty chgsys  --修改内核参数
+ 
+2. AIX 克隆盘（用于创建克隆盘的磁盘不能属于任何卷组）
+ 2.1 使用smitty进行克隆
+  以此进入smitty -> software installation and maintenance -> altername disk installation -> clone the rootvg to an altername disk 进行操作
+ 2.2 使用 mksysb 创建克隆盘
+  #mksysb -i /usr/sys/rootvg.bk --创建 mksysb 备份文件
+  #smitty alt_mksysb  --使用smitty进行克隆
+  或者
+  #alt_disk_mksysb -m /usr/sys/rootvg.bk -P "all" -d "hdisk0" --手工备份映像
+ 2.3 使用命令进行克隆
+  #alt_disk_copy -d hdisk0 --将rootvg克隆到hdisk0
+  #alt_rootvg_op -X old_rootvg --清除原始的rootvg（old_rotvg）
+  #alt_rootvg_op -X altinst_rootvg --清除原始的rootvg（altinst_rootvg）
+ 2.4 克隆盘的查看（克隆卷组altinst_rootvg不能使用LVM命令）
+  #alt_rootvg_op -W -d hdisk1 --唤醒克隆盘，此后即可对克隆盘进行修改,但不能继续执行引导操作
+  #alt_rootvg_op -S -t hdisk1 --使其再次休眠
+  #alt_rootvg_op -v old_rootvg -d hdisk1 --重新设置卷组名为old_rootvg
+ 2.5 AIX 克隆升级系统
+  检查磁盘，确定rootvg是否包含2块磁盘
+  #lspv
+  拆除镜像，并将hdisk1从rootvg中去掉
+  #unmirrorvg rootvg hdisk1
+  #reducevg rootvg hdisk1
+  查看系统启动顺序
+  #bootlist -m normal -o
+  创建rootvg克隆盘
+  #alt_disk_copy -d hdisk1
+  查看并修改系统启动顺序
+  #bootlist -m normal -o
+  #bootlist -m normal hdisk0 --此处设置为以前的
+  执行AIX系统升级包（存储在/usr/sys/inst.images）
+  #install_all_updates -d /usr/sys/inst.images
+  重启系统
+  #shutdown -Fr  --F强制关机，r重启
+  如果系统顺利启动并运行于新版本，则删除克隆盘
+  #alt_rootvg_op -X altinst_rootvg
+  #lspv
+  如果系统没有运行于新版本甚至无法启动，则使用克隆盘
+  #bootlist -m normal -o hdisk1
+  #bootlist -m normal -o
+  重启系统
+  #shutdown -Fr
+  删除原来的rootvg卷组，hdisk1成为新的rootvg成员磁盘，hdisk0置为空
+  #lspv
+  #alt_rootvg_op -X old_rootvg
+  
+  3. 关于软件的安装和卸载(xlC.rte)
+ 3.1 查看当前安装软件的状态
+  #lslpp -f xlC.rte
+  或者
+  #lslpp -l | grep xlC.rte
+ 3.2 清除之前安装失败的软件残余
+  #installp -C --清除所有安装失败的软件残余
+ 3.3 安装软件包
+  #installp -acpX -d /temp/sys/xlC.rte --安装预览
+  #installp -avX -d /temp/sys/xlC.rte --以applied的方式安装
+  #installp -cgX all --提交系统中所有处于应用状态的更新软件
+ 3.4 删除已成功安装的软件
+  #installp -ugp -V2 xlC.rte --预览删除
+  #installp -u xlC.rte  --直接删除
+ 3.5 列出光盘上可安装的文件内容
+  #installp -L -d /dev/cd0
+ 3.6 查看某软件的技术级别
+  #lslpp -l xlC.rte
+4. AIX 网络设定
+ 4.1 常用命令
+  #lsdev -Cc adapter  --查看适配器
+  #lsdev -Cc if   --查看网络适配器
+  #smitty chgenet   --使用smity配置以太网
+  #smitty chgtok   --使用smity配置令牌环网
+  #ifconfig -a   --列出所有已分配IP的网络接口
+  #ifconfig en1   --列出en1网络接口/网络接口加回系统
+  #ifconfig en0 up  --激活en0接口
+  #ifconfig en0 down  --关闭en0接口
+  #ifconfig en0 delete  --删除en0接口配置
+  #ifconfig en0 detach  --断开en0接口
+  #ifconfig en0 192.168.1.143 netmask 255.255.255.0 up --激活同时赋予IP地址
+  #ifconfig en0 192.168.1.143 netmask 255.255.255.0 alias --将IP及掩码别名绑定到en0（重启系统后失效）
+ 4.2 使用smitty配置网络接口TCP/IP
+  #smitty tcoip -> minimum configuration & startup -> available network interfaces
+  
+5. 用户、组、文件权限相关
+ 5.1 用户相关
+  #mkuser oracle  --创建用户
+  $passwd    --修改自己用户密码
+  #passwd oracle  --修改指定用户密码
+  #chuser rlogin=true oracle --设置oracle用户可远程访问
+  #chuser groups=dba oracle --将用户oracle加到dba组
+  #lsuser oracle  --列出oracle用户属性
+  #rmuser oracle  --删除用户oracle（只删除用户信息）
+  #rmuser -p oracle --删除用户oracle（删除用户所有信息）
+  #who    --查看用户
+  #whoami    --查看用户
+  #who -r    --系统运行级别
+  $chsh    --修改用户shell
+  #last root console | more   --查看root用户从控制台登录和退出的相关信息
+  #last oracle | more    --查看oracle从任意位置的登录和退出的相关信息
+ 5.2 组相关
+  #mkgroup oinstall  --创建用户组
+  #mkgroup -a oinstall --创建管理型用户组
+ 5.3 文件权限相关
+  #chmod u+x backup.sh --授予用户对文件的执行权限
+  
+6. AIX设备、日志相关
+ 6.1 常用命令
+  #ls -alt /dev   --查看所有设备
+  #lsdev -C    --列出定制库设备信息
+  #lsdev -P | more  --列出预定义库设备信息
+  #cfgmgr     --扫描并配置设备
+  #cfgmgr -l scsi0  --配置指定的设备
+  #cfgmgr -i /usr/sys/inst.images --扫描并自动安装设备
+  #lspv     --查看磁盘设备
+  #lspv -p hdisk0 | more --查看物理磁盘物理分区
+  #lsdev -Cc tape   --查看磁带设备信息
+  #lsattr -El rmt0  --查看磁带设备rmt0配置信息
+  #lsattr -l rmt0 -D  --查看磁带设备默认属性值
+  #lsattr -l rmt0 -E  --查看磁带设备当前属性值
+  #lsattr -El tty0 -a speed --查看设备指定属性当前值
+ 6.2 日志相关
+  #/usr/lib/errdemon  --重启系统错误守候进程
+  #/usr/lib/errdemon -l --查看错误相关属性
+  #errpt     --显示到目前的所有错误信息
+  #errpt -a    --错误详细信息
+  #errpt -a -s 1102043810 --显示指定时间之前的错误信息（2010年11月02日04点38分）
+  #errpt -aj 864D2CE3 | more  --显示指定错误号的详细信息
+  #errclear -d S 0  --删除所有软件类错误
+  #errclear 0    --删除所有信息
+  #diag -d sysplanar0 -v -e   --查看指定设备的硬件错误信息
+  
+  
+  7. AIX任务调度相关
+ #crontab -l
+ 50 23 * * 6 /home/oracle/rman.sh
+ 每周6的23点50进行rman备份
+8. AIX存储相关
+ 8.1 常用命令
+  #cat /etc/filesystems --查看文件系统分布
+  #mount     --查看文件系统和逻辑卷对应关系
+  #lsfs test    --查看文件系统属性
+ 8.2 LVM存储管理流程
+  8.2.1 物理卷相关
+   #shutdown -F   --关机添加磁盘
+   #lspv     --查看是否识别物理卷
+    或者手动识别，并强制设置为物理卷
+    #lspv
+    #cfgmgr
+    #lspv
+    #chdev -l hdisk1 -a pv = yes --强制修改为物理卷
+   #chpv -v r hdisk2  --设置为不可用
+   #chpv -v a hdisk2  --设置为可用
+   #mklv -y lv_test datavg 10 hdisk2 --创建逻辑卷
+   #mklv -T O -y lv_redo1 datavg 1  --创建逻辑卷（裸设备）oracle redo 1个PP在卷组datavg上
+   #chpv -a n hdisk2  --关闭物理卷可分配权
+   #chpv -a y hdisk2  --开启物理卷可分配权
+   #rmdev -l hdisk2  --删除磁盘设备
+   #rmdev -l hdisk2 -d  --彻底删除磁盘设备
+   #lspv hdisk2   --查看物理盘属性
+   #lsdev -C -c disk  --查看物理盘属性
+   #lscfg     --查看物理盘属性
+   #lspv -M hdisk2   --查看物理卷上物理分区分配情况
+  8.2.2 卷组相关
+   #lsvg    --查看卷组属性
+   #lsvg -o   --查看激活的卷组属性
+   #lsvg -p   --列出卷组中物理卷信息
+   #lsvg -l datavg  --列出卷组中逻辑卷信息
+   #lspv    --查看是否存在可用物理卷
+   #smitty mkvg  --使用smitty创建卷组
+    #mkvg -y 'test' -s'4' hdisk0 hdisk1 hdisk2  --手动创建PP大小为4M不自动激活的卷组test
+   #reducevg rootvg hdisk1  --删除卷组中的物理卷，只有逐个删除物理卷才可删除卷组
+   #extendvg test hdisk3  --添加磁盘到卷组
+   #reorgvg test fslv00  --重组卷组（test）中的逻辑卷（fslv00），重组前，卷组必须处于激活状态，且必须有一个空闲分区，不会重组条带化后的逻辑卷物理分区。
+   #varyonvg datavg --激活卷组
+   #varyoffvg datavg --关闭卷组
+   #varyonvg -f datavg --强制激活卷组
+   #exportvg test  --导出卷组（除rootvg，且已关闭的卷组）
+   #importvg -y test hdsiak12 --导入卷组
+   #mirrorvg -c 3 datavg --卷组镜像（3重镜像）
+   #lsvg -l datavg  --查看卷组中逻辑卷信息
+   #镜像卷组中成员物理卷替换
+    #unmirrorvg datavg hdisk3 --假设hdisk3出现问题
+    #reducevg datavg hdisk3  
+    #rmdev -l hdisk3 -d
+    #cfgmgr
+    #extendvg datavg hdisk7  --使用hdisk7替换hdisk3
+   #镜像根卷组（rootvg）
+    #extendvg rootvg hdisk1    --添加物理卷到卷组
+    #mirrorvg rootvg hdisk1    --镜像到物理卷一份
+    #bosboot -ad /dev/hdisk1   --在镜像盘上创建启动映像
+    #bootlist -m normal hdisk0 hdisk1 
+    #bootlist -m normal -o
+    #shutdown -Fr      --重启系统，关闭rootvg卷组的quorum
+   #替换卷组中的物理卷
+    #lsvg -p datavg      --确定卷组中成员磁盘
+    #extendvg datavg hdisk3    --添加物理盘，注：源盘的已用物理分区数要小于或等于目标盘中未用的物理分区数
+     #lspv hdisk2 | grep "USED PPs"  --查看源盘的已用物理分区数
+     #lspv hdisk3 | grep "FREE PPs"  --查看目标盘的未用物理分区数
+    #migratepv hdisk2 hdisk3   --物理卷（hdisk2）复制迁移到hdisk3
+    #lspv -M hdisk2      --确定原物理卷hdisk2是否已经为空
+    #reducevg datavg hdisk2    --从卷组中剔除物理卷
+  8.2.3 逻辑卷相关
+   #smitty mklv  --smitty创建逻辑卷
+    #mklv -y lv1 -c 2 rootvg 10  --在卷组rootvg中创建逻辑卷lv1，其拥有10个逻辑分区采用2镜像，以20个物理分区来匹配这10个逻辑分区。
+   #rmlv lv1   --删除逻辑卷
+   #smitty rmlv  --smitty删除逻辑卷
+   #逻辑卷物理空间占有大小=逻辑分区数*PP数*逻辑卷镜像数
+   #extendlv lv1 10 --为逻辑卷lv1增加10个逻辑分区（逻辑卷扩容）
+    #smitty extendlv --逻辑卷扩容
+   #chfs -a size=-100M /db  --文件系统/db缩减100M
+   #lslv lv_system  --查看具体逻辑卷信息
+   #smitty lvsc  --修改逻辑卷属性
+   #smitty mklvcopy --增加逻辑卷镜像副本
+    #smitty rmlvcopy --减少逻辑卷镜像副本
+   #mklv -y'lv_data1' -t'jfs2' 'S2M' testvg 10 hdsiak0 hdisk1 hdisk2 lv_data1  --创建条带化逻辑卷lv_data1，条带尺寸为2M，使用3块物理盘
+    #smitty mklv   --创建条带化逻辑卷
+   #cplv -v datavg -y lv1 oldlv1  --逻辑卷迁移，将逻辑卷oldlv1复制到卷组datavg上的逻辑卷lv1中，需注意二者的大小
+    #smitty cplv  --使用smitty逻辑卷迁移
+   #lslv lv1 | grep COPIES   --查看逻辑卷lv1的镜像数
+   #splitlvcopy -y newlv1 lv1 2 --分离镜像逻辑卷，逻辑卷lv1只保留2份副本，原来的一份逻辑卷被分离为newlv1逻辑卷，注：分离式应卸载文件系统使逻辑卷处于关闭状态
+   #syncvg -p hdisk04 hdisk05  --同步物理卷hdisk04和hdisk05上的逻辑卷副本
+   #syncvg -v datavg    --同步卷组datavg上的所有镜像副本
+   #lspv -l hdisk0  --查看物理卷中逻辑卷属性
+ 8.3 换页空间相关(配置文件:/etc/swapspaces)
+  #lsps -a -c   --查看换页空间属性
+  #lsps -s   --查看换页空间属性
+  #mkps -a -n -s20 rootvg  --创建换页空间（在rootvg上创建一个新的20个PP大小的换页空间，自动激活，一般均在rootvg中）
+   #smitty mkps
+  #swapoff /dev/paging00  --不激活换页空间的物理卷paging00
+  #swapon /dev/paging00  --激活换页空间的物理卷paging00
+  #chps -s 1 hd6    --换页空间添加逻辑分区（1个）
+  #chps -d 1 hd6    --换页空间减少逻辑分区（1个）
+  #lsps -a     --查看所有分页空间
+  #删除换页空间
+   #swapoff /dev/paging00 --去活
+   #rmps paging00   --删除换页空间
+9. AIX 文件系统(配置文件：/etc/filesystems)
+ 9.1 常用命令
+  #mount      --查看文件系统
+   #smitty fs     --操作文件系统
+  #lsfs | grep lv_striped  --查看指定文件系统
+  #fuser -xc /tmp /hacmp.out --查看文件系统中文件占用情况
+ 9.2 创建文件系统 
+  #crfs -v jfs2 -g rootvg -a size=10M -m /test   --创建文件系统test，类型为jfs2，属于卷组rootvg，大小为10M，挂载点为/test
+  #crfs -v jfs2 -g rootvg -a size=10M -p ro -m /test1  --创建文件系统test(只读)，类型为jfs2，属于卷组rootvg，大小为10M，挂载点为/test
+ 9.3 挂载文件系统
+  #mount /test
+  或者，修改文件/etc/filesystems中对应条目 mount=automatic[自动挂载]
+  #mount -rv cdrfs /dev/cd0 /mnt  --挂载光盘
+  #umount /mnt      --卸载光盘
+ 9.4 卸载/删除文件系统
+  #fuser -ku /test  --杀掉文件系统/test占用进程
+  #umount test   --卸载文件系统/test
+  #rmfs /test    --删除文件系统/test，会删除对应的逻辑卷
+ 9.5 文件系统容量管理
+  #df -m        --查看文件系统容量
+  #du /usr | sort -r -n    --显示/usr文件系统中文件和目录所占磁盘块数，并按磁盘块数升序排序
+  #chfs -a size=+20M /test   --增加20M空间容量（需注意有空闲PP）
+  #chfs -a size=-20M /test   --减少20M空间容量
+   #smitty chjfs
+ 9.6 文件系统一致性管理
+  #fsck -p /dev/fslv00    --检查文件系统并进行错误修复（文件系统未挂载，且可读取对应的逻辑卷）
+  #fsck  /dev/fslv00     --检查文件系统完整性（文件系统未挂载，且可读取对应的逻辑卷）
+  #snapshot -o snapfrom=/db -o size 500M  --创建文件系统/db的外部快照，大小为500M
+  #snapshot -q /db       --查看/db的快照设置
+ 9.7 文件系统快照相关
+  #mkdir -p /home/oracle/db_snap          --创建快照挂载点
+  #mount -v jfs2 -o snapshot /dev/fslv02 /home/oracle/db_snap   --将文件系统/db的快照挂载到其他目录
+  #df -g /home/oracle/db_snap           --查看快照文件系统的空间使用
+  
+  10. AIX 备份恢复
+ 10.1 rootvg卷组备份
+  #mksysb '-m' '-i' '-X' /dev/rmt0 --备份rootvg到第一块磁带（-e 排除文件;-i 自动生成/image.data;-m 生成映像文件;-X 需要时扩展/tmp）
+   #smitty mksysb
+    #备份文件排除
+   #编辑文件/etc/exclude.rootvg
+   #mksysb -e /dev/rmt0
+  
+  恢复
+  采用磁带备份引导->进入系统恢复界面
+ 
+ 10.2 用户卷组备份（非rootvg卷组）
+ 注意：卷组必须处于激活状，文件系统必须处于挂载状。
+  #savevg -if /dev/rmt0 datavg  --备份用户卷组到磁带
+   #smitty savevg
+  #备份文件排除
+   #编辑文件/etc/exclude.datavg
+   #savevg -if /dev/rmt0 datavg
+  
+  恢复卷组
+  #savevg -f '/datavg.backup' '-v' '-i' '-m' '-X' datavg --备份卷组datavg到/datavg.backup
+  #listvgbackup -l -f '/datavg.backup'     --查看备份内容
+  #restvg -q -f '/datavg.backup' -P '2' hdisk7 hdisk8 hdisk9  --恢复备份到新的卷组（由3块新盘组成）
+   #smitty -> remake a volume group
+   
+  恢复卷组中文件
+  #restore -x -d -v -q -f '/datavg.backup' ./data/testfile01  --从备份恢复指定文件
+  
+ 10.3 文件系统备份
+  #cd /db/oracle/product
+  #find .-depth | backup -i -f /dev/rmt0  --备份/db/oracl e/product中所有文件和目录(相对目录备份，恢复时需切换到相应目录)
+  #backup -f /db/backup.file -'0' -u /db  --完全备份文件系统/db
+   #smitty backup
+  恢复
+  #restore -rvqf /dev/rmt0     --从磁带恢复文件系统
+  #restore -xdvqf /dev/rmt0 /dir/mydirectory --从备份恢复一个特定目录
+  #restore -xvqf /dev/rmt0 /dir/myfile  --从备份恢复一个特定文件
+  
+ 10.4 其他备份恢复
+  #tar -cvf /dev/rmt0 /db/oracle    --把/db/oracle备份到磁带上
+  #tar -tvf /dev/rmt0 | more     --查看磁带上备份文件内容
+  #tar -xvf /dev/rmt0 /db/oracle    --把磁带上的备份恢复到/db/oracle目录
+  #tar -xvf /dev/rmt0 /db/oracle/admin/orcl/pfile/init.ora --用备份文件替换当前文件
+  #tar -xvf /dev/rmt0 /db/oracle/admin/orcl/pfile/init.ora --用备份文件替换当前文件
+  
+  #find /db/oracle -print | cpio -ov > /dev/rmt0    --备份指定目录下的文件和目录到磁带
+  #cpio -itv < /dev/rmt0 | more        --查看备份内容
+  #cd /db/oracle
+  #cpio -idmv < /dev/rmt0          --恢复磁带上的文件及目录
+  #cpio -idmv < /dev/rmt0 "/db/oracle/admin/orcl/pfile/init.ora" --恢复指定文件
+  
+  #dd if=/dev/control01.ctl f=/backup/control01.bak   --裸设备备份及恢复
+  
+  #pax -wvf /dev/rmt0           --将当前目录及文件复制到磁带
+  #pax -wvf /dev/rmt0 -x pax /db/db2 /db/oracle    --复制指定文件到磁带
+  #pax -vf /dev/rmt0 -x pax         --列出磁带内容
+  
+  #cd /db/db2
+  #find . -depth | backup -i -f /dev/rmt0
+  #cd /db/db2
+  #find . -print | cpio -o -c -v -B > /dev/rmt0    --备份指定目录及下级目录到磁带
+  
+ 10.5 增量备份
+ 注：备份量级：0-9
+  #backup -0 -u -f /dev/rmt0 /db/db2       --0级增量备份带磁带（全备份）
+  
+11. 磁带操作
+ #cd /dev
+ #ls -alt rmt*  --查看磁带设备文件
+ #lsattr -El rmt0 --查看特定磁带属性
+ #tctl -f /dev/rmt0 status --获取磁带机rmt0的状态
+ #tctl -f /dev/rmt0 rewind --使磁带回到头部
+ #tctl -f /dev/rmt0 erase --删除磁带内容
+ #tctl -f /dev/rmt0 fsf 3 --使磁带跳过备份前3个片段
+ #tctl -f /dev/rmt0 offline --弹出磁带
+ #tcopy /dev/rmt0 /dev/rmt0.1 --复制磁带内容（rmt0.1 -> rmt0）
+ #tcopy /dev/rmt0    --查看磁带内容
+ 
+ 示例恢复系统备份中的文件（/etc/hosts.equiv）
+ #tctl -f /dev/rmt0 rewind     --跳到磁带头
+ #restore -T -d -v -q -s4 -f /dev/rmt0.1  --跳过前三部分,查看备份内容
+ #tctl -f /dev/rmt0 rewind     --跳到磁带头
+ #ls -alt /etc/hosts.equiv     --查看是否文件存在
+ #cd /
+ #restore -X -d -v -q -s4 -f /dev/rmt0.1 ./etc/hosts.equiv --恢复文件到原始位置
+12. AIX性能调整
+ #lsps -a    --查看内存
+ #svmon -G    --查看内存
+ #svmon -U oracle  --查看指定用户内存使用
+ #ps v 4784366   --查看具体进程资源使用情况
+ #iostat -A 1 5   --查看异步IO（AIO）情况
+ #vmstat 2 30   --查看CPU在IO资源消耗
+ #pstat -a|grep aio  --查看异步IO服务器数（aioserver）
+ #mount -o cio /db  --使文件系统采用CIO（缓冲读写）
+ 
+ #vmstat 2 30   --查看系统内存分页情况
+ #vmstat hdisk0 hdisk1 2 5
+ 
+ #iostat 2 10   --查看CPU、IO、磁盘读写情况
+ #iostat -d hdisk0 2 10
+ 
+ #sar -u -P 0,1 2 10  --查看1和2号CPU信息
+ #sar -b 2 20   --查看块设备磁盘读写和磁盘缓冲读写信息
+ #sar -d 2 5    --查看磁盘使用和等待信息

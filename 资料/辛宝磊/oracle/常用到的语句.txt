@@ -1,0 +1,137 @@
+﻿     
+      1、创建数据表空间  
+		create tablespace RPTDAT
+		datafile 'd:\oracle\product\10.2.0\oradata\bocReport\RPTDAT.dbf' 
+		size 50m  
+		autoextend on  
+		next 50m maxsize 20480m; 
+      2、创建用户并指定表空间
+		create user tmrpt identified by tmrpt
+		default tablespace RPTDAT
+		temporary tablespace temp; 
+		
+		 create tablespace RPTIND
+		datafile 'd:\oracle\product\10.2.0\oradata\bocReport\RPTIND.dbf' 
+		size 50m  
+		autoextend on  
+		next 50m maxsize 20480m;  
+   		   
+      3、给用户授予权限  
+		grant dba to tmrpt;
+		GRANT 
+		　　CREATE SESSION, CREATE ANY TABLE, CREATE ANY VIEW ,CREATE ANY INDEX, CREATE ANY PROCEDURE,
+		　　ALTER ANY TABLE, ALTER ANY PROCEDURE,
+		　　DROP ANY TABLE, DROP ANY VIEW, DROP ANY INDEX, DROP ANY PROCEDURE,
+		　　SELECT ANY TABLE, INSERT ANY TABLE, UPDATE ANY TABLE, DELETE ANY TABLE
+		　　TO username;
+	4、创建dblink
+		create database link to_test
+		　　connect to scott identified by tiger
+		　　using '(DESCRIPTION =
+		　　(ADDRESS_LIST =
+		　　(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.5)(PORT = 1521))
+		　　)
+		　　(CONNECT_DATA =
+		　　(SERVER = DEDICATED)
+		　　(SERVICE_NAME = bylw)
+		　　)
+		　　)';
+		　　
+	5、查看用户
+		查看所有用户
+		查看所有用户
+		SELECT * FROM DBA_USERS;
+		SELECT * FROM ALL_USERS;
+		SELECT * FROM USER_USERS;
+		查看用户系统权限
+		查看用户系统权限
+		SELECT * FROM DBA_SYS_PRIVS;
+		SELECT * FROM USER_SYS_PRIVS;
+		查看用户对象或角色权限
+		查看用户对象权限
+		SELECT * FROM DBA_TAB_PRIVS;
+		SELECT * FROM ALL_TAB_PRIVS;
+		SELECT * FROM USER_TAB_PRIVS;
+	　　
+	      select suM(bytes)/1024/1024 from dba_segments where segment_name='EVENT_LOG' AND OWNER='RSA_CORE';
+  
+        ALTER TABLE event_log ADD PARTITION P2030010100 VALUES LESS THAN(TO_DATE('2030/01/01 00', 'YYYY-MM-DD HH24'));
+        
+       @?/rdbms/admin/awrrpt          --导出awr报告 　
+       @?/rdbms/admin/awrrpt          --导出awr报告
+       
+       SQL>shutdown immediate; 
+
+SQL>startup; 
+
+  
+job指定节点
+exec dbms_job.instance(22,1)
+　
+　
+*　查看SGA，PGA 
+　
+　show parameter sga;
+　show parameter pga;
+      
+      
+  *   指定sql语句前面的标志 set sqlprompt ‘SQL’ 
+      
+      TO_DATE(SUBSTR(TO_CHAR(TRANS_TIME,'YYYY-MM-DD HH24:MI:SS'),0,13),'YYYY-MM-DD HH24') 改换时间格式
+      
+  *    create table components2 as select * from components where 1=2;--复制表
+        
+  *      将表查询的权限给另外得用户：  grant select any table to 另一用户
+        							select 'GRANT SELECT ON '||table_name||' to b;'  from user_tables
+        							
+  *     select sys_guid() from dual ;--得到guid		
+  *       SET TRANSACTION NAME 'GET_DATA_FROM_REALTIM_2_MINUTE';--建立事务	
+         
+   *查看scn号  
+     SQL> select to_char(current_scn) from v$database;
+
+TO_CHAR(CURRENT_SCN)
+----------------------------------------
+348278059
+
+ /*数据库block的大小*/
+ *show parameter db_block_size
+
+*  select *  from user_tab_partitions t  --查看分区
+  
+*黑窗口查看存储过程等用户资源 
+ SELECT TEXT     FROM USER_SOURCE  WHERE NAME = 'PRODUCT_SCRIPT' ORDER BY LINE ;
+
+* desc event_log ; --查看表结构  
+
+ 
+ *SET autotrace on;--不用oracle工具查看sql执行计划 http://www.2cto.com/database/201208/147211.html
+
+ * Oracle数据库数据导出dump方式
+     expdp tmrpt/tmrpt dumpfile=event_test222.dmp directory=DUMPDIR TABLES=tmrpt.event_log_test logfile=event_test222.log job_name=event_test      parallel=4 FLASHBACK_SCN=348278059
+
+ exp rsa_core/rsa_core file=/rsatm/dump/event_test111.dmp log=/rsatm/dump/event_test111.log  TABLES=rsa_core.event_log_test2  		
+ 
+* 更改数据库表表名
+	alert table customer rename to costomer2;
+*需要为表customer添加主键约束，主键列为customer_id
+	alert tbale customer add constraint pk_customer primary key "customer_id"
+*查看表的主键信息
+	SELECT TABLE_NAME ,CONSTRAINT_NAME,CONSTRAINT_TYPE,STATUS
+		FROM USER_CONSTRAINTS
+		WHERE TABLE_NAME='CUSTOMER';
+		
+SELECT NAME n,VALUE v,ROWNUM R FROM V$SGA  
+
+select t.n,t.v from (SELECT NAME n,VALUE v,ROWNUM R FROM V$SGA ) t where t.r<4 and t.r>1
+
+SELECT * FROM  ( SELECT A.*, rownum r FROM  (SELECT * FROM userlist ) A  WHERE rownum <= "+pageid+"*"+pagesize+" ) B  WHERE r >  "+(pageid-1)+"*"+pagesize+" order by id		
+		 
+         
+       6.      如何定位重要(消耗资源多)的SQL
+ 
+使用CPU多的用户session 
+SELECT a.SID, spid, status, SUBSTR (a.program, 1, 40) prog, a.terminal,a.SQL_TEXT, osuser, VALUE / 60 / 100 VALUE 
+FROM v$session a, v$process b, v$sesstat c 
+WHERE c.statistic# = 12 AND c.SID = a.SID AND a.paddr = b.addr ORDER BY VALUE DESC;   
+select sql_text from v$sql  where disk_reads &gt; 1000 or (executions &gt; 0 and buffer_gets/executions &gt; 30000);  						

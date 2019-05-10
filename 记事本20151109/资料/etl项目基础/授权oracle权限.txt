@@ -1,0 +1,10 @@
+﻿RESOURCE，CONNECT，CREATE SEQUENCE，
+select on SYS.DBA_JOBS_RUNNING，
+execute on SYS.DBMS_JOB，
+execute on SYS.KILL_SESSION，
+select on SYS.V_$LOCKED_OBJECT，
+select on SYS.V_$SESSION，
+debug connect session，
+unlimited tablespace，
+read, write on directory SYS.DUMPDIR，
+create view；

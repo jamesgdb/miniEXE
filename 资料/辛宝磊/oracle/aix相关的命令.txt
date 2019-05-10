@@ -1,0 +1,16 @@
+﻿
+1，导入脚本(aix中要求的脚本格式和window下的格式不一样，在window下生成的脚本，
+	可以通过ue打开，然后文件--》转换--》dos转unix，另存为选择编码格式)
+	@../tmrpt/test.sql----（..表示上层目录）
+	导入的可以是直接执行的命令
+2，执行存储过程
+	 execute job_create_partition;
+	 
+3,	 
+	停止job
+ 	EXECUTE DBMS_JOB.BROKEN(job#,TRUE);
+ 	COMMIT;
+	移除job
+ 	EXECUTE DBMS_JOB.REMOVE(:JOB);
+ 	COMMIT;
+	

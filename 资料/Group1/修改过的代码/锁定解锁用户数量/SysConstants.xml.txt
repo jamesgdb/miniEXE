@@ -1,0 +1,4 @@
+﻿增加：
+       <dataItem>
+		<dataKey>lockOrNoDashboard</dataKey><dataValue>锁定/解锁用户数量 </dataValue>
+	</dataItem>

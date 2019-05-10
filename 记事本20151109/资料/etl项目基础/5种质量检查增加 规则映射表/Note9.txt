@@ -1,0 +1,26 @@
+﻿copy生成-----------------CK-14040400005
+
+
+[DqTotalRateDetail [checkCode=CK-14040400005', 
+organ='VP', zfCd='2', checkTable='TD_TERM_DEP_ACCT_INF', 
+tableDesc='null', orgCodeField='Assess_Org_Cd',
+currencyCodeField='Buz_Categ_Cd', subjectCodeField='Assess_Org_Cd', 
+amtRateField='Buz_Categ_Cd', dataDtField='Assess_Org_Cd',
+checkPhaseFlg='1', dataSource='1',
+ filterCode='RU-14040200005,RU_14032100130']]
+ 
+ 
+ DqTotalRateDetail [checkCode='CK-14040400005', organ='VP', zfCd='2',
+  checkTable='TD_TERM_DEP_ACCT_INF', tableDesc='null',
+   orgCodeField='Assess_Org_Cd', currencyCodeField='Buz_Categ_Cd', 
+   subjectCodeField='Assess_Org_Cd', amtRateField='Buz_Categ_Cd',
+    dataDtField='Assess_Org_Cd', checkPhaseFlg='1', dataSource='1',
+     filterCode='RU-14040200005,RU_14032100130']
+     
+     
+     
+     
+     
+     
+     
+DqTotalRateDetail [checkCode='CK-14040400005', organ='VP', zfCd='2', checkTable='TD_TERM_DEP_ACCT_INF', tableDesc='null', orgCodeField='Assess_Org_Cd', currencyCodeField='Buz_Categ_Cd', subjectCodeField='Assess_Org_Cd', amtRateField='Buz_Categ_Cd', dataDtField='Assess_Org_Cd', checkPhaseFlg='1', dataSource='1', filterCode='RU-14040200005,RU_14032100130']

@@ -1,0 +1,68 @@
+﻿<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+ 
+  <table id="city">
+    <tr id ="name" >
+      <td >Value1</td>
+    </tr>
+    <tr id ="name2">
+       <td>Value 2</td>
+    </tr>
+  </table>
+  
+  <form>
+  <input type="text" name="email" />
+  <input type="hidden" name="id"  value="zhangsan"/>
+  <input type="hidden" name="id" value="zhangsa12n"/>
+   <input type="hidden" name="id" value="zhangs32an"/>
+</form>
+<table id="city1">
+    <tr id ="name" >
+      <td >Value1</td>
+    </tr>
+    <tr id ="name2">
+       <td>Value 2</td>
+    </tr>
+  </table>
+  </body>
+  <script type="text/javascript">
+  //内部的结尾处追加内容
+ $("#city").append("<tr id ='name3' > <td >Value5</td> </tr>");
+ //将特定的元素追加到内部的结尾处
+  $("<tr id ='name3' > <td >Value6</td> </tr>").appendTo ($("#city"));
+   //内部的开始处追加内容
+ $("#city").prepend("<tr id ='name4' > <td >Value6</td> </tr>");
+   //将特定的元素追加到内部的结尾处
+  $("<tr id ='name3' > <td >Value7</td> </tr>").prependTo ($("#city"));
+//指定元素后面插入节点                  同级
+ $("#city").after($("#city1"));
+//指定元素前面插入节点         同级
+ $("#city").before($("#city1"));
+ //insertAfter和insertBefore
+ 
+  </script>
+</html>

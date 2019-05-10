@@ -1,0 +1,1 @@
+﻿Error 500: javax.servlet.ServletException: Filter [encodingFilter]: org.springframework.web.filter.CharacterEncodingFilter was found, but is missing another required class. 

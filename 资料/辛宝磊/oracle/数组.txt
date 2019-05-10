@@ -1,0 +1,52 @@
+﻿固定数组   
+declare   
+  type type_array is varray(10) of varchar2(20);     --一维数组，字符串类型
+ var_array type_array:=type_array('ggs','jjh','wsb','csl','dd','bb');   
+begin   
+  for i in 1..var_array.count loop                           --数组的长度用count
+      dbms_output.put_line(var_array(i));   
+  end loop;   
+end;   
+ 
+ 
+ 
+COUNT             返回集合中元素的个数    
+DELETE            删除集合中所有元素    
+DELETE(x)         删除元素下标为x的元素      对VARRAY非法     
+DELETE(x,y)       删除元素下标从X到Y的元素   对VARRAY非法     
+EXIST(x)          如果集合元素x已经初始化，则返回TRUE, 否则返回FALSE    
+EXTEND            在集合末尾添加一个元素      对Index_by非法    
+EXTEND(x)         在集合末尾添加x个元素       对Index_by非法    
+EXTEND(x,n)       在集合末尾添加元素n的x个副本 对Index_by非法    
+FIRST             返回集合中的第一个元素的下标号，对于VARRAY集合始终返回1。    
+LAST              返回集合中最后一个元素的下标号, 对于VARRAY返回值始终等于COUNT.    
+LIMIT             返回VARRY集合的最大的元素个数   Index_by集合和嵌套表无用    
+NEXT(x)           返回在第x个元素之后及紧挨着它的元素值，如果x是最后一个元素，返回null.    
+PRIOR(x)          返回在第x个元素之前紧挨着它的元素的值，如果x是第一个元素，则返回null。    
+TRIM              从集合末端开始删除一个元素  对于index_by不合法    
+TRIM(x)           从集合末端开始删除x个元素   
+var_array.next(3);   //返回var_array(3)
+可变数组   
+declare    
+type type_array is table of varchar2(20) index by binary_integer;   
+var_array type_array;   
+begin    
+var_array(1):='aa';   
+var_array(2):='bb';                     --下标必须是连续的
+     
+ for i in 1..var_array.count loop   
+ dbms_output.put_line( var_array(i));   
+end loop;   
+     
+end;   
+ 
+declare
+type type_array is table of t_user%rowtype index by binary_integer;   --类似二维数组
+var_array type_array;
+begin
+     select * bulk collect into var_array from t_user;
+     for i in 1..var_array.count loop
+         dbms_output.put_line(var_array(i).user_id);          --二维数组的访问
+         dbms_output.put_line(var_array(i).username);
+     end loop;
+end;

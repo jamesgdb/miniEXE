@@ -1,0 +1,11 @@
+﻿SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [zip:E:/newbea/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_user/_appsdir_CTS_dir/6ctkfx/war/WEB-INF/lib/slf4j-log4j12-1.5.8.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [zip:E:/newbea/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_user/_appsdir_CTS_dir/6ctkfx/war/WEB-INF/lib/slf4j-log4j12-1.5.8.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+我的Jar文件用了：slf4j-log4j12-1.5.8.jar，slf4j-api-1.5.8.jar，log4j-1.2.15.jar等jar文件，请指点一下！！！
+
+查了一下，也许是一个bug，描述的网址在这里
+
+http://news.gmane.org/gmane.comp.java.slf4j.devel
+
+我去掉slf4j-log4j12-1.5.8.jar就解决了楼主的问题，没有报错。

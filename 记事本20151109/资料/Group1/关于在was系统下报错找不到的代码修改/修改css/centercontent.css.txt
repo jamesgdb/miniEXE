@@ -1,0 +1,25 @@
+﻿/*     background-image: url("../image/system/images_title.png"); */
+
+修改log日志表css中，在class路径中增加info_box路径，然后将所有的固定宽度修改为百分比形式
+.centercontent001.info_box.info_input_box .table_log {
+	width:96.5%;
+	background-color:#b1bac3;	
+	}
+.centercontent001.info_box.info_input_box .table_log .other_td中宽度变为百分比形式
+.centercontent001 .info_box.info_input_box .table_log .left_td中宽度变为百分比形式
+.centercontent001.info_box .info_input_box .table_log .right_td
+.centercontent001 .info_box.info_input_box .table_log .right_time_td
+.centercontent001.info_box.info_input_box .table_log .right_status_td
+.centercontent001.info_box.info_input_box .table_log .other_td
+
+
+其中还增加了对于汇率管理中页面css设置
+.images_box2 {
+	margin:10px;
+	border:0px solid #b1bac3;
+	height:0px;	
+	}
+
+
+
+

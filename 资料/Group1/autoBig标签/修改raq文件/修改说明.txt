@@ -1,0 +1,3 @@
+﻿以前是直接传递sql；
+修改之后为了适应autoBig标签
+在外层增加  select * from (sql);

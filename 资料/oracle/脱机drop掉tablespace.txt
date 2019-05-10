@@ -1,0 +1,52 @@
+﻿某个数据文件损坏，如何打开数据库？ (for Linux)
+PuJiang Science Park Of ShangHai 、 jccz_zys_zhouys 
+最近做开发时不小心删除了创建的数据库表空间文件，导致服务器重新启动时普通用户
+不能够正常登陆。网上有一篇此类文章是针对winnt和oracle8i的。我通过简单的尝试即解决了此问题，过程如下：
+
+系统环境： 
+1、操作系统：RedHat Advanced Server，机器内存512M
+2、数据库：　Oracle 9i Release 9.2.0.1.0 for linux
+3、安装路径：/home/oracle/ora
+
+错误现象： 
+因误操作，数据库中某一数据文件被误删，
+Oracle相关服务显示已启动，用SQL*Plus可以连接sys DBA用户，但普通用户无法连接，
+显示以下错误
+ORA-01033: ORACLE initialization or shutdown in progress
+
+模拟现象： 
+
+create tablespace tablespace_ecms
+datafile '/home/oracle/ora/products/9.2.0/oradata/ora9i/tablespace_ecms.dbf'
+size 512M extent management local autoallocate
+--default storage (initial 128k next 2M pctincrease 0)
+online;
+
+shutdown
+
+在操作系统中删除tablespace_ecms.dbf文件
+
+[oracle@js-oracle oracle]$ sudo - oracle -c "dbstart" >> /var/log/oracle
+[oracle@js-oracle oracle]$ sudo - oracle -c "lsnrctl start" >> /var/log/oracle
+
+在客户端PL/SQL工具中正常连接sys DBA用户，但数据库没有打开，同时普通用户无法连接，
+显示以下错误
+ORA-01033: ORACLE initialization or shutdown in progress
+
+解决方法：
+
+先让该数据文件脱机,就可以打开数据库
+--NOARCHIVELOG模式命令
+[oracle@js-oracle oracle]$ sqlplus /NOLOG
+
+SQL> connect sys/wellhope as sysdba
+
+SQL> alter database datafile '/home/oracle/ora/products/9.2.0/oradata/ora9i/tablespace_ecms.dbf' offline drop;
+
+SQL> alter database open; --则数据库正常打开
+
+SQL> select file#,name,status from v$datafile;
+
+SQL> drop tablespace tablespace_ecms INCLUDing contents;
+
+表空间已丢弃。

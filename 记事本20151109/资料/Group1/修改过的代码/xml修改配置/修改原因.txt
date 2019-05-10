@@ -1,0 +1,20 @@
+﻿已确认欺诈事件表中
+删除：
+                              <reportItem>
+					<reportItemHeader>规则表达式</reportItemHeader>
+					<expression4Runqian>ds1.group(CCE_RULE_NOTE)</expression4Runqian>
+					<expression4SQL>CCE_RULE_NOTE</expression4SQL>
+				</reportItem>
+				
+新增加：
+                            <reportItem>
+					<reportItemHeader>标记欺诈方式</reportItemHeader>
+					<expression4Runqian>ds1.group(FAIL_METHOD)</expression4Runqian>
+					<expression4SQL>FAIL_METHOD</expression4SQL>
+				</reportItem>
+				<reportItem>
+					<reportItemHeader>挑战方式</reportItemHeader>
+					<expression4Runqian>ds1.group(CHALLENGE_AUTH_METHOD)</expression4Runqian>
+					<expression4SQL>CHALLENGE_AUTH_METHOD</expression4SQL>
+				</reportItem>
+      

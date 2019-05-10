@@ -1,0 +1,5 @@
+﻿function report1_saveAsHtml() {
+
+		document.getElementById( "report1_saveAs_frame" ).src = "${ctx}/ExportToHtml";
+	}	
+	

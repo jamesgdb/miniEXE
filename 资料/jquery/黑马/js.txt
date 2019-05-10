@@ -1,0 +1,9 @@
+﻿#表示的是id；
+$('#id') 等于 document.getElementById('id')；返回id的。对象
+创建新窗口
+window.top.createNewWindow("changePassword", "修改密码", "manage/view/changePassword", 400, 300);
+
+
+<button id='aaa'>tijiao</button>函数直接量方式定义函数，匿名函数：
+document.getElementById("aaa").onclick=function(){
+}

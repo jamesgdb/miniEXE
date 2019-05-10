@@ -1,0 +1,100 @@
+﻿<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+  基本选择器是以“：”分隔;
+   <input type="button"  value="first" id="first" ></input><br>
+   <input type="button"  value="last" id="last" ></input><br>
+   <input type="button"  value="not" id="not" ></input><br>
+   匹配所有索引值为偶数的元素，从 0 开始计数
+   <input type="button"  value="even" id="even" ></input><br>
+   查找表格的2、4、6行（即索引值1、3、5...）
+   <input type="button"  value="odd" id="odd" ></input><br>
+   匹配一个给定索引值的元素
+   <input type="button"  value="eq" id="eq" ></input><br>
+   匹配所有大于给定索引值的元素
+   <input type="button"  value="gt" id="gt" ></input><br>
+   匹配所有小于给定索引值的元素
+   <input type="button"  value="lt" id="lt" ></input><br>
+   <input type="button"  value="header" id="header" ></input><br>
+
+
+   <div id="dddd1" class ="name1" style="width:100px;height:10px;border:1px solid #ccc;">1212434 </div>
+   <div id="dddd2" class ="name2" style="width:100px;height:10px;border:1px solid #ccc;">1212434 </div>
+   <div id="dddd3" class ="name3" style="width:100px;height:10px;border:1px solid #ccc;">1212434 </div>
+  淡出fadeOut/淡入fadeIn
+   <div id="movie" class ="name" style="width:100px;height:10px;border:1px solid #ccc;">滑动1 </div>
+     匹配所有正在执行动画效果的元素
+      <input type="button"  value="animated" id="animated1" ></input><br>
+   <div id="animated" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">1212434 </div>
+    
+    <ul>
+    <li>list item 1</li>
+    <li>list item 2</li>
+    <li>list item 3</li>
+    <li>list item 4</li>
+    <li>list item 5</li>
+</ul>
+匹配如 h1, h2, h3之类的标题元素
+<h1>Header 1</h1>
+<p>Contents 1</p>
+<h2>Header 2</h2>
+<p>Contents 2</p>
+  </body>
+  <script type="text/javascript">
+  //层次选择器. 改变子的div背景色
+  $("#first").click( function () { $("div:first").css("color","blue");}); 
+  $("#last").click( function () { $("div:last").css("color","red");}); 
+  $("#not").click( function () { $("div:not(.name)").css("color","red");}); 
+  $("#even").click( function () { $("li:even").css("background","yellow");}); 
+  $("#odd").click( function () { $("li:odd").css("background","green");}); 
+  $("#eq").click( function () { $("li:eq(3)").css("background","green");}); 
+  $("#gt").click( function () { $("li:gt(3)").css("background","green");}); 
+  $("#lt").click( function () { $("li:lt(3)").css("background","red");}); 
+  $("#header").click( function () { $(":header").css("background","red");}); 
+  $("#animated1").click( function () { $(":animated").css("background","red");}); 
+  
+ function ca(){
+      $("#animated").slideToggle("slow",ca);
+ }
+  ca();
+//  function movie(){
+//       $("#movie").slideDown("slow",function(){
+//    alert("Animation Done.");
+//  });
+//  }
+//  function movie(){
+//       $("#movie").fadeOut("slow",function(){
+//    alert("Animation Done.");
+//  });
+//  }
+ function movie(){
+      $("#movie").fadeIn("slow",function(){
+   alert("Animation Done.");
+ });
+ }
+  movie();
+  </script>
+</html>

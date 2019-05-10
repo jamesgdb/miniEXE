@@ -1,0 +1,102 @@
+﻿Oracle AIM
+
+1.By Process
+
+01. Configuration Management
+CMQ.050 Software Migration and Version Control Procedure
+
+02. Resource Management
+RMQ.001 General Guidlines to Project Team Member
+
+05. Control & Reporting
+CR.010 Quality Plan
+CR.CRF Change Request Form
+CR.PMA Project Meeting Agenda
+CR.PMI Project Meeting Minutes
+CR.PMM Project Memo
+CR.PMS Project Monthly Status Report
+CR.PWS Project Weekly Status Report
+CR.SPR Software Problem Report
+
+08. Business Process Architecture
+BP.040 Current Process Model
+BP.050 Best Practice Model
+BP.060 High-Level Process Vision
+BP.080 Future Process Module
+BP.090 Business Procedure Documentation
+BPQ.020 PMO Study Checklist
+BPQ.040 Current Process Models (PMOs) Comparison Form
+BR.030 Mapped Business Requirements
+
+09. Business Requirement Definition
+RD.020 CURRENT  BUSINESS BASELINE
+RD.030 PROCESS AND MAPPING SUMMARY
+RD.050 Business Requirements ScenariosRDQ.020 Customers Business Operation Reference Documents
+
+10. Business Requirement Mapping
+BR.010 High-Level Gap Analysis
+BR.100 Application Setup Documents
+
+11. Application and Technical Architecture
+TA.040 Application Architecture
+TA.050 System Availability Strategy
+TA.110 System Capacity Plan
+TA.120 Platform and Network Architecture
+TA.150 System Management Procedures
+TAQ.020 Network Requirements Definition
+TAQ.030 Disaster Recovery Strategy
+
+12. Module Design and Build
+MD.040 Build Standards
+MD.050 Application Extension Functional Design
+MD.070 Application Extension Technical Design
+
+13. Data Conversion
+CV.010 Data Conversion Requirements and Strategy
+CV.060 Conversion Program Design
+
+14. Documentation
+DO.060 User Reference Manual
+DO.070 Project Team Learning Plan
+DO.070 Traning Manual
+DO.080 Technical Reference Manual
+
+15. Business System Testing
+TE.010 Testing Requirements and Strategy
+TE.020 UNIT TEST SCRIPT
+TE.040 System Test Script
+TE.130 UAT Result
+TE.UAC User Acceptance Certificate
+TEQ.010 UAT Plan
+
+
+16. Performance Testing
+PT.130-压力测试报告
+
+
+17. Adoption and Learning
+AP.030 Project Team Learning Plan
+AP.150 Training Manual
+APQ.010 Tools Instruction
+APQ.150 Oracle Module Training and Reference Materail
+TR.010 User Manual
+
+
+18. Production Migration
+PM.PAL Production Acceptance Checklist
+PM.PAT Production Acceptance Test Certification
+PM.PCL Project Closure Report
+
+
+
+2.By Phase
+1. ALL
+2. Definition
+3. Operations Analysis
+4. Solution Design
+5. Build
+6. Transition
+7. Production
+
+
+

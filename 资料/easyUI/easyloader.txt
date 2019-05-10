@@ -1,0 +1,45 @@
+﻿ 
+ 单个的时候是不用数组
+easyloader.load可以用using代替
+ 
+   <script type="text/javascript" charset="UTF-8">
+ $(function(){
+	 easyloader.load('dialog',function(){
+		 $("#dd").dialog({title: 'My Dialog',    
+				    width: 400,    
+				    height: 200,    
+				    closed: false,    
+				    cache: false, 
+				    minimizable:true,
+				    collapsible:true,
+				    maximizable:true,
+				    modal: true } );
+	 });
+ });
+ 
+ </script >
+ ---------------------------------------------------------------
+ 引入
+     <script type="text/javascript" src="easyui/jquery-1.7.2.min.js"></script>   
+     <script type="text/javascript" src="easyui/easyloader.js"></script>
+     
+     -----------------------body----------------------------------------
+     
+     <div id="dd" title="My Dialog" style="width:400px;height:200px;" >sssssssssssssss</div>
+     
+     ---------------------------------------------------------------
+    如果是加载多个的时候用数组['dialog','messager']，后面是个回调函数
+      $(function(){
+	 easyloader.load(['dialog','messager'],function(){
+		 $("#dd").dialog({title: 'My Dialog',    
+				    width: 400,    
+				    height: 200,    
+				    closed: false,    
+				    cache: false, 
+				    minimizable:true,
+				    collapsible:true,
+				    maximizable:true,
+				    modal: true } );
+		 $.messager.alert("title","load ok");
+	 });
+});

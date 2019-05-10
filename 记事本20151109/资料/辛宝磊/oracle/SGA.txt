@@ -1,0 +1,41 @@
+﻿组成
+
+SGA主要由数据高速缓冲区（Database Buffer Cache）、共享池（Shared Pool）、重做日志缓冲区（Redo Log Cache）、大型池（Large Pool）、Java池（Java Pool）、流池（Streams Pool）和其他结构（如固定SGA、锁管理等）组成。
+重要特性
+
+1、SGA的构成——数据和控制信息，我们下面会详细介绍。
+2、SGA是共享的，即当有多个用户同时登录了这个实例，SGA中的信息可以被它们同时访问（当涉及到互斥的问题时，由latch和sequence控制）。
+3、一个SGA只服务于一个实例，也就是说，当一台机器上有多个实例运行时，每个实例都有一个自己的SGA尽管SGA来自于OS的共享内存区，但实例之间不能相互访问对方的SGA区。
+主要包括
+
+
+1.数据库高速缓冲(the data buffer cache)，
+2.重做日志缓冲（the redo log buffer）
+3.共享池（the shared pool），包括库高速缓存（the Library cache）和数据字典缓存（the data dictionary cache）以及其它各方面的信息。
+1.数据高速缓冲区（Data Buffer Cache）
+在数据高速缓冲区中存放着Oracle系统使用过的数据块（即用户的高速缓冲区），当把数据写入数据库时，它以数据块为单位进行读写，当数据高速缓冲区填满时，则系统自动去掉一些不常被用户访问的数据。如果用户要查的数据不在数据高速缓冲区时，Oracle自动从磁盘中去读取。数据高速缓冲区包括三个类型的区：
+1） 脏数据区（Dirty Buffers）：包含有已经改变过并需要写回数据文件的数据块。
+2） 自由区（Free Buffers）：没有包含任何数据并可以再写入的区，Oracle可以从数据文件读数据块该区。
+3） 保留区（Pinned Buffers）：此区包含有正在处理的或者明确保留用作将来用的区。
+2.Redo Log Buffer Cache缓存对于数据块的所有修改。
+主要用于恢复其中的每一项修改记录都被称为redo 条目。利用Redo条目的信息可以重做修改。
+3. Shared Pool用于缓存被执行的SQL语句和被使用的数据定义。
+它主要由两个内存结构构成：Library cache和Data dictionary cache
+修改共享池的大小：ALTER SYSTEM SET SHARED_POOL_SIZE = 64M;
+Libray Cache缓存被执行的SQL和PL/SQL的相关信息，即存放SQL语句的文本,分析后的代码及执行计划。实现常用语句的共享，使用LRU算法进行管理，由以下两个结构构成：Shared SQL area、Shared PL/SQL area；
+Data Dictionary Cache缓存被使用的数据库定义，即存放有关表,列和其它对象定义及权限。它包括关于数据库文件、表、索引、列、用户、权限以及其它数据库对象的信息。在语法分析阶段，Server Process访问数据字典中的信息以解析对象名和对存取操作进行验证。数据字典信息缓存在内存中有助于缩短响应时间。
+
+
+ SGA主要有那些部分，主要作用是什么
+ 
+系统全局区（SGA）:是ORACLE为实例分配的一组共享缓冲存储区，用于存放数据库数据和控制信息，以实现对数据库数据的管理和操作。 
+SGA主要包括: a)共享池(shared pool) ：用来存储最近执行的SQL语句和最近使用的数据字典的数据。 
+b)数据缓冲区 (database buffer cache)：用来存储最近从数据文件中读写过的数据。 
+c)重作日志缓冲区（redo log buffer）：用来记录服务或后台进程对数据库的操作。 
+另外在SGA中还有两个可选的内存结构： d)Java pool:  用来存储Java代码。 
+e)Large pool: 用来存储不与SQL直接相关的大型内存结构。备份、恢复使用。   
+GA：db_cache/shared_pool/large_pool/java_pool  
+db_cache: 数据库缓存（Block Buffer）对于Oracle数据库的运转和性能起着非常关键的作用，它占据Oracle数据库SGA（系统共享内存区）的主要部分。Oracle数据库通过使用LRU算法，将最近访问的数据块存放到缓存中，从而优化对磁盘数据的访问. 
+shared_pool: 共享池的大小对于Oracle 性能来说都是很重要的。共享池中保存数据字典高速缓冲和完全解析或编译的的PL/SQL 块和SQL 语句及控制结构  
+large_pool: 使用MTS配置时，因为要在SGA中分配UGA来保持用户的会话，就是用Large_pool来保持这个会话内存使用RMAN做备份的时候，要使用Large_pool这个内存结构来做磁盘I/O缓存器  
+java_pool: 为java procedure预备的内存区域,如果没有使用java proc,java_pool不是必须的

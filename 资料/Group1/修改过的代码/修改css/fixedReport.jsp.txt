@@ -1,0 +1,8 @@
+﻿	
+	
+	错误的路径
+	<link rel="shortcut icon" href="${ctx}/image/favicon.ico"></link> 
+	<link rel="stylesheet" type="text/css" href="${ctx}/css/reoprt/page.css">
+	<link rel="stylesheet" href="${ctx}/css/common.css">
+	<link rel="stylesheet" type="text/css" href="${ctx}/css/report/report.css">
+	

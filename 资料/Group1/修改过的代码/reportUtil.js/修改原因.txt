@@ -1,0 +1,49 @@
+﻿周报开始结束时间一直是当前时间
+修改前：
+var today = $("#today").val();//获取当前时间
+	    	var year = today.substring(0,4);
+			var month = today.substring(5,7);
+			var day = today.substring(8,10);
+			var time=parseInt(year+""+month+""+day);
+		       $("#year ").val(year +"年");
+			$("#year ").val(year +"年");
+			//判断当前日期为当月的第几周
+			var weekString = showWeekDate(year,month);
+			var firstSunday = Number(weekString.substring(0, 1)) +6;
+	    	var beginYear = $("#beginYear").val().substring(0,$("#beginYear").val().indexOf("年"));
+	    	var endYear = $("#endYear").val().substring(0,$("#endYear").val().indexOf("年"));
+	    
+	    	var beginMonth = $("#beginMonth").val();
+	    	var endMonth = $("#endMonth").val();
+	    	var beginWeek =$("#beginWeek").val();
+	    	var endWeek = $("#endWeek").val();
+	    	var start = parseInt(beginYear + "" + beginMonth + "" + beginWeek);
+		    var end = parseInt(endYear + "" + endMonth + "" + endWeek);
+		    var intEndWeek=parseInt(endWeek);
+		    var intFirstSunday=parseInt(firstSunday);
+		    var input=intFirstSunday+intEndWeek*7-7;
+修改后：
+             var today = $("#today").val();//获取当前时间
+	      var year = today.substring(0,4);
+	      var month = today.substring(5,7);
+	      var day = today.substring(8,10);
+	      var time=parseInt(year+""+month+""+day);
+	       //判断当前日期为当月的第几周
+	      var weekString = showWeekDate(year,month);
+	       var firstSunday = Number(weekString.substring(0, 1)) +6;
+	    	var beginYear = $("#beginYear").val().substring(0,$("#beginYear").val().indexOf("年"));
+	    	var endYear = $("#endYear").val().substring(0,$("#endYear").val().indexOf("年"));
+	    	$("#beginYear").val(beginYear+"年");
+		$("#endYear").val(endYear+"年");
+	    	var beginMonth = $("#beginMonth").val();
+	    	var endMonth = $("#endMonth").val();
+	    	var beginWeek =$("#beginWeek").val();
+	    	var endWeek = $("#endWeek").val();
+	    	var start = parseInt(beginYear + "" + beginMonth + "" + beginWeek);
+		 var end = parseInt(endYear + "" + endMonth + "" + endWeek);
+		    var intEndWeek=parseInt(endWeek);
+		    var intFirstSunday=parseInt(firstSunday);
+		    var input=intFirstSunday+intEndWeek*7-7;
+		    
+		    
+		    

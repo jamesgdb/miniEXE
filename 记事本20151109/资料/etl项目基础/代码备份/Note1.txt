@@ -1,0 +1,521 @@
+﻿package com.vprisk.edm.dq.web.action;
+
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
+import net.sf.json.util.CycleDetectionStrategy;
+
+import org.springframework.util.Assert;
+
+import com.vprisk.edm.dq.entity.DqBasicCheck;
+import com.vprisk.edm.dq.entity.DqBatchStatus;
+import com.vprisk.edm.dq.entity.DqCheckBase;
+import com.vprisk.edm.dq.entity.DqCheckStatus;
+import com.vprisk.edm.dq.entity.DqCodeCheck;
+import com.vprisk.edm.dq.entity.DqLogicCheck;
+import com.vprisk.edm.dq.entity.DqTotalInspDetail;
+import com.vprisk.edm.dq.entity.DqTotalInspDetailId;
+import com.vprisk.edm.dq.entity.DqTotalRateDetail;
+import com.vprisk.edm.dq.entity.DqTotalRateDetailId;
+import com.vprisk.edm.dq.service.DqBasicCheckService;
+import com.vprisk.edm.dq.service.DqCheckBaseService;
+import com.vprisk.edm.dq.service.DqCheckStatusService;
+import com.vprisk.edm.dq.service.DqCodeCheckService;
+import com.vprisk.edm.dq.service.DqLogicCheckService;
+import com.vprisk.edm.dq.service.DqTotalInspDetailService;
+import com.vprisk.edm.dq.service.DqTotalRateDetailService;
+import com.vprisk.edm.pub.entity.DmCommonParam;
+import com.vprisk.edm.pub.service.DmCommonParamService;
+import com.vprisk.edm.pub.service.PubBizcodeConfigService;
+import com.vprisk.etl.model.IBatchStatus;
+import com.vprisk.etl.service.ExternalService;
+import com.vprisk.rmplatform.cache.CacheFacade;
+import com.vprisk.rmplatform.common.dao.domain.Page;
+import com.vprisk.rmplatform.common.dao.domain.Pageable;
+import com.vprisk.rmplatform.common.service.BaseService;
+import com.vprisk.rmplatform.common.web.action.BaseAction;
+import com.vprisk.rmplatform.exception.RMPException;
+import com.vprisk.rmplatform.util.DateUtil;
+import com.vprisk.rmplatform.util.StringUtil;
+
+public class DqCheckBaseAction extends BaseAction {
+
+	DqTotalInspDetailService dqTotalInspDetailService = (DqTotalInspDetailService) super
+			.getBean("dqTotalInspDetailService");
+
+	DqTotalRateDetailService dqTotalRateDetailService = (DqTotalRateDetailService) super
+			.getBean("dqTotalRateDetailService");
+
+	DqCheckBaseService dqCheckBaseService = (DqCheckBaseService) super
+			.getBean("dqCheckBaseService");
+
+	DqBasicCheckService dqBasicCheckService = (DqBasicCheckService) super
+			.getBean("dqBasicCheckService");
+
+	DqLogicCheckService dqLogicCheckService = (DqLogicCheckService) super
+			.getBean("dqLogicCheckService");
+
+	DqCodeCheckService dqCodeCheckService = (DqCodeCheckService) super
+			.getBean("dqCodeCheckService");
+
+	DmCommonParamService dmCommonParamService = (DmCommonParamService) super
+			.getBean("dmCommonParamService");
+
+	DqCheckStatusService dqCheckStatusService = (DqCheckStatusService) super
+			.getBean("dqCheckStatusService");
+
+	PubBizcodeConfigService pubBizcodeConfigService = (PubBizcodeConfigService) super
+			.getBean("pubBizcodeConfigService");
+
+	ExternalService externalService = (ExternalService) super
+			.getBean("etlExternalService");
+
+	@Override
+	public BaseService getService() {
+		return this.dqCheckBaseService;
+	}
+
+	@Override
+	public Class getEntityClass() {
+		return DqCheckBase.class;
+	}
+
+	@Override
+	public void query() {
+		Map params = this.getRequestParams(this.getEntityClass());
+		Pageable pageable = this.getPager();
+
+		Page<DqCheckBase> page = getService().queryForPage(pageable, params);
+
+		Assert.notNull(page);
+		JSONObject jsonObject = new JSONObject();
+		JsonConfig config = new JsonConfig();
+		config.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
+		List<DqCheckBase> dqCheckBaseList = page.getContent();
+		List<DqCheckBase> dataList = new ArrayList();
+
+		// 公共参数信息
+		List<DmCommonParam> paramList = this.dmCommonParamService
+				.findAllParam();
+		Map map = new HashMap();
+		for (DmCommonParam dmCommonParam : paramList) {
+			map.put(dmCommonParam.getParamId(), dmCommonParam.getParamName());
+		}
+		String paramName = "";
+		for (DqCheckBase dqCheckBase : dqCheckBaseList) {
+			if (StringUtil.isNotNullOrEmpty(map.get(dqCheckBase
+					.getDataDtParamId()))) {
+				paramName = map.get(dqCheckBase.getDataDtParamId()).toString();
+			}
+
+			dqCheckBase.setDataDtParamId(paramName);
+			dataList.add(dqCheckBase);
+		}
+		jsonObject.put(PAGE_PROPERTY_ROWS, JSONArray.fromObject(dataList));
+		jsonObject.put(PAGE_PROPERTY_TOTAL, page.getTotalCount());
+
+		writeContent(jsonObject);
+	}
+
+	// 跳转到选择检查类型页面
+	public String toChoose() {
+
+		Map map = (Map) CacheFacade.getInstance().getCacheData("datadict",
+				"dict_item_map_dq_checkType");
+		super.getHttpRequest().setAttribute("map", map);
+		return "toChoose";
+
+	}
+
+	// 根据选择检查类型跳转到对应新增页面
+	public String forward() {
+		String checkType = super.getHttpRequest().getParameter("checkType");
+		// 调用方法生成检查编号 暂时页面输入
+
+		String checkCode = this.pubBizcodeConfigService
+				.createBizCode("EDM_DQ_CHECK");
+		DqCheckBase dqCheckBase = new DqCheckBase();
+		dqCheckBase.setCheckCode(checkCode);
+		getHttpRequest().setAttribute("dqCheckBase", dqCheckBase);
+
+		if (checkType.equals("1")) {// 基础检查
+			/*
+			 * DqBasicCheck dqBasicCheck = new DqBasicCheck();
+			 * dqBasicCheck.setCheckCode(checkCode);
+			 * getHttpRequest().setAttribute("entity", dqBasicCheck);
+			 */
+
+			return "basicCheck";
+		} else if (checkType.equals("2")) {// 逻辑检查
+			/*
+			 * DqLogicCheck dqLogicCheck = new DqLogicCheck();
+			 * dqLogicCheck.setCheckCode(checkCode);
+			 * getHttpRequest().setAttribute("entity", dqLogicCheck);
+			 */
+
+			return "logicCheck";
+		} else if (checkType.equals("3")) {// 代码检查
+			/*
+			 * DqCodeCheck dqCodeCheck = new DqCodeCheck();
+			 * dqCodeCheck.setCheckCode(checkCode);
+			 * getHttpRequest().setAttribute("entity", dqCodeCheck);
+			 */
+
+			return "codeCheck";
+		} else if (checkType.equals("4")) {// 总分余额检查
+			/*
+			 * DqCheckBase dqCheckBase = new DqCheckBase();
+			 * dqCheckBase.setCheckCode(checkCode);
+			 * getHttpRequest().setAttribute("entity", dqCheckBase);
+			 */
+			return "totalInsp";
+		} else if (checkType.equals("5")) {// 总分利息检查
+			/*
+			 * DqCheckBase dqCheckBase = new DqCheckBase();
+			 * dqCheckBase.setCheckCode(checkCode);
+			 * getHttpRequest().setAttribute("entity", dqCheckBase);
+			 */
+
+			return "totalRate";
+		} else {
+			return "";
+		}
+	}
+
+	@Override
+	public String toForm() {
+		String id = getHttpRequest().getParameter("id");
+		// 检查类型
+		String checkType = getHttpRequest().getParameter("checkType");
+		// 操作类型
+		String operateType = getHttpRequest().getParameter("operateType");
+
+		// 标识编辑和复制
+		String type = getHttpRequest().getParameter("type");
+
+		getHttpRequest().setAttribute("operateType", operateType);
+
+		// 质量检查基表信息
+		DqCheckBase dqCheckBase = this.dqCheckBaseService.query(id);
+
+		/*
+		 * if ("copy".equals(type)) { // 如果是复制 String checkCode =
+		 * this.pubBizcodeConfigService .createBizCode("EDM_DQ_CHECK"); String
+		 * dateTime = DateUtil.getDateTime(DateUtil.timePattern, new Date());
+		 * dqCheckBase.setCheckCode(checkCode);
+		 * dqCheckBase.setCheckName(dqCheckBase.getCheckName() + " " +
+		 * dateTime); }
+		 */
+		getHttpRequest().setAttribute("dqCheckBase", dqCheckBase);
+
+		// 获取实体信息
+		this.dqCheckBaseService.getEntityInfo(getHttpRequest(), id, checkType,
+				type);
+		if (checkType.equals("1")) { // 基础检查
+			return "basicCheck";
+		} else if (checkType.equals("2")) {// 逻辑检查
+			return "logicCheck";
+
+		} else if (checkType.equals("3")) {// 代码检查
+			return "codeCheck";
+
+		} else if (checkType.equals("4")) {// 总分余额检查
+			return "totalInsp";
+
+		} else if (checkType.equals("5")) {// 总分利息检查
+			return "totalRate";
+
+		} else {
+			return "";
+		}
+	}
+
+	/**
+	 * 复制操作
+	 */
+	public void copy() {
+		String id = super.getHttpRequest().getParameter("id");
+		String checkType = getHttpRequest().getParameter("checkType");// 检查类型
+
+		// 质量检查基表信息
+		DqCheckBase dqCheckBase = this.dqCheckBaseService.query(id);
+
+		String checkCode = this.pubBizcodeConfigService
+				.createBizCode("EDM_DQ_CHECK");
+		String dateTime = DateUtil.getDateTime("yyyyMMddHHmmss", new Date());
+		dqCheckBase.setCheckCode(checkCode);
+		dqCheckBase.setCheckName(dqCheckBase.getCheckName() + " " + dateTime);
+
+		if ("1".equals(checkType)) {
+			// 基础检查
+			DqBasicCheck dqBasicCheck = new DqBasicCheck();
+			dqBasicCheck = this.dqBasicCheckService.query(id);
+
+			dqBasicCheck.setCheckCode(checkCode);
+			dqBasicCheck.setCheckName(dqCheckBase.getCheckName());
+
+			this.dqBasicCheckService.save(dqBasicCheck, dqCheckBase, null);
+
+		} else if ("2".equals(checkType)) {
+			// 逻辑检查
+			DqLogicCheck dqLogicCheck = new DqLogicCheck();
+			dqLogicCheck = this.dqLogicCheckService.query(id);
+
+			dqLogicCheck.setCheckCode(checkCode);
+			dqLogicCheck.setCheckName(dqCheckBase.getCheckName());
+
+			this.dqLogicCheckService.save(dqLogicCheck, dqCheckBase, null);
+
+		} else if ("3".equals(checkType)) {
+			// 代码检查
+
+			DqCodeCheck dqCodeCheck = new DqCodeCheck();
+			dqCodeCheck = this.dqCodeCheckService.query(id);
+
+			dqCodeCheck.setCheckCode(checkCode);
+			dqCodeCheck.setCheckName(dqCheckBase.getCheckName());
+			this.dqCodeCheckService.save(dqCodeCheck, dqCheckBase, null);
+
+		} else if ("4".equals(checkType)) {
+			// 总分余额检查
+
+			List<DqTotalInspDetail> list = this.dqTotalInspDetailService.findTableGridByCheckCode(id);
+			
+			if (list.size() > 0) {
+				for (DqTotalInspDetail dqTotalInspDetail : list) {
+					dqTotalInspDetail.setCheckCode(checkCode);
+					DqTotalInspDetailId  dqTotalInspDetailId=new DqTotalInspDetailId();
+					dqTotalInspDetailId.setAmtBalField(dqTotalInspDetail.getAmtBalField());
+					dqTotalInspDetailId.setCheckCode(dqTotalInspDetail.getCheckCode());
+					dqTotalInspDetailId.setCurrencyCodeField(dqTotalInspDetail.getCurrencyCodeField());
+					dqTotalInspDetailId.setOrgCodeField(dqTotalInspDetail.getOrgCodeField());
+					dqTotalInspDetailId.setSubjectCodeField(dqTotalInspDetail.getSubjectCodeField());
+					dqTotalInspDetail.setId(dqTotalInspDetailId);
+					this.dqTotalInspDetailService.save(dqTotalInspDetail,dqCheckBase, null);
+				}
+			} else {
+				// 只保存基表
+				this.dqCheckBaseService.save(dqCheckBase);
+			}
+
+		} else if ("5".equals(checkType)) {
+			// 总分利息检查
+			
+			List<DqTotalRateDetail> list = this.dqTotalRateDetailService.findTotalRateByCheckCode(id);
+			
+			if (list.size() > 0) {
+				for (DqTotalRateDetail dqTotalRateDetail : list) {
+					dqTotalRateDetail.setCheckCode(checkCode);
+					DqTotalRateDetailId dqTotalRateDetailId = new DqTotalRateDetailId();
+					dqTotalRateDetailId.setAmtRateField(dqTotalRateDetail.getAmtRateField());
+					dqTotalRateDetailId.setCheckCode(dqTotalRateDetail.getCheckCode());
+					dqTotalRateDetailId.setCurrencyCodeField(dqTotalRateDetail.getCurrencyCodeField());
+					dqTotalRateDetailId.setOrgCodeField(dqTotalRateDetail.getOrgCodeField());
+					dqTotalRateDetailId.setSubjectCodeField(dqTotalRateDetail.getSubjectCodeField());
+					dqTotalRateDetail.setId(dqTotalRateDetailId);
+					this.dqTotalRateDetailService.save(dqTotalRateDetail,dqCheckBase, null);
+				}
+			} else {
+				// 只保存基表
+				this.dqCheckBaseService.save(dqCheckBase);
+			}
+
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("flag", "1");
+		map.put("checkCode", checkCode);
+		map.put("checkName", dqCheckBase.getCheckName());
+		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+		list.add(map);
+		super.writeContent(convertToJson(list));
+	}
+
+	/**
+	 * 启用 禁用操作
+	 */
+	public void changeStatus() {
+		String ids = super.getHttpRequest().getParameter("rowIds");
+		String flag = getHttpRequest().getParameter("flag");// 标识是启用还是禁用
+		this.dqCheckBaseService.changeStatus(ids, flag);
+		writeContent("1");
+	}
+
+	/**
+	 * 删除前进行校验--正在运行不能删除
+	 */
+	public void beforeRemove() {
+		String[] ids = this.getHttpRequest().getParameterValues("id");
+		for (String checkCode : ids) {
+			DqCheckStatus dqCheckStatus = this.dqCheckStatusService
+					.query(checkCode);
+			if (StringUtil.isNotNullOrEmpty(dqCheckStatus)) {
+				if (dqCheckStatus.getRunStatus().equals("1")) {// 如果正在运行的不能删除
+					writeContent("1");
+					return;
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * 删除操作（修改状态为删除）
+	 * 
+	 * @throws RMPException
+	 */
+	public void removes() throws RMPException {
+		String[] ids = this.getHttpRequest().getParameterValues("id");
+		this.dqCheckBaseService.remove(ids);
+	}
+
+	/**
+	 * 执行检查
+	 */
+	public void exeCheck() {
+		// 检查编号
+		String rowId = getHttpRequest().getParameter("rowId");
+		// 根据检查编号获取检查信息
+		DqCheckBase dqCheckBase = this.dqCheckBaseService.query(rowId, null);
+
+		// 根据数据日期参数获取数据日期值
+		DmCommonParam dmCommonParam = this.dmCommonParamService
+				.findParamById(dqCheckBase.getDataDtParamId());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = new Date();
+		try {
+			date = sdf.parse(dmCommonParam.getParamValue());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// 更新检查状态
+		/*
+		 * DqCheckStatus dqCheckStatus = this.dqCheckBaseService.updateStatus(
+		 * dqCheckBase, date);
+		 */
+		// 获取脚本的名称
+
+		String scriptName = this.dqCheckBaseService.getScriptName(
+				dqCheckBase.getCheckCode(), date, dqCheckBase.getCheckType());
+
+		// 执行检查操作
+		// new ExecuteCheckThread(date, scriptName, dqCheckStatus).start();
+
+		writeContent("1");
+	}
+
+	/**
+	 * 调用etl任务执行检查
+	 * 
+	 * @throws RMPException
+	 * 
+	 * 
+	 */
+	public void run() {
+		// 检查编号
+		String checkCode = getHttpRequest().getParameter("rowId");
+		// 根据检查编号获取检查信息
+		DqCheckBase dqCheckBase = this.dqCheckBaseService.query(checkCode);
+
+		try {
+			// 调用etl执行任务
+			DqBatchStatus dqBatchStatus = this.dqCheckBaseService
+					.getParam(dqCheckBase);
+			// 数据日期
+			Date dataDt = dqBatchStatus.getDataDate();
+			// 调用存储过程需要的参数
+			Map<String, Object> param = new HashMap<String, Object>();
+			// param.put("@P_AS_OF_DATE", dataDt);
+			param.put("@CHECKCODE", dqCheckBase.getCheckCode());
+
+			// 查询job_id是否存在 ,存在则将uuid赋给dqBatchStatus
+			IBatchStatus iBatchStatus = this.externalService
+					.findBatchStatusByJobId(dqBatchStatus.getJobId());
+			if (StringUtil.isNotNullOrEmpty(iBatchStatus)) {
+				dqBatchStatus.setUuid(iBatchStatus.getUuid());
+			}
+			// 创建job
+			this.externalService.createJob(dqBatchStatus);
+			// 执行job
+			this.externalService.startJobByJobIdParamDataEndDate(
+					dqBatchStatus.getJobId(), param, dataDt, dataDt);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		writeContent("1");
+	}
+
+	/**
+	 * 调用etl任务停止检查
+	 */
+	public void stop() {
+		String checkCode = getHttpRequest().getParameter("rowId");
+		String runTm = getHttpRequest().getParameter("runTm");
+		Map paramMap = new HashMap();
+		paramMap.put("@RUNTM", runTm);
+
+		// 调用接口停止检查 1：停止成功，0：作业没有运行，3：该作业不存在
+		String flag = this.externalService
+				.stopJob("job_" + checkCode, paramMap);
+
+		writeContent(flag);
+	}
+
+	/**
+	 * 测试
+	 */
+	public String getTest() {
+		String checkCode = getHttpRequest().getParameter("checkCode");
+
+		// 检查信息
+		DqCheckBase dqCheckBase = this.dqCheckBaseService.query(checkCode);
+
+		// 生成预览sql
+		String sql = this.dqCheckBaseService.getSql(dqCheckBase);
+
+		getHttpRequest().setAttribute("sql", sql);
+
+		return "toTest";
+	}
+
+	/**
+	 * 执行sql
+	 * 
+	 * @throws Exception
+	 */
+	public void executeSql() throws RMPException {
+
+		String sql = getHttpRequest().getParameter("sql");
+
+		if (StringUtil.isNullOrEmpty(sql)) {
+			throw new RMPException("测试SQL为空！");
+		} else {
+			this.dqCheckBaseService.executeSql(sql);
+		}
+
+		writeContent("1");
+
+	}
+	
+	public void queryCheckBaseByCheckCode(){
+		String checkCode = getHttpRequest().getParameter("checkCode");
+		DqCheckBase dqCheckBase = this.dqCheckBaseService.queryCheckBaseByCheckCode(checkCode);
+		if(dqCheckBase != null){
+			super.writeContent("1");
+		}
+		
+	}
+	
+	
+}

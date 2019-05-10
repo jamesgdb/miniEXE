@@ -1,0 +1,112 @@
+﻿CREATE PROCEDURE "CA"."PROC_RULE_RUN" 
+    (
+        IN P_AS_OF_DATE DATE,
+        IN IN_RULE_CODE VARCHAR(50),
+        IN IN_RUN_TYPE VARCHAR(10),
+        IN IN_SCENE_TYPE VARCHAR(10),
+        OUT RET_FLG VARCHAR(20),
+        OUT RET_MSG VARCHAR(200)) 
+/*****************************************************************************************
+     purpose: 成本分摊规则分配处理
+     input parameter: IN_RULE_CODE 规则编码
+                                IN_RUN_TYPE 运行方式 1：单独运行  2：场景中运行
+                                IN_SCENE_TYPE     1 暂时实现了生成到账户明细表中，只对账户级分摊有效
+
+     -----   ---------   ---------       -------------------------
+     ver.    date        author          remark
+     1.0     2013-12-12  wangyubin     create.
+  ******************************************************************************************/
+LANGUAGE SQL SPECIFIC SQL140319171621800
+    BEGIN
+                -- 规则类型
+        DECLARE V_DRIVER_TYPE VARCHAR(32);
+        DECLARE V_RET_FLG VARCHAR(1);
+        DECLARE V_RET_MSG VARCHAR(200);
+
+        	--异常定义
+	DECLARE SQLCODE INTEGER DEFAULT 0; 
+  	DECLARE SQLSTATE CHAR(5) DEFAULT '00000'; 
+  	DECLARE exit handler FOR sqlexception,NOT FOUND,SQLWARNING 
+	begin
+	values('PROC_RULE_RUN exception :sqlcode='||sqlcode||';sqlstate='||sqlstate) into RET_MSG ;
+	set RET_FLG='1';
+ 	--SIGNAL SQLSTATE '99999' SET MESSAGE_TEXT = RET_MSG;
+	end ;
+            SELECT
+                DRIVER_TYPE
+            INTO
+                V_DRIVER_TYPE
+            FROM
+                CA.CA_RULE_BASE
+            WHERE
+                RULE_CODE = IN_RULE_CODE;
+        IF V_DRIVER_TYPE = 'S' THEN
+            -- 静态动因规则入口
+           CALL CA.PROC_RULE_STATIC(IN_RULE_CODE, IN_RUN_TYPE, IN_SCENE_TYPE, V_RET_FLG, V_RET_MSG);
+        ELSE
+            IF V_DRIVER_TYPE = 'D' THEN
+                -- 动态动因规则入口
+               CALL CA.PROC_RULE_DYNAMIC(IN_RULE_CODE, IN_RUN_TYPE, IN_SCENE_TYPE, V_RET_FLG, V_RET_MSG);
+            END IF;
+        END IF;
+        SET RET_FLG = V_RET_FLG;
+        SET RET_MSG = V_RET_MSG;   
+    END 张巧军 11:13:07
+让你改改，能跑就行
+张巧军 11:13:30
+
+
+CREATE PROCEDURE "CA"."PROC_RULE_RUN" 
+    (
+        IN P_AS_OF_DATE DATE,
+        IN IN_RULE_CODE VARCHAR(50),
+        IN IN_RUN_TYPE VARCHAR(10),
+        IN IN_SCENE_TYPE VARCHAR(10),
+        OUT RET_FLG VARCHAR(20),
+        OUT RET_MSG VARCHAR(200)) 
+/*****************************************************************************************
+     purpose: 成本分摊规则分配处理
+     input parameter: IN_RULE_CODE 规则编码
+                                IN_RUN_TYPE 运行方式 1：单独运行  2：场景中运行
+                                IN_SCENE_TYPE     1 暂时实现了生成到账户明细表中，只对账户级分摊有效
+
+     -----   ---------   ---------       -------------------------
+     ver.    date        author          remark
+     1.0     2013-12-12  wangyubin     create.
+  ******************************************************************************************/
+LANGUAGE SQL SPECIFIC SQL140319171621800
+    BEGIN
+                -- 规则类型
+        DECLARE V_DRIVER_TYPE VARCHAR(32);
+        DECLARE V_RET_FLG VARCHAR(1);
+        DECLARE V_RET_MSG VARCHAR(200);
+
+        	--异常定义
+	DECLARE SQLCODE INTEGER DEFAULT 0; 
+  	DECLARE SQLSTATE CHAR(5) DEFAULT '00000'; 
+  	DECLARE exit handler FOR sqlexception,NOT FOUND,SQLWARNING 
+	begin
+	values('PROC_RULE_RUN exception :sqlcode='||sqlcode||';sqlstate='||sqlstate) into RET_MSG ;
+	set RET_FLG='1';
+ 	--SIGNAL SQLSTATE '99999' SET MESSAGE_TEXT = RET_MSG;
+	end ;
+            SELECT
+                DRIVER_TYPE
+            INTO
+                V_DRIVER_TYPE
+            FROM
+                CA.CA_RULE_BASE
+            WHERE
+                RULE_CODE = IN_RULE_CODE;
+        IF V_DRIVER_TYPE = 'S' THEN
+            -- 静态动因规则入口
+           CALL CA.PROC_RULE_STATIC(IN_RULE_CODE, IN_RUN_TYPE, IN_SCENE_TYPE, V_RET_FLG, V_RET_MSG);
+        ELSE
+            IF V_DRIVER_TYPE = 'D' THEN
+                -- 动态动因规则入口
+               CALL CA.PROC_RULE_DYNAMIC(IN_RULE_CODE, IN_RUN_TYPE, IN_SCENE_TYPE, V_RET_FLG, V_RET_MSG);
+            END IF;
+        END IF;
+        SET RET_FLG = V_RET_FLG;
+        SET RET_MSG = V_RET_MSG;   
+    END

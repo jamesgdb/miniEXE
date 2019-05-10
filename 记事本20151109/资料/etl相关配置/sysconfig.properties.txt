@@ -1,0 +1,1 @@
+﻿获取配置中的值：String recordNum = MessageUtil.getSysMessage("EDM_BASIC_CHECK_RECORD"); // 预览要显示的记录数

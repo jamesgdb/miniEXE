@@ -1,0 +1,55 @@
+﻿window.onload=function(){
+ducument.getElementById("").onchange=function(){
+//获取变化的省份
+ var changePovinceValue=this.value;
+ //
+var xmlDoc =parseXML("cities.xml");
+var provinceElement =null;
+  var ccc =xmlDoc.getElementByTagName("province");
+   for(var i=0;i<ccc.length;i++){
+     var  xmlPrEle=ccc[i];
+        var name =xmlPrEle.getAttribute("name");
+  		if(changePovinceValue==name){
+  		provinceElement =name;
+         break;
+    }
+   }
+      if(provinceElement !=null){
+    //获取省下所有的city节点
+    var  xmlcity = provinceElement .getElementByTagName("city");
+    for(var i=0;i<xmlcity .length;i++){
+    var cityValue =xmlcity [i].firstChild.nodeValue;
+    //创建option标签，
+    清空城市的下拉选
+   var cityelement= document.getElementById("city")
+    var ddd=   document.getElementById("city").getElementByTagName("option");
+      for(var i=ddd.length-1;i>0;i--){
+cityelement.removechild(ddd[i]);
+}
+    document.getElementById("city").add (new    Option(str,str));
+    }
+       }
+     }
+}
+
+function parseXML(aaaaa)
+{
+try //Internet Explorer
+  {
+  xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+  }
+catch(e)
+  {
+  try //Firefox, Mozilla, Opera, etc.
+    {
+    xmlDoc=document.implementation.createDocument("","",null);
+    }
+  catch(e)
+    {
+    alert(e.message);
+    return;
+    }
+  }
+xmlDoc.async=false;
+xmlDoc.load(aaa);
+

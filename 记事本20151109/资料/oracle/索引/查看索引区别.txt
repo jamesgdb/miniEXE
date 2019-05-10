@@ -1,0 +1,288 @@
+﻿unique index and constraint 
+博客分类： oracle 
+ 
+
+1. 测试unique index 和 unique constraint
+SYS@anqing2(rac2)> create table ut(idnumber,phone varchar2(15),name varchar2(15));
+
+Table created. 
+
+SYS@anqing2(rac2)> insert into utvalues(1,'13888888888','dave');
+
+1 row created.
+
+SYS@anqing2(rac2)> insert into utvalues(1,'13888888888','dave');
+
+1 row created.
+
+SYS@anqing2(rac2)> insert into utvalues(2,'13899999999','dba');
+
+1 row created.
+
+SYS@anqing2(rac2)> commit;
+
+Commit complete.
+
+ 
+
+--在phone 字段上，我们创建uniqueconstraint
+
+SYS@anqing2(rac2)> alter table ut addconstraint uc_phone unique(phone);
+
+alter table ut add constraint uc_phoneunique(phone)
+
+                              *
+
+ERROR at line 1:
+
+ORA-02299: cannot validate (SYS.UC_PHONE) -duplicate keys found
+
+--这里报错，因为我们在插入数据的时候，有重复值，先删除掉重复值
+
+ 
+
+SYS@anqing2(rac2)> select * from ut;
+
+ 
+
+       ID PHONE           NAME
+
+---------- --------------- ---------------
+
+        1 13888888888     dave
+
+        2 13899999999     dba
+
+        1 13888888888     dave
+
+ 
+
+SYS@anqing2(rac2)> delete from ut whererownum=1;
+
+1 row deleted.
+
+ 
+
+SYS@anqing2(rac2)> commit;
+
+Commit complete.
+
+ 
+
+SYS@anqing2(rac2)> select * from ut;
+
+       ID PHONE           NAME
+
+---------- --------------- ---------------
+
+        2 13899999999     dba
+
+        1 13888888888     dave
+
+ 
+
+--唯一性约束创建成功
+
+SYS@anqing2(rac2)> alter table ut addconstraint uc_phone unique(phone);
+
+Table altered.
+
+ 
+
+--查看约束
+
+SYS@anqing2(rac2)> selectconstraint_name,constraint_type,table_name,index_owner,index_name fromuser_constraints where table_name = 'UT';
+
+ 
+
+CONSTRAINT_NAME C TABLE_NAME  INDEX_OWNER  INDEX_NAME
+
+--------------- - -------------------------- -------------
+
+UC_PHONE        U UT            SYS           UC_PHONE
+
+--Oracle 自动创建了索引并关联到约束, 索引名和约束名是相同的。
+
+ 
+
+--验证下索引
+
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+
+ 
+
+INDEX_NAME    INDEX_TYPE    UNIQUENES GENERATED
+
+------------- ------------- -------------------
+
+UC_PHONE      NORMAL        UNIQUE    N
+
+--我们并没有创建索引，而是在创建unique constraint时，oracle 强制创建了uniqueindex。
+
+ 
+
+--现在我们drop index 看看
+
+SYS@anqing2(rac2)> drop index uc_phone;
+
+drop index uc_phone
+
+          *
+
+ERROR at line 1:
+
+ORA-02429: cannot drop index used forenforcement of unique/primary key
+
+--这里报错，不能删除unique/primary key 上的索引。在这种情况下，我们只有先删除约束。
+
+ 
+
+SYS@anqing2(rac2)> alter table ut dropconstraint uc_phone;
+
+Table altered.
+
+ 
+
+SYS@anqing2(rac2)> drop index uc_phone;
+
+drop index uc_phone
+
+          *
+
+ERROR at line 1:
+
+ORA-01418: specified index does not exist
+
+--再次drop 索引时，提示索引已经不存在，说明已经在删除约束的同时，把索引删掉了。
+
+ 
+
+SYS@anqing2(rac2)> selectconstraint_name,constraint_type,table_name,index_owner,index_name fromuser_constraints where table_name = 'UT';
+
+no rows selected
+
+ 
+
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+
+no rows selected
+
+ 
+
+结论：
+       当约束列上没有索引时，在创建unique constraint 时，oracle 会自动创建unique index，并且该索引不能删除，当删除unique constraint 时，unique index 会自动删除。
+
+ 
+
+ 
+
+2. 测试unique constraint 和non-unique index
+ 
+
+--现在字段phone上创建B-Tree索引
+
+SYS@anqing2(rac2)> create indexidx_ut_phone on ut(phone);
+
+Index created.
+
+ 
+
+--查看索引
+
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+
+INDEX_NAME    INDEX_TYPE    UNIQUENES GENERATED
+
+------------- ------------- -------------------
+
+IDX_UT_PHONE  NORMAL       NONUNIQUE N
+
+ 
+
+--创建unique constraint
+
+SYS@anqing2(rac2)>  alter table ut add constraint uc_phoneunique(phone);
+
+Table altered.
+
+ 
+
+--查看约束和索引信息
+
+SYS@anqing2(rac2)> selectconstraint_name,constraint_type,table_name,index_owner,index_name fromuser_constraints where table_name = 'UT';
+
+ 
+
+CONSTRAINT_NAME C TABLE_NAME   INDEX_OWNER  INDEX_NAME
+
+--------------- - -------------------------- -------------
+
+UC_PHONE        U UT            SYS           IDX_UT_PHONE
+
+--这里重用了已经存在的索引
+
+ 
+
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+
+INDEX_NAME    INDEX_TYPE    UNIQUENES GENERATED
+
+------------- ------------- -------------------
+
+IDX_UT_PHONE  NORMAL       NONUNIQUE N
+
+ 
+
+--删除索引
+
+SYS@anqing2(rac2)> drop index IDX_UT_PHONE;
+
+drop index IDX_UT_PHONE
+
+          *
+ERROR at line 1:
+ORA-02429: cannot drop index used forenforcement of unique/primary key
+--这个提示和之前的一样，我们先删除约束，在来查看
+SYS@anqing2(rac2)> alter table ut dropconstraint uc_phone;
+Table altered.
+SYS@anqing2(rac2)> select constraint_name,constraint_type,table_name,index_owner,index_namefrom user_constraints where table_name = 'UT';
+no rows selected
+--这里约束已经删除掉了。
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+INDEX_NAME    INDEX_TYPE    UNIQUENES GENERATED
+------------- ------------- -------------------
+IDX_UT_PHONE  NORMAL       NONUNIQUE N
+--但是我们的索引并在删除约束时删除掉
+--在手工删除索引，成功
+SYS@anqing2(rac2)> drop indexIDX_UT_PHONE;
+Index dropped.
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+no rows selected
+--重新把约束和索引加上，然后一次删除
+SYS@anqing2(rac2)> create indexidx_ut_phone on ut(phone);
+Index created.
+SYS@anqing2(rac2)> alter table ut addconstraint uc_phone unique(phone);
+Table altered.
+SYS@anqing2(rac2)> selectconstraint_name,constraint_type,table_name,index_owner,index_name fromuser_constraints where table_name = 'UT';
+CONSTRAINT_NAME C TABLE_NAME    INDEX_OWNER   INDEX_NAME
+--------------- - -------------------------- -------------
+UC_PHONE        U UT            SYS           IDX_UT_PHONE
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+INDEX_NAME    INDEX_TYPE    UNIQUENES GENERATED
+------------- ------------- -------------------
+IDX_UT_PHONE  NORMAL       NONUNIQUE N
+SYS@anqing2(rac2)> alter table ut drop constraint uc_phone drop index;
+Table altered.
+SYS@anqing2(rac2)> selectconstraint_name,constraint_type,table_name,index_owner,index_name fromuser_constraints where table_name = 'UT';
+no rows selected
+SYS@anqing2(rac2)> selectindex_name,index_type,uniqueness,generated from user_indexes wheretable_name='UT';
+no rows selected
+--索引和约束一次删除
+小结：
+       当我们的列上有索引时，在创建unique constraint时，Oracle 会重用之前的索引，并且不会改变索引的类型，在第一个测试里，Oracle 自动创建的索引是unique index。
+
+       当我们删除约束时，关联的索引不会自动删除。 这个问题的MOS 上有说明。 参考MOS [ID309821.1]。
+
+       我们可以分两步，先删除约束，在删除索引。 MOS 提供了方法，就是在删除约束时，加上drop index，这样就能一次搞定。
+
+       SQL>altertable ut drop constraint uc_phone drop index;

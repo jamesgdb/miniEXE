@@ -1,0 +1,42 @@
+﻿nmon 进入的监控页面
+之后输入 h，是帮助，查看字母的用途
+ #nmon -f -s  2 -c 10  ---f文件，s是秒，c是时间。
+ 之后将生成的文件放到nmon analyser v33g.xls文件中进行分析：查看MEM（内存），MEMNEW，SYS-SUMM，DISKBUSY（硬盘使用情况），CPU_ALL（cpu使用请况）
+ 说明：通常MEM、CPU_ALL、DISKBUSY不能超过75%。SUMM中cpus波动不能太大，太大是有问题的
+idle是空闲。user用户。sys是系统 
+topas：查看
+
+新特性  描述  
+启动 目前还有一个称为 "nmon" 的小型 Shell 脚本，可以用来启动适当的 nmon 版本。将该脚本和 nmon 二进制文件放入到您的 $PATH 中，然后输入：nmon。该版本目前仅在 32 位模式下进行了编译。所以，它可以运行于 32 位和 64 位硬件。这是为了使它更容易安装和运行。 
+N = NFS 对于 nmon 10 来说，NFS 是全新的特性。 
+p = 分区 (Partitions) 该特性是为了共享 CPU 分区信息，这是 p5/AIX5.3 的重要特性。  
+C = CPU 这是为了支持使用 32 个以上 CPU 的计算机，最多可以根据需要达到 128 个逻辑 CPU。 
+c = CPU 如果您在 POWER5 上使用 AIX 5.3，并且处于共享 CPU 环境中，那么该特性可以提供关于物理 CPU 使用的详细信息。 
+S = 子类 (Subclass) 该特性根据要求表示 WLM 的子类。 
+a = 磁盘适配器 (Disk adapters) 提供磁盘适配器的详细信息，比如它们的完整类型。 
+r = 资源 (Resources) 其中包括以 MHz 为单位的 CPU 速度。 
+k = 内核 (Kernel) 提供了一些新的字段。 
+L = 大型页面 (Large pages) 提供了大型页面的状态信息，适用于追求高性能的用户。 
+D = 磁盘 (Disk) 提供关于磁盘、磁盘类型大小、可用空间、卷组、适配器等更详细的信息。 
+n = 网络 (Network) 提供关于网络适配器、MTU 和相关错误的详细信息。 
+m = 内存 (Memory) 提供内存使用的更详细的信息，如系统（内核）和进程、活动虚拟内存。 
+-B 这是移除封装的启动选项。 
+
+
+xh = Help information     q = Quit nmon             0 = reset peak counts                                                                                                                     x
+x+ = double refresh time  - = half refresh          r = ResourcesCPU/HW/MHz/AIX                                                                                                               x
+xc = CPU by processor     C=upto 128 CPUs           p = LPAR Stats (if LPAR)                                                                                                                  x
+xl = CPU avg longer term  k = Kernel Internal       # = PhysicalCPU if SPLPAR                                                                                                                 x
+xm = Memory & Paging      M = Multiple Page Sizes  P = Paging Space                                                                                                                           x
+xd = DiskI/O Graphs       D = DiskIO +Service times o = Disks %Busy Map                                                                                                                       x
+xa = Disk Adapter         e = ESS vpath stats       V = Volume Group stats                                                                                                                    x
+x^ = FC Adapter (fcstat)  O = VIOS SEA (entstat)    v = Verbose=OK/Warn/Danger                                                                                                                x
+xn = Network stats        N=NFS stats (NN for v4)   j = JFS Usage stats                                                                                                                       x
+xA = Async I/O Servers    w = see AIX wait procs   "="= Net/Disk KB<-->MB                                                                                                                     x
+xb = black&white mode     g = User-Defined-Disk-Groups (see cmdline -g)                                                                                                                       x
+xt = Top-Process --->     1=basic 2=CPU-Use 3=CPU(default) 4=Size 5=Disk-I/O                                                                                                                  x
+xu = Top+cmd arguments    U = Top+WLM Classes       . = only busy disks & procs                                                                                                               x
+xW = WLM Section          S = WLM SubClasses                                                                                                                                                  x
+x[ = Start ODR            ] = Stop ODR                                                                                                                                                        x
+x~ = Switch to topas screen                                                                                                                                                                   x
+xNeed more details?  Then stop nmon and use: nmon -?   

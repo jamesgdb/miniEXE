@@ -1,0 +1,69 @@
+﻿ps -ef | grep java
+sqlplus tmrpt/tmrpt@oraAATM1
+topas
+rm * 删除
+hostname
+查看监听
+lsnrctl status
+cp /tmrpt/ojdbc6.jar /WebSphere/AppServerb/ojdbc6.jar
+
+一、oracle在aix上连接
+   1.su - oracle  //进入oracle用户；
+   2.export ORACLE_SID=house  //指定实例，多个实例的情况下；
+   3.sqlplus log
+   4.conn /as sysdba
+cronble
+sh
+cd /oracle/product/11g/rdbmss/;
+find . -mmin +60 -name "arch_*.arc" -exec rm {} \;
+最好的建议只使用root的crontab 然后需要别的用户的crontab的时候使用su 过去执行
+例如 0 * * * * * su - monitor -c 'ontape -s L 0'
+
+绝对路径  
+
+ar/spool/mail/root mail路径   
+
+cronble crontest.cron
+cronble -l
+
+创建cron脚本
+第一步：写cron脚本文件,命名为crontest.cron。
+15,30,45,59 * * * * echo "xgmtest....." >> xgmtest.txt  表示，每隔15分钟，执行打印一次命令 
+第二步：添加定时任务。执行命令 “crontab crontest.cron”。搞定 
+第三步："crontab -l" 查看定时任务是否成功或者检测ar/spool/cron下是否生成对应cron脚本  
+
+
+目录
+
+启动was命令
+cd /WebSphere/AppServer/bin
+sh startManager.sh
+cd /WebSphere/AppServer/profiles/AppSrv01/bin
+sh startNode.sh
+sh startServer.sh server1
+
+停was
+cd /WebSphere/AppServer/profiles/AppSrv01/bin
+sh stopServer.sh server1
+sh stopNode.sh
+cd /WebSphere/AppServer/bin
+sh stopManager.sh
+
+杀掉进程
+ ps -ef | grep java
+谢晖 17:05:53
+  kill -9 
+
+
+登陆oracle
+su - oracle进入oracle
+sqlplus tmrpt/tmrpt 进入特定的用户
+
+
+出现
+
+节点 SHPAM028Cell01Node01 上的 TMRPT-1_0_0-TEST_war 扩展尚未完成。控制台将不会在节点 SHPAM028Cell01Node01 服务器 server1 上启动该应用程序。
+等待其扩展完成后在启动项目就ok了
+
+
+

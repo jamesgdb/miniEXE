@@ -1,0 +1,1 @@
+﻿/opt/Oracle/Middleware/user_projects/domains/base_domain/bin

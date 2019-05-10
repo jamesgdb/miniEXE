@@ -1,0 +1,6 @@
+﻿求cpu平均值：cpu_all
+硬盘：diskbusy  硬盘3
+io：
+tps：问tm
+event_log条数：
+

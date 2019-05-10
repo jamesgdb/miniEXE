@@ -1,0 +1,153 @@
+﻿log4j.xml输出日志调试过程  
+现在业务系统运行也有日志输出，读的是log4j.properties，配置如下：
+
+#-------------------------------
+
+log4j.rootCategory=DEBUG, stdout
+#每天输出一个日志
+log4j.appender.stdout=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+#log4j.appender.stdout.layout.ConversionPattern=%d - %m%n
+#%-d{yyyy-MM-dd HH:mm:ss,SSS}
+%d 输出日志时间点的日期或时间
+#%m 输出代码中指定的消息
+#%p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
+#%r 输出自应用启动到输出该log信息耗费的毫秒数
+#%c 输出所属的类目，通常就是所在类的全名
+#%t 输出产生该日志事件的线程名
+#%n 输出一个回车换行符，Windows平台为"\r\n"，Unix平台为"\n"
+log4j.appender.stdout.layout.ConversionPattern=%-d{yyyy-MM-dd HH:mm:ss} - %p - %m%n
+#输出文件的名字
+log4j.appender.stdout.File=E:\\tomcatLog\\test.log
+#日志优先级别由低到高 DEBUG  INFO  WARN  ERROR  FATAL
+log4j.appender.stdout.Threshold=DEBUG
+
+#---------------------------
+
+描述：系统所有输出日志都写到文件E:\\tomcatLog\\test.log，不能更具日志debug,info,warn,error和fatal级别分别输出到不同的文件。
+
+ 
+
+在网上查询log4j.xml,然后修改相关配置，配置如下：
+
+ 
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+ 
+
+<!--debug日志输出配置-->
+
+
+ <appender name="debug"
+  class="org.apache.log4j.DailyRollingFileAppender">
+  <param name="File" value="D:/data/programe/cgt/log/debug.txt" />
+  <param name="Append" value="true" />
+  <layout class="org.apache.log4j.PatternLayout">
+   <param name="ConversionPattern" value="%d [%t] %p - %m%n" />
+  </layout>
+  <filter class="org.apache.log4j.varia.LevelRangeFilter">
+   <param name="LevelMax" value="DEBUG" /><!--过滤只输出DEBUG级别日志-->
+   <param name="LevelMin" value="DEBUG" />
+  </filter>
+
+ </appender>
+
+ 
+
+<!--infor日志输出配置-->
+
+ <appender name="info"
+  class="org.apache.log4j.DailyRollingFileAppender">
+  <param name="File" value="D:/data/programe/cgt/log/info.txt" />
+  <param name="Append" value="true" />
+  <layout class="org.apache.log4j.PatternLayout">
+   <param name="ConversionPattern" value="%d [%t] %p - %m%n" />
+  </layout>
+  <filter class="org.apache.log4j.varia.LevelRangeFilter">
+   <param name="LevelMax" value="INFO" />
+   <param name="LevelMin" value="INFO" />
+  </filter>
+
+ </appender>
+
+<!--warn日志输出配置-->
+ <appender name="warn"
+  class="org.apache.log4j.DailyRollingFileAppender">
+  <param name="File" value="D:/data/programe/cgt/log/warn.txt" />
+  <param name="Append" value="true" />
+  <layout class="org.apache.log4j.PatternLayout">
+   <param name="ConversionPattern" value="%d [%t] %p - %m%n" />
+  </layout>
+  <filter class="org.apache.log4j.varia.LevelRangeFilter">
+   <param name="LevelMax" value="WARN" />
+   <param name="LevelMin" value="WARN" />
+  </filter>
+
+ </appender>
+
+ 
+
+<!--error日志输出配置-->
+
+ <appender name="error"
+  class="org.apache.log4j.DailyRollingFileAppender">
+  <param name="File" value="D:/data/programe/cgt/log/error.txt" />
+  <param name="Append" value="true" />
+  <layout class="org.apache.log4j.PatternLayout">
+   <param name="ConversionPattern" value="%d [%t] %p - %m%n" />
+  </layout>
+  <filter class="org.apache.log4j.varia.LevelRangeFilter">
+   <param name="LevelMax" value="ERROR" />
+   <param name="LevelMin" value="ERROR" />
+  </filter>
+
+ </appender>
+
+ 
+
+<!--fatal日志输出配置-->
+
+ <appender name="fatal"
+  class="org.apache.log4j.DailyRollingFileAppender">
+  <param name="File" value="D:/data/programe/cgt/log/fatal.txt" />
+  <param name="Append" value="true" />
+  <layout class="org.apache.log4j.PatternLayout">
+   <param name="ConversionPattern" value="%d [%t] %p - %m%n" />
+  </layout>
+  <filter class="org.apache.log4j.varia.LevelRangeFilter">
+   <param name="LevelMax" value="FATAL" />
+   <param name="LevelMin" value="FATAL" />
+  </filter>
+
+ </appender>
+
+
+ <root>
+  <priority value="debug" /><!--日志输出最低级别-->
+  <appender-ref ref="debug" /><!--debug日志输出-->
+  <appender-ref ref="info" /><!--info日志输出-->
+  <appender-ref ref="warn" /><!--warn日志输出-->
+  <appender-ref ref="error" /><!--error日志输出-->
+  <appender-ref ref="fatal" /><!--fatal日志输出-->
+ </root>
+
+</log4j:configuration>
+
+这样就可以把系统不同级别的输出到不同的文件了。
+
+一点想法【个人观点】：
+
+log4j.properties：使用这个配置，所有输出都输出到一个文件中，这样在系统调试过程比较合适，这样可以跟踪业务流程；
+
+log4j.xml：使用这个配置不同级别的日志输出到不同的文件夹，比较适合于系统正式上线运行阶段，这个可以很快的定位到错误所在，但要求必须熟悉系统流程，看到异常日志时能知道问题是出到哪一块了。
+
+ 
+
+ 
+
+如果把log4j.xml和log4j.properties都放到classes文件加下，系统会自动先去查找log4j.xml配置文件，如果log4j.xml存在，那么系统日志将按照log4j.xml配置输出；不过log4j.xml不存在，则查找log4j.properties文件。
+

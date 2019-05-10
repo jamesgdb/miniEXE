@@ -1,0 +1,26 @@
+﻿
+<form>
+  <input type="text" name="email" />
+  <input type="hidden" name="id"  value="zhangsan"/>
+  <input type="hidden" name="id" value="zhangsa12n"/>
+  <input type="hidden" name="id" value="zhangs32an"/>
+</form>
+
+ 方法一-----------------------------------------
+     $("#hidden1").click( function () { 
+     var $hid= $("input:hidden");
+       $hid.each(function (index, domEle) { 
+       //遍历集合和数组，调用回调函数
+  // domEle == this ；index为遍历的索引
+      var $val=this.value;
+      //用jquery写
+      alert($(domEle).val());
+     });
+  });
+  
+方法二---------------------------------------------
+ var p1=$("p");
+  $.each(p1,function(index,domElm){
+//   alert($(this).html());
+  $(this).click(function(){alert($(domElm).html());});
+});

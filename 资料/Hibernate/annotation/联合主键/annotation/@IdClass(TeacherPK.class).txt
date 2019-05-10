@@ -1,0 +1,2 @@
+﻿直接在teacher的联合主键的字段上增加@Id
+在类上面增加@IdClass(TeacherPK.class)；

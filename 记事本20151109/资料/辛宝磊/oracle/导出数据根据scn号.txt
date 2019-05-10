@@ -1,0 +1,30 @@
+﻿-- alter table event_log_50 nologging;使用于中间表
+ 
+ 
+ insert /*+ APPEND */ into EVENT_LOG_50
+ 
+   select 
+     event_id, event_time, ip_address, event_type, user_defined_event_type, risk_score, policy_action, challenge_auth_method, challenge_successful, policy_rule_id, short_date, sys_creation_date, lastmodified, user_id, user_hash, preliminary_score, ip_country, ip_city, channel_indicator, operating_system, browser_type, amount_original, amount_currency, user_acct_number, ext_acct_number, ext_acct_owner_name, flagged, resolution, cdf_s_1, cdf_s_2, cdf_s_3, cdf_s_4, cdf_s_5, cdf_s_6, cdf_s_7, cdf_s_8, cdf_s_9, cdf_s_10, cdf_s_11, cdf_s_12, cdf_s_13, cdf_s_14, cdf_s_15, cdf_s_16, cdf_s_17, cdf_s_18, cdf_s_19, cdf_s_20, org_id, is_device_bound, cookie, ip_region
+
+    from event_log_test as  of scn 348278059;select * from v$transaction;--事务
+
+select paddr,p.spid,s.sid from v$session s, v$process p where s.PADDR=p.addr and taddr='070000022076FF30';
+select * from v$process where addr='07000002313B8560';
+select * from v$sql where address='07000002383D3B50';
+
+
+
+select * from  event_log_test;
+
+select count(1) from EVENT_LOG_TEST2;SQL> select to_char(current_scn) from v$database;
+
+TO_CHAR(CURRENT_SCN)
+----------------------------------------
+348278059
+
+
+expdp tmrpt/tmrpt dumpfile=event_test222.dmp directory=DUMPDIR TABLES=tmrpt.event_log_test logfile=event_test222.log job_name=event_test parallel=4 FLASHBACK_SCN=348278059
+
+ exp rsa_core/rsa_core file=/rsatm/dump/event_test111.dmp log=/rsatm/dump/event_test111.log  TABLES=rsa_core.event_log_test2 
+ 
+ 

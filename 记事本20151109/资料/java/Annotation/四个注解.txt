@@ -1,0 +1,10 @@
+﻿在bean.xml中配置关于注解的配置
+ <context:annotation-config />
+              <context:component-scan base-package="com.bluedot">
+        </context:component-scan>
+
+
+controller
+service
+component
+repository

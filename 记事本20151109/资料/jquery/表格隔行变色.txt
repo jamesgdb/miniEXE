@@ -1,0 +1,6 @@
+﻿$("table.eq(0)  tr.even").css("background","blue");
+eq(0):表示的是页面中的第一个表格
+even：表示的是：匹配所有索引值为偶数的元素，从 0 开始计数；
+
+$("table.eq(0)  tr.odd").css("background","blue");
+odd：表示的是：匹配所有索引值为奇数的元素，从 0 开始计数；

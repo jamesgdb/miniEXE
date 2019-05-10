@@ -1,0 +1,2 @@
+﻿select * from SYS_DICT_DEF d where d.dict_def_id like 'etl_%';
+ select * from sys_dict_item t where t.dict_def_uuid in (select distinct(uuid) from SYS_DICT_DEF d where d.dict_def_id like 'etl_%' )；

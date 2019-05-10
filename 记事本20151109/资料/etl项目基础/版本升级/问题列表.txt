@@ -1,0 +1,2 @@
+﻿applicationContext-resource-dbcp.xml中，数据源问题
+logback.xml 中日志级别用的不同

@@ -1,0 +1,10 @@
+﻿错误的将global写成了globle
+原始：<link href="${ctx}/css/globle.css" rel="stylesheet" type="text/css"> 
+修改：<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css"> 
+
+在header.jsp中已经配置了相关的dwr信息，所以在此页面中不能再重复配置：
+<%-- 		<SCRIPT type="text/javascript" src="${ctx}/dwr/engine.js"></SCRIPT> --%>
+<%-- 		<SCRIPT type="text/javascript" src="${ctx}/dwr/util.js"></SCRIPT> --%>
+<%-- 		<SCRIPT type="text/javascript" src="${ctx}/dwr/interface/RiskService"></SCRIPT> --%>
+	
+        

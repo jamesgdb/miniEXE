@@ -1,0 +1,21 @@
+﻿create or replace function GET_LINE_BY_NUM(
+num in number--传入数字，确定表中列的值
+)
+return VARCHAR2 is
+
+  Result1  VARCHAR2(50);--返回一个百分数
+begin
+  select
+          case when NUM=1 then 'CCC'
+                when NUM=2 then 'QUESTION'
+                when NUM =3 then 'SMS'
+                when NUM =4 then 'DENY'
+                when NUM =5 then 'CHALLENGE'
+                when NUM =6 then 'REVIEW'
+                when NUM =7 then 'ALLOW'
+                   END
+                INTO Result1  FROM DUAL;
+
+
+  return Result1;
+end GET_LINE_BY_NUM;

@@ -1,0 +1,18 @@
+﻿关于修改WebSphere应用的web.xml的问题（如：修改session-outtime ）
+【@叫我小猫Frank】与你分享
+
+　　在websphere中，如果我们直接修改我们应用程序底下的web.xml的话，在不重新打包部署的情况下，那么这次修改肯定会是不会起作用的。解决的方法是：
+
+　　我们在不打包重新部署的情况下，不能只修改应用底下的web.xml，因为还有 “config/cells……” 目录，是用来存储WAS的配置文件的。应用分为2部分--资源和配置，资源包括类文件，引用的包，图片等；配置包括各个模块的部署描述符。在WAS中，应用的配置是从 “config/cells……” 目录下读取；而资源从 “/installedApps……” 目录下读取。应用导出只能导出上一次发布的版本。所以建议任何的更改应该打包重新发布应用。  
+
+　　通常我们在Websphere下部署了一个java工程后，如果修改了web.xml文件，重新启动这个java工程发现Websphere并没有自动加载web.xml文件，即修改后的web.xml并不起作用，除非重新把这个java工程再部署一次，这需要花一些时间，如果是远程操作机器，上传整个jar包也是很慢的事情。
+
+　 　其实这是因为Websphere下的配置文件通常有两份，一份在installedApps下，另一份在config下面，所以需要修改两个地方的web.xml文件后才能起效。这里以websphere6为例，两份配置文件的详细路径一般为
+
+1、/opt/IBM/WebSphere/profiles/AppSrv01/installedApps/coshineNode01Cell/arms.ear
+
+  ※ 其中coshineNode01Cell这个是机器名，arms.ear为项目名
+
+2、/opt/IBM/WebSphere/profiles/AppSrv01/config/cells/coshineNode01Cell/applications/arms.ear
+
+只要修改这两处的web.xml文件，重启应用就可以生效了。

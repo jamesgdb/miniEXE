@@ -1,0 +1,20 @@
+﻿var data ="id="+id+"&name="+name+"&sch="+sch ;
+	    		var url="dcClear_getPatition.action";
+	    		$.ajax({
+	    	       	dataType: 'text',
+	    			url: url,
+	    			data: data,
+	    			type: 'post',
+	    			success: function(data){
+	    				if(data == 1) {
+	    					return false;
+	    				}else{
+	    					removes();	
+	    				}
+	    			}
+	    		});
+	    		
+	    		
+	    		
+	    		
+	    		Caused by: org.hibernate.exception.SQLGrammarException: could not load an entity: [com.vprisk.edm.dm.entity.DmPhysicalTabCols#8bd6bb2c513b4a55bd219ea5d61f3e99]

@@ -1,0 +1,100 @@
+﻿1.声明实体：@Entity
+
+声明表名：@Table(name="tbl_sky")
+
+声明表键：@Table(name="tbl_sky",
+		    uniqueConstraints = {@UniqueConstraint(columnNames={"month", "day"})}
+		)
+------------------------------------------------------------------------
+声明主键：@Id
+	          public String getId() {
+		   return id;}
+-------------------------------------------------------------------		   
+不想展示某个属性：@Transient
+                                 public String getId() {
+		              return id;}
+-------------------------------------------------------------------		              
+声明时间类型：@Temporal(TemporalType.DATE)
+                	        public Date getTime() {
+		                return time;
+				}
+---------------------创建一个枚举类型------------------------
+package com.gdb.entity;
+
+public enum Position {
+	A,B,C
+}
+---------------------------------------------------------------------
+声明枚举类型@Enumerated(EnumType.STRING)
+				public Position getPosition() {
+					return position;
+				}
+  			
+  --------------------------------------------------------------------------------
+sequence自增加
+        @Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	public int getNumbers() {
+		return numbers;
+	}  
+ ------------------------------------------------------------------------------- 
+  这个是放在类上（用途不大）
+ @javax.persistence.TableGenerator(
+    name="EMP_GEN",
+    table="GENERATOR_TABLE",-------------标名字
+    pkColumnName = "key", 表中字段
+    valueColumnName = "hi" ,表中字段
+    pkColumnValue="EMP", 
+    allocationSize=20                       -------------字段增加的幅度
+)
+
+--------------------------------------------------------------------------------------------------------     
+      
+        
+  
+@Entity
+@Table(name="tbl_sky")
+public class Flight implements Serializable {
+...
+    @Version
+    @Column(name="OPTLOCK")
+    public Integer getVersion() { ... }
+}    
+
+2.声明列属性:@Column
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

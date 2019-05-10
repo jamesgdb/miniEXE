@@ -1,0 +1,81 @@
+﻿-- Create table
+create table EDM_DM_MODEL_INSTALL
+(
+  model_install_id VARCHAR2(32) not null,
+  install_tm       CHAR(19) not null,
+  install_type     CHAR(1) not null,
+  organ            VARCHAR2(40) not null,
+  model_version    VARCHAR2(20) not null,
+  base_version     VARCHAR2(20) not null,
+  time_version     CHAR(19) not null,
+  product_model    VARCHAR2(100) not null,
+  install_property CHAR(1) not null,
+  install_schema   VARCHAR2(50) not null,
+  install_catalog  VARCHAR2(50),
+  install_tbspace  VARCHAR2(50) not null,
+  creater          VARCHAR2(50) not null,
+  creater_name     VARCHAR2(50) not null,
+  install_status   CHAR(1) not null,
+  install_log      VARCHAR2(4000),
+  model_id         VARCHAR2(32)
+)
+tablespace USERS
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64
+    minextents 1
+    maxextents unlimited
+  );
+-- Add comments to the table 
+comment on table EDM_DM_MODEL_INSTALL
+  is '模型安装';
+-- Add comments to the columns 
+comment on column EDM_DM_MODEL_INSTALL.model_install_id
+  is '模型安装编号';
+comment on column EDM_DM_MODEL_INSTALL.install_tm
+  is '安装日期';
+comment on column EDM_DM_MODEL_INSTALL.install_type
+  is '安装模式(1全新,2更新)';
+comment on column EDM_DM_MODEL_INSTALL.organ
+  is '模型所属组织';
+comment on column EDM_DM_MODEL_INSTALL.model_version
+  is '模型版本';
+comment on column EDM_DM_MODEL_INSTALL.base_version
+  is '模型主版本号';
+comment on column EDM_DM_MODEL_INSTALL.time_version
+  is '模型时间戳';
+comment on column EDM_DM_MODEL_INSTALL.product_model
+  is '产品模型';
+comment on column EDM_DM_MODEL_INSTALL.install_property
+  is '安装主题';
+comment on column EDM_DM_MODEL_INSTALL.install_schema
+  is '数据库Schema';
+comment on column EDM_DM_MODEL_INSTALL.install_catalog
+  is '数据库Catalog';
+comment on column EDM_DM_MODEL_INSTALL.install_tbspace
+  is '数据库表空间';
+comment on column EDM_DM_MODEL_INSTALL.creater
+  is '创建用户名';
+comment on column EDM_DM_MODEL_INSTALL.creater_name
+  is '创建用户姓名';
+comment on column EDM_DM_MODEL_INSTALL.install_status
+  is '安装状态';
+comment on column EDM_DM_MODEL_INSTALL.install_log
+  is '安装日志';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table EDM_DM_MODEL_INSTALL
+  add constraint PK_MODEL_INSTALL primary key (MODEL_INSTALL_ID)
+  using index 
+  tablespace USERS
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    minextents 1
+    maxextents unlimited
+  );

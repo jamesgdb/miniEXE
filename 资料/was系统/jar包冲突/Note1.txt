@@ -1,0 +1,13 @@
+﻿1.
+“类装入和更新检测”中的“类装入器顺序”得选“类已经装入并且是父类装入器”
+ “管理模块”中的“类装入器顺序”加载顺序设置为“先使用本地类装入器（父类最后）”
+ oracle jdbc driver先不设
+ 在服务里面把那个关于类加载顺序的配置删除后测试
+ 结果。
+ 
+ 
+ AM_PARENT_ID
+ 
+ VARCHAR2(255 CHAR)
+ 
+ exp tmrpt1/tmrpt1@orau11g file=/tmrpt/resource_tmrpt.sql full =y;

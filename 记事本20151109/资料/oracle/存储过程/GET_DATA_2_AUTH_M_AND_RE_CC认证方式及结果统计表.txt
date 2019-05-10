@@ -1,0 +1,270 @@
+﻿create or replace procedure GET_DATA_2_AUTH_M_AND_RE_CC
+
+ is
+ TRANS_TIME DATE;
+ TRANS_TIME_ DATE;--交易时间
+ TRANS_TIME_MIN_MON DATE;--月报中的最小时间
+
+ CHALLENGE_AUTH_METHOD VARCHAR2(50);--认证方式
+ AUTH_TRANS_NUM NUMBER;--认证比数
+ AUTH_SUCCESS_TRANS_NUM NUMBER;--成功认证比数
+ AUTH_FAILED_TRANS_NUM NUMBER;--失败认证比数
+ DEVICE_AUTH_FAILED_TRANS_NUM NUMBER;--绑定设备认证失败交易比数
+ AUTH_FALIED_DEVICE_NUM NUMBER;--认证失败的绑定设备数
+ TIME_SCY             DATE;--用于循环的时间(取当前时间)
+ MAX_TIME              DATE;--本表中的最大时间
+ TIME_TODAY            DATE;--当前时间
+ VAR_CHAL_AUTH_ME      NUMBER;--CHALLENGE_AUTH_METHOD的个数
+ VAR_AUTH_METHOD_AND_RE RP_AUTH_METHOD_AND_RESULT%ROWTYPE;
+ CCC_SMS_Q    VARCHAR2(50);
+ VAR_NULL     NUMBER;
+ VAR_RECORD_ID  VARCHAR2(30);--log日志主键
+
+
+begin
+
+    SELECT MAX(T.TRANS_TIME) INTO TRANS_TIME_ FROM RP_TRANS_LOG_MONTH T;
+    SELECT min(T.TRANS_TIME) INTO TRANS_TIME_MIN_MON FROM RP_TRANS_LOG_MONTH T;
+     SELECT max(T.TRANS_TIME) INTO  MAX_TIME FROM  RP_AUTH_METHOD_AND_RESULT T;
+
+    IF   TRANS_TIME_ IS NOT NULL AND MAX_TIME IS NULL THEN
+
+      WHILE TRANS_TIME_MIN_MON < to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd')
+        LOOP
+          ----------------------------------------------------------------------------------
+
+
+            VAR_CHAL_AUTH_ME := 1;
+         WHILE
+           VAR_CHAL_AUTH_ME < 4
+
+          LOOP
+           SELECT GET_LINE_BY_NUM(VAR_CHAL_AUTH_ME) INTO CCC_SMS_Q FROM DUAL;
+
+           SELECT COUNT(*) INTO VAR_NULL FROM RP_TRANS_LOG_MONTH T WHERE  T.TRANS_TIME = TRANS_TIME_MIN_MON AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q;
+
+
+           IF VAR_NULL > 0  THEN
+
+              INSERT INTO RP_AUTH_METHOD_AND_RESULT(
+
+               TRANS_TIME,
+               CHALLENGE_AUTH_METHOD,
+               AUTH_TRANS_NUM,
+               AUTH_SUCCESS_TRANS_NUM,
+               AUTH_FAILED_TRANS_NUM,
+               DEVICE_AUTH_FAILED_TRANS_NUM,
+               AUTH_FALIED_DEVICE_NUM
+              )
+              SELECT * FROM(
+              SELECT
+                T.TRANS_TIME as TRANS_TIME,
+               T.CHALLENGE_AUTH_METHOD as CHALLENGE_AUTH_METHOD,
+               sum(T.trans_num) AS AUTH_TRANS_NUM,
+               sum(case T.CHALLENGE_SUCCESSFUL
+                   when 'Y' then
+                    T.trans_num
+                   else
+                    0
+                 end) as AUTH_SUCCESS_TRANS_NUM,
+                  sum(case T.CHALLENGE_SUCCESSFUL
+                   when 'N' then
+                    T.trans_num
+                   else
+                    0
+                 end) as AUTH_FAILED_TRANS_NUM,
+                 sum(case when T.CHALLENGE_SUCCESSFUL = 'N'
+                               and IS_USE_DEVICE ='Y'
+                          then T.trans_num
+                          else 0
+                  end) as DEVICE_AUTH_FAILED_TRANS_NUM ,
+                  COUNT(C.DEVICE_ID) AS  AUTH_FALIED_DEVICE_NUM
+
+                 FROM  RP_TRANS_LOG_MONTH T ,RP_CHALLENGE_FAIL_BD_DEVICE_ID C
+                 WHERE T.CHALLENGE_AUTH_METHOD=C.CHALLENGE_AUTH_METHOD(+)
+                       AND T.TRANS_TIME = TRANS_TIME_MIN_MON
+                        AND C.TRANS_TIME(+) =  T.TRANS_TIME
+                        AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q
+                 group by T.TRANS_TIME ,t.CHALLENGE_AUTH_METHOD
+                 order by  t.CHALLENGE_AUTH_METHOD
+                  );
+                  COMMIT;
+
+                   END IF;
+                  VAR_CHAL_AUTH_ME :=VAR_CHAL_AUTH_ME+1;
+                  END LOOP;
+
+
+
+          TRANS_TIME_MIN_MON := ADD_MONTHS(TRANS_TIME_MIN_MON,1);
+        END LOOP;
+
+    ELSE
+
+
+    select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO TIME_SCY from dual;
+    select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO TIME_TODAY from dual;
+
+          while TIME_SCY >  ADD_MONTHS(TIME_TODAY,-3)
+           LOOP
+
+             TIME_SCY := ADD_MONTHS(TIME_SCY,-1);
+
+
+             IF TIME_SCY <= MAX_TIME THEN
+
+              VAR_CHAL_AUTH_ME := 1;
+                 WHILE
+                   VAR_CHAL_AUTH_ME < 4
+
+                  LOOP
+
+                   SELECT GET_LINE_BY_NUM(VAR_CHAL_AUTH_ME) INTO CCC_SMS_Q FROM DUAL;
+                  -- SELECT min(T.TRANS_TIME) INTO TRANS_TIME_MIN_MON FROM RP_TRANS_LOG_MONTH T where T.POLICY_ACTION = CCC_SMS_Q;
+                   SELECT COUNT(*) INTO VAR_NULL FROM RP_TRANS_LOG_MONTH T WHERE  T.TRANS_TIME = TIME_SCY AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q;
+                   --------------------------------------------------------------------------------
+
+                   IF VAR_NULL > 0  THEN
+
+
+                    SELECT
+
+                           NVL(T.CHALLENGE_AUTH_METHOD,'NULL') AS CHALLENGE_AUTH_METHOD ,
+                           NVL(sum(T.trans_num),0) AS AUTH_TRANS_NUM ,
+                           NVL(sum(case T.CHALLENGE_SUCCESSFUL
+                               when 'Y' then
+                                T.trans_num
+                               else
+                                0
+                             end),0) AS AUTH_SUCCESS_TRANS_NUM ,
+                              NVL(sum(case T.CHALLENGE_SUCCESSFUL
+                               when 'N' then
+                                T.trans_num
+                               else
+                                0
+                             end),0) AS AUTH_FAILED_TRANS_NUM ,
+                             NVL(sum(case when T.CHALLENGE_SUCCESSFUL = 'N'
+                                           and IS_USE_DEVICE ='Y'
+                                      then T.trans_num
+                                      else 0
+                              end),0) AS DEVICE_AUTH_FAILED_TRANS_NUM,
+                              SUM(1) AS AA,
+                              NVL(T.TRANS_TIME,Sysdate)
+
+                              INTO VAR_AUTH_METHOD_AND_RE
+
+                              FROM  RP_TRANS_LOG_MONTH T
+                               WHERE T.TRANS_TIME = TIME_SCY AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q
+                               group by T.TRANS_TIME ,t.CHALLENGE_AUTH_METHOD;
+
+
+
+                     UPDATE RP_AUTH_METHOD_AND_RESULT T SET
+                           T.TRANS_TIME = VAR_AUTH_METHOD_AND_RE.TRANS_TIME,
+                           T.CHALLENGE_AUTH_METHOD=VAR_AUTH_METHOD_AND_RE.CHALLENGE_AUTH_METHOD,
+                           T.AUTH_TRANS_NUM=VAR_AUTH_METHOD_AND_RE.AUTH_TRANS_NUM,
+                           T.AUTH_SUCCESS_TRANS_NUM=VAR_AUTH_METHOD_AND_RE.AUTH_SUCCESS_TRANS_NUM,
+                           T.AUTH_FAILED_TRANS_NUM=VAR_AUTH_METHOD_AND_RE.AUTH_FAILED_TRANS_NUM,
+                           T.DEVICE_AUTH_FAILED_TRANS_NUM=VAR_AUTH_METHOD_AND_RE.DEVICE_AUTH_FAILED_TRANS_NUM
+
+                           WHERE T.TRANS_TIME = TIME_SCY AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q;
+                           COMMIT;
+
+                       end if;
+
+                          VAR_CHAL_AUTH_ME :=VAR_CHAL_AUTH_ME+1;
+                   END LOOP;
+
+
+              ELSE
+
+               VAR_CHAL_AUTH_ME := 1;
+                 WHILE
+                   VAR_CHAL_AUTH_ME < 4
+
+                  LOOP
+                   SELECT GET_LINE_BY_NUM(VAR_CHAL_AUTH_ME) INTO CCC_SMS_Q FROM DUAL;
+
+                   SELECT COUNT(*) INTO VAR_NULL FROM RP_TRANS_LOG_MONTH T WHERE  T.TRANS_TIME = TIME_SCY AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q;
+                   --------------------------------------------------------------------------------
+
+                   IF VAR_NULL > 0  THEN
+
+                      INSERT INTO RP_AUTH_METHOD_AND_RESULT(
+
+                       TRANS_TIME,
+                       CHALLENGE_AUTH_METHOD,
+                       AUTH_TRANS_NUM,
+                       AUTH_SUCCESS_TRANS_NUM,
+                       AUTH_FAILED_TRANS_NUM,
+                       DEVICE_AUTH_FAILED_TRANS_NUM,
+                       AUTH_FALIED_DEVICE_NUM
+                      )
+                      SELECT * FROM(
+                      SELECT
+                        T.TRANS_TIME as TRANS_TIME,
+                       T.CHALLENGE_AUTH_METHOD as CHALLENGE_AUTH_METHOD,
+                       sum(T.trans_num) AS AUTH_TRANS_NUM,
+                       sum(case T.CHALLENGE_SUCCESSFUL
+                           when 'Y' then
+                            T.trans_num
+                           else
+                            0
+                         end) as AUTH_SUCCESS_TRANS_NUM,
+                          sum(case T.CHALLENGE_SUCCESSFUL
+                           when 'N' then
+                            T.trans_num
+                           else
+                            0
+                         end) as AUTH_FAILED_TRANS_NUM,
+                         sum(case when T.CHALLENGE_SUCCESSFUL = 'N'
+                                       and IS_USE_DEVICE ='Y'
+                                  then T.trans_num
+                                  else 0
+                          end) as DEVICE_AUTH_FAILED_TRANS_NUM ,
+                          COUNT(C.DEVICE_ID) AS  AUTH_FALIED_DEVICE_NUM
+
+                         FROM  RP_TRANS_LOG_MONTH T ,RP_CHALLENGE_FAIL_BD_DEVICE_ID C
+                         WHERE T.CHALLENGE_AUTH_METHOD=C.CHALLENGE_AUTH_METHOD(+)
+                               AND T.TRANS_TIME = TIME_SCY
+                                AND C.TRANS_TIME(+) =  T.TRANS_TIME
+                                AND T.CHALLENGE_AUTH_METHOD = CCC_SMS_Q
+                         group by T.TRANS_TIME ,t.CHALLENGE_AUTH_METHOD
+                         order by  t.CHALLENGE_AUTH_METHOD
+                          );
+                          COMMIT;
+
+                           END IF;
+                          VAR_CHAL_AUTH_ME :=VAR_CHAL_AUTH_ME+1;
+                          END LOOP;
+
+                          ------------------------------------------------------------------
+
+
+              ------------------------------------------------------------------
+
+             END IF;
+
+
+         END LOOP;
+
+
+       END IF;
+ EXCEPTION
+           WHEN OTHERS
+           THEN
+              ROLLBACK;
+               /*操作失败后插入日志记录*/
+               INSERT_COLLECT_DATA_LOG_4_FIX(
+                   VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+                  'GET_DATA_2_AUTH_M_AND_RE_CC', --PROC_NAME 存储过程名称
+                  'rp_trans_log_month--RP_CHALLENGE_FAIL_BD_DEVICE_ID',  --FROM_TABLE 来源表
+                  '',  --TO_TABLE 目标表
+                  SYSDATE,        --DATA_RANGE 数据范围
+                  TIME_SCY,        --DATA_BEGIN_TIME 数据开始时间
+                  TIME_SCY          --DATA_END_TIME 数据开始时间
+                   );
+
+             RETURN;
+
+end GET_DATA_2_AUTH_M_AND_RE_CC;

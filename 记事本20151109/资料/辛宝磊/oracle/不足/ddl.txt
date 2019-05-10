@@ -1,0 +1,251 @@
+﻿一、表空间管理
+CREATE [BIGFILE|SMALLFILE] [TEMPORARY] TABLESPACE tablespace name -- 表空间名字
+DATAFILE datafile spec | TEMPORARYFILE tempfile spec        -- 数据文件/临时文件说明
+ [MINIMUM EXTENT minimum extent size]        -- 最小扩展空间
+ [[BLOCKSIZE blocksize] DEFAULT STORAGE (defalut storage clause)]        -- （锁空间大小） 默认存储子句
+ [LOGGING | NOLOGGING]        -- 有无日志
+ [FORCE LOGGING]        -- 强制日志
+ [ONLINE | OFFLINE]        -- 在线/不在线
+ [EXTENT MANAGEMENT DICTIONARY | LOCAL [AUTOALLOCATE | UNIFORM SIZE size]]  -- 扩展管理字典/本地（自动定位/统一大小）
+ [SEGMENT SPACE MANAGEMENT MANUAL | AUTO]  -- 管理extent中的block（设置为自动最佳）
+ [FLASHBACK ON|OFF]         -- 删除文件是否可找回
+1、1、创建永久表空间
+ 例：
+ CREATE TABLESPACE MYTABLESPACE LOGGING
+ DATAFILE 'D:\oracle\product\10.1.0\oradata\MYDB\MYTABLESPACE.DBF' SIZE 10M   REUSE 
+ AUTOEXTEND ON NEXT 5M MAXSIZE UNLIMITED
+ EXTENT MANAGEMENT LOCAL
+1、2、创建临时表空间
+ 例：
+ CREATE TEMPORARY TABLESPACE MYTEMP LOGGING
+ TEMPFILE 'D:\oracle\product\10.1.0\oradata\MYDB\MYTEMP.DBF' SIZE 10M  REUSE 
+ AUTOEXTEND ON NEXT 5M MAXSIZE UNLIMITED
+ EXTENT MANAGEMENT LOCAL
+ 更改默认临时表空间
+ alter database default temporary tablespace TEMP2;
+1、3 删除表空间
+ 1）强行删除表空间，包括数据文件
+ drop tablespace  mytemp including contents and datafiles cascade constraints
+ 2）表空间内无任何对象时才能删除
+ drop tablespace  mytemp
+1.4 为表空间增加文件
+ alter tablespace users add datafile 'd:\oracle\oradata\....\users02.dbf' size 10m;
+1.5 默认临时表空间
+ 在创建用户时，如果没有指定临时表空间，则会使用系统表空间作为临时表空间，如果指定了默认临时表空间，则在未指定临时表空间的情况下使用默认的临时表空间。
+ alter database default temporary tablespace temp01
+1.6 将表空间脱机
+ alter tablespace users offline;
+1.7 更改表空间的大小
+ alter tablespace  datafile 'd:\oracle\....\xxx.dbf' resize 100m;
+1.8 更改表空间文件的名称或路径
+ 1)先将对应表空间脱机
+ 2)将文件重命名或则移动到新的位置
+ 3)alter tablespace user01 rename datafile 'd:\oracle\oradata\fox\user01.dbf' to 'd:\oracle\oradata\fox\user02.dbf'
+1.9 查看临时表空间的文件
+ select * from dba_temp_files;
+ or select * from v$tempfile;
+
+二、表管理
+2.1 建表
+ CREATE TABLE emp
+  (
+  empno number(6) constraint emp_empno_pk primary key using index (create index emp_empno_pk on emp(empno) tablespace idx_ts), --不使用默认Primary 的索引
+  firstname varchar(20),
+  lastname varchar(25) constraint emp_last_name_nn not null,
+  hire_date date default sysdate,
+  salary number(8,2) constraint salary_ck check(salary>0),
+  managerid number(6),
+  deptno number(4) constraint emp_deptno_fk references deptment(deptno),  --定义外键约束
+  email varchar(25),
+  constraint emp_email_uq unique(email) --创建唯一约束
+  )
+ tablespace mytablespace  --制定表空间
+    2.2 修改表
+2.1.1 增加字段
+     alter table emp add(birthday date default sysdate,ename varchar(20) constriant ename_ck check(ename<>'Admin'))
+2.1.2 删除字段
+ alter table emp drop column birthday
+2.1.3 修改字段
+ alter table emp modify ename varchar(30) default 'unknow'
+2.1.4 修改列名
+ alter table emp rename column ename to en_name
+2.1.5 修改表名
+ rename emp to employees  --其他对象通用
+2.1.6 为(表)列添加描述
+  -- 为表添加描述
+ comment on table employees is '存放雇员的信息'
+ comment on column employees.en_name is '存放雇员的英文名'
+ -- 查询字段的描述
+ select owner,table_name,column_name,comments from dba_col_comments where table_name='EMPLOYEES' --好象所有的值都大写
+ -- 查询表的描述
+ SELECT TABLE_NAME,COMMENTS FROM ALL_TAB_COMMENTS WHERE TABLE_NAME='EMPLOYEES'
+2.1.7 截断表
+ truncate table employees   --清除所有的数据，保留表结构，该操作不记录日志，请慎用
+2.1.8 删除表
+ DROP TABLE table_name [CASCADE CONSTRAINTS] [PURGE] -- CASCADE CONSTRAINTS 选项用于删除其他表的外键约束，[PURGE]选项用于彻底删除表
+2.1.9 恢复被删除的表
+ Flashback table employees to before drop
+
+三、约束
+3.1 创建约束
+3.1.1   NOT NULL约束
+ 注:NOT NULL约束只能定义为列级约束，而不能为表级约束
+eg: CREATE TABLE performance
+   (
+   student_no int not null,
+   student_name varchar(10) constraint student_name_nn NOT NULL,
+   performance number(6,2) 
+   )
+ -- 修改列为not null约束
+ alter table performance modify performance not null
+3.1.2 UNIQUE约束
+eg: CREATE TABLE EMP
+  (
+   e_no int,
+   name varchar(8),
+   salary number(6,2),
+   constraint name_unq UNIQUE(name)
+   )
+ -- 增加UNIQUE约束
+ constraint emp_name_uk unique (e_no,name) 
+3.1.3 PRIMARY KEY约束
+eg: create table emp
+  (
+    emp_no int primary key,
+    emp_name varchar(8),
+    address varchar(20)
+   )
+ or
+   create table emp
+   (
+    emp_no int,
+    emp_name varchar(8),
+    address varchar(20),
+    constraint emp_no_pk primary key(emp_no)
+   )
+ -- 增加索引
+ alter table emp add constraint emp_pk primary key (emp_no,emp_name)
+3.1.3 foreign key 约束
+  eg: create table salary
+      (
+       emp_no int,
+       salary number(6,2) constraint emp_no_fk  references emp(emp_no)
+      )
+   or
+      create table salary
+      (
+       emp_no int,
+       salary number(6,2),
+       constraint emp_no_fk foreign key (emp_no) references emp(emp_no)
+      )
+ -- 添加外键约束
+ alter table emp add constraint emp_no_fk foreign key (emp_no)  references emp(emp_no) on delete cascade 
+ -- 添加外键约束(双主键)
+ alter table emp add constraint emp_no_fk foreign key (emp_no,emp_name)  references emp(emp_no,emp_name) on delete cascade
+3.1.4 CKECK 约束
+     create table salary
+     (
+       emp_no int,
+       salary number(6,2) constraint salary_min check(salary>0)
+      )
+   or
+     create table salary
+     (
+       emp_no int,
+       salary number(6,2),
+       constraint salary_min check(salary>0)
+     )
+ -- 添加CKECK约束
+ alter table salary add constraint salary_min_chk check(salary>0)
+3.2 修改约束
+3.2.1 禁用/激活约束
+  禁用/激活约束会引起删除和重建索引的操作
+  alter table employees disable/enable unique email 
+  alter table employees disable/enable constraint emp_ename_pk 
+  alter tabel employees modify constraint emp_pk disable/enable 
+  alter tabel employees modify constraint emp_ename_phone_uk disable/enable 
+3.2.2 删除约束
+  alter table salary drop constraint salary_min_chk
+3.2.3 查询约束信息
+  -- 约束及表信息
+  select owner,constraint_name,table_name,search_condition from dba_constraints where owner='WENZI'
+  --  约束及字段信息
+  select owner,constraint_name,table_name,column_name,position from dba_cons_columns where owner='WENZI'
+
+四、索引
+索引和对应的表应该位于不同的表空间中,oracle能够并行读取位于不同硬盘上的数据，可以避免产生I/O冲突 
+B树索引：在B树的叶节点中存储索引字段的值与ROWID. 
+唯一索引和不唯一索引都只是针对B树索引而言. 
+Oracle最多允许包含32个字段的复合索引
+索引创建策略：
+1.导入数据后再创建索引
+2.不需要为很小的表创建索引
+3.对于取值范围很小的字段（比如性别字段）应当建立位图索引
+4.限制表中的索引的数目
+5.为索引设置合适的PCTFREE值
+6.存储索引的表空间最好单独设定
+4.1 创建索引
+4.1.1 创建不唯一索引
+  create index emp_ename on employees(ename) tablespace users 
+4.1.2 创建唯一索引
+  create unique index emp_email on employees(email) tablespace users;
+4.1.3 创建位图索引
+  create bitmap index emp_sex on employees(sex) tablespace users;
+4.1.4 创建反序索引
+  create unique index order_reinx on orders(order_num,order_date) tablespace users reverse
+4.1.5 创建函数索引
+  create index emp_substr_empno on employees(substr(empno,1,2)) tablespace users; 
+4.2 维护索引
+4.2.1 修改索引
+  由于定义约束时由oracle自动建立的索引通常是不知道名称的，对这类索引的修改经常是利用alter table ..using index语句进行的,而不是alter index语句。
+  利用下面的语句将employees表中primary key约束对应的索引的PCTFREE参数修改为5：
+  alter table employees enable primary key using index pctfree 5;
+4.2.2 合并索引
+  只是简单的将B树叶结点中的存储碎片合并在一起，并不会改变索引的物理组织结构
+  alter index emp_pk coalesce;
+4.2.3 重建索引
+  不仅能够消除存储碎片,还可以改变索引的全部存储参数设置，并且可以将索引移动到其它的表空间中,重建索引 
+  实际上就是再指定的表空间中重新建立一个新的索引,然后删除原来的索引。
+  alter index emp_pk rebuild;
+4.3 删除索引
+  在删除一个表时,oracle会自动删除所有与该表相关的索引. 
+  drop index emp_ename
+4.4 查询索引的相关信息
+  -- 索引名称及表：
+  select owner,index_name,index_type,table_owner,table_type,tablespace_name,status from dba_indexes where owner='WENZI'
+  -- 索引及字段
+  select INDEX_OWNER,INDEX_NAME,TABLE_NAME,COLUMN_NAME,COLUMN_POSITION,DESCEND FROM dba_ind_columns where index_owner='WENZI'
+
+五、视图
+5.1 创建视图
+ CREATE VIEW division1_staff AS
+ SELECT ename, empno, job, dname FROM emp, dept
+ WHERE emp.deptno IN (10, 30) AND emp.deptno = dept.deptno;
+5.2 修改视图
+ CREATE OR REPLACE VIEW sales_staff AS
+ SELECT empno, ename, deptno FROM emp
+ WHERE deptno = 30 WITH CHECK OPTION CONSTRAINT sales_staff_cnst;
+5.3 删除视图
+ DROP VIEW emp_dept;
+
+六、序列
+6.1 创建序列
+  CREATE SEQUENCE emp_sequence
+  INCREMENT BY 1
+  START WITH 1
+  NOMAXVALUE
+  NOCYCLE
+  CACHE 10;  --指定CACHE可以提高效率，但是当系统意外关闭时可能会发生跳号现象.
+6.2 修改序列
+  ALTER SEQUENCE emp_sequence
+  INCREMENT BY 10
+  MAXVALUE 10000
+  CYCLE
+  CACHE 20;
+6.3 使用序列
+  INSERT INTO Orders_tab (Orderno, Custno) VALUES (Order_seq.NEXTVAL, 1032);  --NEXTVAL 为序列的下一个编号，CURRVAL 为当前编号
+  or
+  UPDATE Orders_tab   SET Orderno = Order_seq.NEXTVAL  WHERE Orderno = 10112;
+6.4 删除序列
+  DROP SEQUENCE order_seq;
+

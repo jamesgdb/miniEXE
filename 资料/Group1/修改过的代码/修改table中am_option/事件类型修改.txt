@@ -1,0 +1,4 @@
+﻿事件类型：
+REQUEST_NEW_CARD-REPORTING_LOSS  	信用卡挂失/补卡 改成   信用卡挂失及补卡
+REPORTING_LOSS	信用卡挂失及补卡                                    改成  信用卡挂失
+

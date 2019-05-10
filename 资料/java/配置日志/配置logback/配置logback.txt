@@ -1,0 +1,62 @@
+﻿帮看下logback问题，日志输出到文件。
+logback配置如下
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+<substitutionProperty name="log.mycomm" value="../logs/mycomm" />
+<jmxConfigurator />
+<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+<layout class="ch.qos.logback.classic.PatternLayout">
+<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+<pattern>%date %-5level %logger{80} - %msg%n</pattern>
+</layout>
+</appender>
+<!-- 按照每天生成日志文件 -->
+<appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<Encoding>UTF-8</Encoding>
+<File>${log.mycomm}.log</File>
+<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+<FileNamePattern>${log.mycomm}.%d{yyyy-MM-dd}.log.zip</FileNamePattern>
+<!--日志保存天数-->
+<maxHistory>100</maxHistory>
+</rollingPolicy>
+<layout class="ch.qos.logback.classic.PatternLayout">
+<pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
+</layout>
+<!--日志文件最大的大小 默认就是10M-->
+<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+<MaxFileSize>10MB</MaxFileSize>
+</triggeringPolicy>
+</appender>
+<logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="WARN" />   
+  <logger name="org.hibernate.type.descriptor.sql.BasicExtractor" level="WARN"/>   
+  <logger name="org.hibernate.SQL" level="WARN" />   
+  <logger name="org.hibernate.engine.QueryParameters" level="WARN" />   
+  <logger name="org.hibernate.engine.query.HQLQueryPlan" level="WARN" />   
+<root level="INFO">
+<appender-ref ref="stdout" />
+<appender-ref ref="logfile" />
+</root>
+</configuration>
+
+我测试了下，比如在类中写一个
+int a = Integer.parseInt("sd");
+那么会报：java.lang.NumberFormatException: For input string: "sd"这个异常，为什么这个异常控制台会显示，但输出的日志文件中缺没有，但日志中有logger.info输出的信息。
+
+[解决办法]
+你可能输入了空格，如果没有的话应该是在你的配置文件中配置了空格，删掉就行了
+[解决办法]
+你没有给控制台定义文件输出啊。。。
+
+<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+<layout class="ch.qos.logback.classic.PatternLayout">
+<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+<pattern>%date %-5level %logger{80} - %msg%n</pattern>
+</layout>
+</appender>
+
+这个不是你写的控制台定义吗。。
+
+控制台输出和日志输出是两个概念
+[解决办法]
+把log打印类型改为FILE，应该可以吧

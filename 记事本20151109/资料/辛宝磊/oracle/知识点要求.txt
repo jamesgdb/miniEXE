@@ -1,0 +1,674 @@
+﻿一、表空间管理
+CREATE [BIGFILE|SMALLFILE] [TEMPORARY] TABLESPACE tablespace name -- 表空间名字
+DATAFILE datafile spec | TEMPORARYFILE tempfile spec        -- 数据文件/临时文件说明
+ [MINIMUM EXTENT minimum extent size]        -- 最小扩展空间
+ [[BLOCKSIZE blocksize] DEFAULT STORAGE (defalut storage clause)]        -- （锁空间大小） 默认存储子句
+ [LOGGING | NOLOGGING]        -- 有无日志
+ [FORCE LOGGING]        -- 强制日志
+ [ONLINE | OFFLINE]        -- 在线/不在线
+ [EXTENT MANAGEMENT DICTIONARY | LOCAL [AUTOALLOCATE | UNIFORM SIZE size]]  -- 扩展管理字典/本地（自动定位/统一大小）
+ [SEGMENT SPACE MANAGEMENT MANUAL | AUTO]  -- 管理extent中的block（设置为自动最佳）
+ [FLASHBACK ON|OFF]         -- 删除文件是否可找回
+1、1、创建永久表空间
+ 例：
+ CREATE TABLESPACE MYTABLESPACE LOGGING
+ DATAFILE 'D:\oracle\product\10.1.0\oradata\MYDB\MYTABLESPACE.DBF' SIZE 10M   REUSE 
+ AUTOEXTEND ON NEXT 5M MAXSIZE UNLIMITED
+ EXTENT MANAGEMENT LOCAL
+1、2、创建临时表空间
+ 例：
+ CREATE TEMPORARY TABLESPACE MYTEMP LOGGING
+ TEMPFILE 'D:\oracle\product\10.1.0\oradata\MYDB\MYTEMP.DBF' SIZE 10M  REUSE 
+ AUTOEXTEND ON NEXT 5M MAXSIZE UNLIMITED
+ EXTENT MANAGEMENT LOCAL
+ 更改默认临时表空间
+ alter database default temporary tablespace TEMP2;
+1、3 删除表空间
+ 1）强行删除表空间，包括数据文件
+ drop tablespace  mytemp including contents and datafiles cascade constraints
+ 2）表空间内无任何对象时才能删除
+ drop tablespace  mytemp
+1.4 为表空间增加文件
+ alter tablespace users add datafile 'd:\oracle\oradata\....\users02.dbf' size 10m;
+1.5 默认临时表空间
+ 在创建用户时，如果没有指定临时表空间，则会使用系统表空间作为临时表空间，如果指定了默认临时表空间，则在未指定临时表空间的情况下使用默认的临时表空间。
+ alter database default temporary tablespace temp01
+1.6 将表空间脱机
+ alter tablespace users offline;
+1.7 更改表空间的大小
+ alter tablespace  datafile 'd:\oracle\....\xxx.dbf' resize 100m;
+1.8 更改表空间文件的名称或路径
+ 1)先将对应表空间脱机
+ 2)将文件重命名或则移动到新的位置
+ 3)alter tablespace user01 rename datafile 'd:\oracle\oradata\fox\user01.dbf' to 'd:\oracle\oradata\fox\user02.dbf'
+1.9 查看临时表空间的文件
+ select * from dba_temp_files;
+ or select * from v$tempfile;
+
+二、表管理
+2.1 建表
+ CREATE TABLE emp
+  (
+  empno number(6) constraint emp_empno_pk primary key using index (create index emp_empno_pk on emp(empno) tablespace idx_ts), --不使用默认Primary 的索引
+  firstname varchar(20),
+  lastname varchar(25) constraint emp_last_name_nn not null,
+  hire_date date default sysdate,
+  salary number(8,2) constraint salary_ck check(salary>0),
+  managerid number(6),
+  deptno number(4) constraint emp_deptno_fk references deptment(deptno),  --定义外键约束
+  email varchar(25),
+  constraint emp_email_uq unique(email) --创建唯一约束
+  )
+ tablespace mytablespace  --制定表空间
+    2.2 修改表
+2.1.1 增加字段
+     alter table emp add(birthday date default sysdate,ename varchar(20) constriant ename_ck check(ename<>'Admin'))
+2.1.2 删除字段
+ alter table emp drop column birthday
+2.1.3 修改字段
+ alter table emp modify ename varchar(30) default 'unknow'
+2.1.4 修改列名
+ alter table emp rename column ename to en_name
+2.1.5 修改表名
+ rename emp to employees  --其他对象通用
+2.1.6 为(表)列添加描述
+  -- 为表添加描述
+ comment on table employees is '存放雇员的信息'
+ comment on column employees.en_name is '存放雇员的英文名'
+ -- 查询字段的描述
+ select owner,table_name,column_name,comments from dba_col_comments where table_name='EMPLOYEES' --好象所有的值都大写
+ -- 查询表的描述
+ SELECT TABLE_NAME,COMMENTS FROM ALL_TAB_COMMENTS WHERE TABLE_NAME='EMPLOYEES'
+2.1.7 截断表
+ truncate table employees   --清除所有的数据，保留表结构，该操作不记录日志，请慎用
+2.1.8 删除表
+ DROP TABLE table_name [CASCADE CONSTRAINTS] [PURGE] -- CASCADE CONSTRAINTS 选项用于删除其他表的外键约束，[PURGE]选项用于彻底删除表
+2.1.9 恢复被删除的表
+ Flashback table employees to before drop
+
+三、约束
+3.1 创建约束
+3.1.1   NOT NULL约束
+ 注:NOT NULL约束只能定义为列级约束，而不能为表级约束
+eg: CREATE TABLE performance
+   (
+   student_no int not null,
+   student_name varchar(10) constraint student_name_nn NOT NULL,
+   performance number(6,2) 
+   )
+ -- 修改列为not null约束
+ alter table performance modify performance not null
+3.1.2 UNIQUE约束
+eg: CREATE TABLE EMP
+  (
+   e_no int,
+   name varchar(8),
+   salary number(6,2),
+   constraint name_unq UNIQUE(name)
+   )
+ -- 增加UNIQUE约束
+ constraint emp_name_uk unique (e_no,name) 
+3.1.3 PRIMARY KEY约束
+eg: create table emp
+  (
+    emp_no int primary key,
+    emp_name varchar(8),
+    address varchar(20)
+   )
+ or
+   create table emp
+   (
+    emp_no int,
+    emp_name varchar(8),
+    address varchar(20),
+    constraint emp_no_pk primary key(emp_no)
+   )
+ -- 增加索引
+ alter table emp add constraint emp_pk primary key (emp_no,emp_name)
+3.1.3 foreign key 约束
+  eg: create table salary
+      (
+       emp_no int,
+       salary number(6,2) constraint emp_no_fk  references emp(emp_no)
+      )
+   or
+      create table salary
+      (
+       emp_no int,
+       salary number(6,2),
+       constraint emp_no_fk foreign key (emp_no) references emp(emp_no)
+      )
+ -- 添加外键约束
+ alter table emp add constraint emp_no_fk foreign key (emp_no)  references emp(emp_no) on delete cascade 
+ -- 添加外键约束(双主键)
+ alter table emp add constraint emp_no_fk foreign key (emp_no,emp_name)  references emp(emp_no,emp_name) on delete cascade
+3.1.4 CKECK 约束
+     create table salary
+     (
+       emp_no int,
+       salary number(6,2) constraint salary_min check(salary>0)
+      )
+   or
+     create table salary
+     (
+       emp_no int,
+       salary number(6,2),
+       constraint salary_min check(salary>0)
+     )
+ -- 添加CKECK约束
+ alter table salary add constraint salary_min_chk check(salary>0)
+3.2 修改约束
+3.2.1 禁用/激活约束
+  禁用/激活约束会引起删除和重建索引的操作
+  alter table employees disable/enable unique email 
+  alter table employees disable/enable constraint emp_ename_pk 
+  alter tabel employees modify constraint emp_pk disable/enable 
+  alter tabel employees modify constraint emp_ename_phone_uk disable/enable 
+3.2.2 删除约束
+  alter table salary drop constraint salary_min_chk
+3.2.3 查询约束信息
+  -- 约束及表信息
+  select owner,constraint_name,table_name,search_condition from dba_constraints where owner='WENZI'
+  --  约束及字段信息
+  select owner,constraint_name,table_name,column_name,position from dba_cons_columns where owner='WENZI'
+
+四、索引
+索引和对应的表应该位于不同的表空间中,oracle能够并行读取位于不同硬盘上的数据，可以避免产生I/O冲突 
+B树索引：在B树的叶节点中存储索引字段的值与ROWID. 
+唯一索引和不唯一索引都只是针对B树索引而言. 
+Oracle最多允许包含32个字段的复合索引
+索引创建策略：
+1.导入数据后再创建索引
+2.不需要为很小的表创建索引
+3.对于取值范围很小的字段（比如性别字段）应当建立位图索引
+4.限制表中的索引的数目
+5.为索引设置合适的PCTFREE值
+6.存储索引的表空间最好单独设定
+4.1 创建索引
+4.1.1 创建不唯一索引
+  create index emp_ename on employees(ename) tablespace users 
+4.1.2 创建唯一索引
+  create unique index emp_email on employees(email) tablespace users;
+4.1.3 创建位图索引
+  create bitmap index emp_sex on employees(sex) tablespace users;
+4.1.4 创建反序索引
+  create unique index order_reinx on orders(order_num,order_date) tablespace users reverse
+4.1.5 创建函数索引
+  create index emp_substr_empno on employees(substr(empno,1,2)) tablespace users; 
+4.2 维护索引
+4.2.1 修改索引
+  由于定义约束时由oracle自动建立的索引通常是不知道名称的，对这类索引的修改经常是利用alter table ..using index语句进行的,而不是alter index语句。
+  利用下面的语句将employees表中primary key约束对应的索引的PCTFREE参数修改为5：
+  alter table employees enable primary key using index pctfree 5;
+4.2.2 合并索引
+  只是简单的将B树叶结点中的存储碎片合并在一起，并不会改变索引的物理组织结构
+  alter index emp_pk coalesce;
+4.2.3 重建索引
+  不仅能够消除存储碎片,还可以改变索引的全部存储参数设置，并且可以将索引移动到其它的表空间中,重建索引 
+  实际上就是再指定的表空间中重新建立一个新的索引,然后删除原来的索引。
+  alter index emp_pk rebuild;
+4.3 删除索引
+  在删除一个表时,oracle会自动删除所有与该表相关的索引. 
+  drop index emp_ename
+4.4 查询索引的相关信息
+  -- 索引名称及表：
+  select owner,index_name,index_type,table_owner,table_type,tablespace_name,status from dba_indexes where owner='WENZI'
+  -- 索引及字段
+  select INDEX_OWNER,INDEX_NAME,TABLE_NAME,COLUMN_NAME,COLUMN_POSITION,DESCEND FROM dba_ind_columns where index_owner='WENZI'
+
+五、视图
+5.1 创建视图
+ CREATE VIEW division1_staff AS
+ SELECT ename, empno, job, dname FROM emp, dept
+ WHERE emp.deptno IN (10, 30) AND emp.deptno = dept.deptno;
+5.2 修改视图
+ CREATE OR REPLACE VIEW sales_staff AS
+ SELECT empno, ename, deptno FROM emp
+ WHERE deptno = 30 WITH CHECK OPTION CONSTRAINT sales_staff_cnst;
+5.3 删除视图
+ DROP VIEW emp_dept;
+
+六、序列
+6.1 创建序列
+  CREATE SEQUENCE emp_sequence
+  INCREMENT BY 1
+  START WITH 1
+  NOMAXVALUE
+  NOCYCLE
+  CACHE 10;  --指定CACHE可以提高效率，但是当系统意外关闭时可能会发生跳号现象.
+6.2 修改序列
+  ALTER SEQUENCE emp_sequence
+  INCREMENT BY 10
+  MAXVALUE 10000
+  CYCLE
+  CACHE 20;
+6.3 使用序列
+  INSERT INTO Orders_tab (Orderno, Custno) VALUES (Order_seq.NEXTVAL, 1032);  --NEXTVAL 为序列的下一个编号，CURRVAL 为当前编号
+  or
+  UPDATE Orders_tab   SET Orderno = Order_seq.NEXTVAL  WHERE Orderno = 10112;
+6.4 删除序列
+  DROP SEQUENCE order_seq;
+
+------------------------------------------------------------------------------------------------------------------------
+
+create table test
+(id number,
+name varchar2(10),
+age number,
+phone varchar2(50),
+);
+
+/*新建检查*/
+alter table test add constraint test_ck check(age>6 and age<14)；
+
+/*删除检查*/
+
+alter table test drop constraint test_ck;
+
+/*给表列增加主键*/
+
+alter table test add constraint c_t primary key (name);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+1，CREATE OR REPLACE PROCEDURE TEST
+AS
+
+CURSOR MY_CURSOR IS
+	SELECT * FROM USERS;
+VAR_USERS USERS%ROWTYPE;
+	
+BEGIN
+	
+	OPEN MY_CURSOR;
+	
+	LOOP
+		FETCH MY_CURSOR IN TO VAR_USERS;
+		
+		EXIT WHEN MY_CURSOR%NOTFOUND;
+		
+		.....
+		
+	END LOOP;
+	
+END TEST;	
+
+														
+2，
+  DECLARE
+  	CURSOR JOB_CURS IS SELECT * FROM USERS;
+  BEGIN 
+  
+  FOR JOB_CUR IN JOB_CURS
+  LOOP
+  	DBMS_JOB.REMOVE(JOB_CUR.JOB);
+  END LOOP;
+  
+  END;
+  
+  	 	 
+  														
+
+---------------------------------------------------------------------------------
+
+1，WHILE
+
+WHILE TO_DATE(VAR_DAY,'YYYY-MM-DD HH24:MI;SS')<SYSDATE  --没有分号
+
+LOOP
+	............
+	VAR_DAY:=TO_CHAR(TO_DATE(VAR_DAY,'YYYY-MM-DD')+1,'YYYY-MM-DD');
+	
+END LOOP;
+
+	
+2，	FOR
+
+BEGIN
+ FOR I IN 1..10
+	
+
+
+
+------------------------------------------------------------------------------------
+
+此文从以下几个方面来整理关于分区表的概念及操作:
+        1.表空间及分区表的概念
+        2.表分区的具体作用
+        3.表分区的优缺点
+        4.表分区的几种类型及操作方法
+        5.对表分区的维护性操作.
+(1.) 表空间及分区表的概念
+表空间：
+　　是一个或多个数据文件的集合，所有的数据对象都存放在指定的表空间中，但主要存放的是表， 所以称作表空间。
+ 
+分区表： 
+当表中的数据量不断增大，查询数据的速度就会变慢，应用程序的性能就会下降，这时就应该考虑对表进行分区。表进行分区后，逻辑上表仍然是一张完整的表，只是将表中的数据在物理上存放到多个表空间(物理文件上)，这样查询数据时，不至于每次都扫描整张表。
+ 
+( 2).表分区的具体作用
+Oracle的表分区功能通过改善可管理性、性能和可用性，从而为各式应用程序带来了极大的好处。通常，分区可以使某些查询以及维护操作的性能大大提高。此外,分区还可以极大简化常见的管理任务，分区是构建千兆字节数据系统或超高可用性系统的关键工具。
+ 
+分区功能能够将表、索引或索引组织表进一步细分为段，这些数据库对象的段叫做分区。每个分区有自己的名称，还可以选择自己的存储特性。从数据库管理员的角度来看，一个分区后的对象具有多个段，这些段既可进行集体管理，也可单独管理，这就使数据库管理员在管理分区后的对象时有相当大的灵活性。但是，从应用程序的角度来看，分区后的表与非分区表完全相同，使用 SQL DML 命令访问分区后的表时，无需任何修改。
+ 
+什么时候使用分区表：
+1、表的大小超过2GB。
+2、表中包含历史数据，新的数据被增加都新的分区中。
+ 
+ (3).表分区的优缺点
+表分区有以下优点： 
+1、改善查询性能：对分区对象的查询可以仅搜索自己关心的分区，提高检索速度。
+2、增强可用性：如果表的某个分区出现故障，表在其他分区的数据仍然可用；
+3、维护方便：如果表的某个分区出现故障，需要修复数据，只修复该分区即可；
+4、均衡I/O：可以把不同的分区映射到磁盘以平衡I/O，改善整个系统性能。
+ 
+缺点： 
+分区表相关：已经存在的表没有方法可以直接转化为分区表。不过 Oracle 提供了在线重定义表的功能。
+ 
+(4).表分区的几种类型及操作方法
+ 一.范围分区：
+范围分区将数据基于范围映射到每一个分区，这个范围是你在创建分区时指定的分区键决定的。这种分区方式是最为常用的，并且分区键经常采用日期。举个例子：你可能会将销售数据按照月份进行分区。
+当使用范围分区时，请考虑以下几个规则：
+1、每一个分区都必须有一个VALUES LESS THEN子句，它指定了一个不包括在该分区中的上限值。分区键的任何值等于或者大于这个上限值的记录都会被加入到下一个高一些的分区中。
+2、所有分区，除了第一个，都会有一个隐式的下限值，这个值就是此分区的前一个分区的上限值。
+3、在最高的分区中，MAXVALUE被定义。MAXVALUE代表了一个不确定的值。这个值高于其它分区中的任何分区键的值，也可以理解为高于任何分区中指定的VALUE LESS THEN的值，同时包括空值。
+例一：
+假设有一个CUSTOMER表，表中有数据200000行，我们将此表通过CUSTOMER_ID进行分区，每个分区存储100000行，我们将每个分区保存到单独的表空间中，这样数据文件就可以跨越多个物理磁盘。下面是创建表和分区的代码，如下：
+CREATE TABLE CUSTOMER 
+( 
+    CUSTOMER_ID NUMBER NOT NULL PRIMARY KEY, 
+    FIRST_NAME  VARCHAR2(30) NOT NULL, 
+    LAST_NAME   VARCHAR2(30) NOT NULL, 
+    PHONE        VARCHAR2(15) NOT NULL, 
+    EMAIL        VARCHAR2(80), 
+    STATUS       CHAR(1) 
+) 
+PARTITION BY RANGE (CUSTOMER_ID) 
+( 
+    PARTITION CUS_PART1 VALUES LESS THAN (100000) TABLESPACE CUS_TS01, 
+    PARTITION CUS_PART2 VALUES LESS THAN (200000) TABLESPACE CUS_TS02 
+)
+例二：按时间划分
+CREATE TABLE ORDER_ACTIVITIES 
+( 
+    ORDER_ID      NUMBER(7) NOT NULL, 
+    ORDER_DATE    DATE, 
+    TOTAL_AMOUNT NUMBER, 
+    CUSTOTMER_ID NUMBER(7), 
+    PAID           CHAR(1) 
+) 
+PARTITION BY RANGE (ORDER_DATE) 
+(
+  PARTITION ORD_ACT_PART01 VALUES LESS THAN (TO_DATE('01- MAY -2003','DD-MON-YYYY')) TABLESPACEORD_TS01,
+  PARTITION ORD_ACT_PART02 VALUES LESS THAN (TO_DATE('01-JUN-2003','DD-MON-YYYY')) TABLESPACE ORD_TS02,
+  PARTITION ORD_ACT_PART02 VALUES LESS THAN (TO_DATE('01-JUL-2003','DD-MON-YYYY')) TABLESPACE ORD_TS03
+)
+例三：MAXVALUE
+CREATE TABLE RangeTable
+( 
+  idd   INT PRIMARY KEY , 
+  iNAME VARCHAR(10), 
+  grade INT  
+) 
+PARTITION  BY  RANGE (grade) 
+( 
+      PARTITION  part1 VALUES  LESS  THEN (1000) TABLESPACE  Part1_tb, 
+      PARTITION  part2 VALUES  LESS  THEN (MAXVALUE) TABLESPACE  Part2_tb 
+);
+ 
+二.列表分区：
+该分区的特点是某列的值只有几个，基于这样的特点我们可以采用列表分区。
+例一
+CREATE TABLE PROBLEM_TICKETS 
+( 
+    PROBLEM_ID   NUMBER(7) NOT NULL PRIMARY KEY, 
+    DESCRIPTION  VARCHAR2(2000), 
+    CUSTOMER_ID  NUMBER(7) NOT NULL, 
+    DATE_ENTERED DATE NOT NULL, 
+    STATUS       VARCHAR2(20) 
+) 
+PARTITION BY LIST (STATUS) 
+( 
+      PARTITION PROB_ACTIVE   VALUES ('ACTIVE') TABLESPACE PROB_TS01, 
+      PARTITION PROB_INACTIVE VALUES ('INACTIVE') TABLESPACE PROB_TS02
+例二
+CREATE  TABLE  ListTable
+( 
+    id    INT  PRIMARY  KEY , 
+    name  VARCHAR (20), 
+    area  VARCHAR (10) 
+) 
+PARTITION  BY  LIST (area) 
+( 
+    PARTITION  part1 VALUES ('guangdong','beijing') TABLESPACE  Part1_tb, 
+    PARTITION  part2 VALUES ('shanghai','nanjing')  TABLESPACE  Part2_tb 
+);
+)
+ 
+三.散列分区：
+这类分区是在列值上使用散列算法，以确定将行放入哪个分区中。当列的值没有合适的条件时，建议使用散列分区。
+散列分区为通过指定分区编号来均匀分布数据的一种分区类型，因为通过在I/O设备上进行散列分区，使得这些分区大小一致。
+例一：
+CREATE TABLE HASH_TABLE 
+( 
+  COL NUMBER(8), 
+  INF VARCHAR2(100) 
+) 
+PARTITION BY HASH (COL) 
+( 
+  PARTITION PART01 TABLESPACE HASH_TS01, 
+  PARTITION PART02 TABLESPACE HASH_TS02, 
+  PARTITION PART03 TABLESPACE HASH_TS03 
+)
+简写：
+CREATE TABLE emp
+(
+    empno NUMBER (4),
+    ename VARCHAR2 (30),
+    sal   NUMBER 
+)
+PARTITION BY  HASH (empno) PARTITIONS 8
+STORE IN (emp1,emp2,emp3,emp4,emp5,emp6,emp7,emp8);
+ 
+hash分区最主要的机制是根据hash算法来计算具体某条纪录应该插入到哪个分区中,hash算法中最重要的是hash函数，Oracle中如果你要使用hash分区，只需指定分区的数量即可。建议分区的数量采用2的n次方，这样可以使得各个分区间数据分布更加均匀。
+ 
+四.组合范围散列分区
+这种分区是基于范围分区和列表分区，表首先按某列进行范围分区，然后再按某列进行列表分区，分区之中的分区被称为子分区。
+CREATE TABLE SALES 
+(
+PRODUCT_ID VARCHAR2(5),
+SALES_DATE DATE,
+SALES_COST NUMBER(10),
+STATUS VARCHAR2(20)
+)
+PARTITION BY RANGE(SALES_DATE) SUBPARTITION BY LIST (STATUS)
+(
+   PARTITION P1 VALUES LESS THAN(TO_DATE('2003-01-01','YYYY-MM-DD'))TABLESPACE rptfact2009 
+          ( 
+              SUBPARTITION P1SUB1 VALUES ('ACTIVE') TABLESPACE rptfact2009, 
+              SUBPARTITION P1SUB2 VALUES ('INACTIVE') TABLESPACE rptfact2009 
+          ), 
+   PARTITION P2 VALUES LESS THAN (TO_DATE('2003-03-01','YYYY-MM-DD')) TABLESPACE rptfact2009 
+          ( 
+              SUBPARTITION P2SUB1 VALUES ('ACTIVE') TABLESPACE rptfact2009, 
+              SUBPARTITION P2SUB2 VALUES ('INACTIVE') TABLESPACE rptfact2009 
+          ) 
+)
+ 
+五.复合范围散列分区：
+这种分区是基于范围分区和散列分区，表首先按某列进行范围分区，然后再按某列进行散列分区。
+create table dinya_test 
+ ( 
+ transaction_id number primary key, 
+ item_id number(8) not null, 
+ item_description varchar2(300), 
+ transaction_date date 
+ ) 
+ partition by range(transaction_date)subpartition by hash(transaction_id)  subpartitions 3 store in (dinya_space01,dinya_space02,dinya_space03) 
+ ( 
+     partition part_01 values less than(to_date(‘2006-01-01’,’yyyy-mm-dd’)), 
+     partition part_02 values less than(to_date(‘2010-01-01’,’yyyy-mm-dd’)), 
+     partition part_03 values less than(maxvalue) 
+ );
+ 
+(5).有关表分区的一些维护性操作： 
+一、添加分区 
+以下代码给SALES表添加了一个P3分区
+ALTER TABLE SALES ADD PARTITION P3 VALUES LESS THAN(TO_DATE('2003-06-01','YYYY-MM-DD'));
+注意：以上添加的分区界限应该高于最后一个分区界限。
+以下代码给SALES表的P3分区添加了一个P3SUB1子分区
+ALTER TABLE SALES MODIFY PARTITION P3 ADD SUBPARTITION P3SUB1 VALUES('COMPLETE');
+二、删除分区 
+以下代码删除了P3表分区：
+ALTER TABLE SALES DROP PARTITION P3;
+在以下代码删除了P4SUB1子分区：
+ALTER TABLE SALES DROP SUBPARTITION P4SUB1;
+注意：如果删除的分区是表中唯一的分区，那么此分区将不能被删除，要想删除此分区，必须删除表。
+三、截断分区 
+截断某个分区是指删除某个分区中的数据，并不会删除分区，也不会删除其它分区中的数据。当表中即使只有一个分区时，也可以截断该分区。通过以下代码截断分区：
+ALTER TABLE SALES TRUNCATE PARTITION P2;
+通过以下代码截断子分区：
+ALTER TABLE SALES TRUNCATE SUBPARTITION P2SUB2;
+四、合并分区 
+合并分区是将相邻的分区合并成一个分区，结果分区将采用较高分区的界限，值得注意的是，不能将分区合并到界限较低的分区。以下代码实现了P1 P2分区的合并：
+ALTER TABLE SALES MERGE PARTITIONS P1,P2 INTO PARTITION P2;
+五、拆分分区 
+拆分分区将一个分区拆分两个新分区，拆分后原来分区不再存在。注意不能对HASH类型的分区进行拆分。
+ALTER TABLE SALES SBLIT PARTITION P2 AT(TO_DATE('2003-02-01','YYYY-MM-DD')) INTO (PARTITION P21,PARTITION P22);
+六、接合分区(coalesca) 
+结合分区是将散列分区中的数据接合到其它分区中，当散列分区中的数据比较大时，可以增加散列分区，然后进行接合，值得注意的是，接合分区只能用于散列分区中。通过以下代码进行接合分区：
+ALTER TABLE SALES COALESCA PARTITION;
+七、重命名表分区 
+以下代码将P21更改为P2
+ALTER TABLE SALES RENAME PARTITION P21 TO P2;
+八、相关查询
+跨分区查询
+select sum( *) from
+(select count(*) cn from t_table_SS PARTITION (P200709_1)
+union all
+select count(*) cn from t_table_SS PARTITION (P200709_2)
+);
+查询表上有多少分区
+SELECT * FROM useR_TAB_PARTITIONS WHERE TABLE_NAME='tableName'
+查询索引信息
+select object_name,object_type,tablespace_name,sum(value)
+from v$segment_statistics
+where statistic_name IN ('physical reads','physical write','logical reads')and object_type='INDEX'
+group by object_name,object_type,tablespace_name
+order by 4 desc
+ 
+--显示数据库所有分区表的信息：
+select * from DBA_PART_TABLES
+ 
+--显示当前用户可访问的所有分区表信息:
+select * from ALL_PART_TABLES
+ 
+--显示当前用户所有分区表的信息：
+select * from USER_PART_TABLES
+ 
+--显示表分区信息 显示数据库所有分区表的详细分区信息：
+select * from DBA_TAB_PARTITIONS
+ 
+--显示当前用户可访问的所有分区表的详细分区信息：
+select * from ALL_TAB_PARTITIONS
+ 
+--显示当前用户所有分区表的详细分区信息：
+select * from USER_TAB_PARTITIONS
+ 
+--显示子分区信息 显示数据库所有组合分区表的子分区信息：
+select * from DBA_TAB_SUBPARTITIONS
+ 
+--显示当前用户可访问的所有组合分区表的子分区信息：
+select * from ALL_TAB_SUBPARTITIONS
+ 
+--显示当前用户所有组合分区表的子分区信息：
+select * from USER_TAB_SUBPARTITIONS
+ 
+--显示分区列 显示数据库所有分区表的分区列信息：
+select * from DBA_PART_KEY_COLUMNS
+ 
+--显示当前用户可访问的所有分区表的分区列信息：
+select * from ALL_PART_KEY_COLUMNS
+ 
+--显示当前用户所有分区表的分区列信息：
+select * from USER_PART_KEY_COLUMNS
+ 
+--显示子分区列 显示数据库所有分区表的子分区列信息：
+select * from DBA_SUBPART_KEY_COLUMNS
+ 
+--显示当前用户可访问的所有分区表的子分区列信息：
+select * from ALL_SUBPART_KEY_COLUMNS
+ 
+--显示当前用户所有分区表的子分区列信息：
+select * from USER_SUBPART_KEY_COLUMNS
+ 
+--怎样查询出oracle数据库中所有的的分区表
+select * from user_tables a where a.partitioned='YES'
+ 
+--删除一个表的数据是
+truncate table table_name;
+ 
+--删除分区表一个分区的数据是
+alter table table_name truncate partition p5;
+本文出自 “天知道的技术博客” 博客，转载请与作者联系！
+
+------------------------------------------------------------------------------------------------------
+
+
+create table test (name varchar2(50),id number not null,sex char(1));
+
+alter table test add constraint s_t check (sex='m' or sex='j')；
+
+alter table test add (height number);
+
+create table test_t as select * from test;
+
+rename  test_t to test_t2;
+
+alter table TEST_T2 rename column name2 to NAME3;
+
+
+Flashback table test_t2 to before drop
+
+drop table test_t2;
+
+delete test t where rownum<(select max(rownum) from test t2 where t2.name=t.name and t2.id=t.id)
+
+
+create table test(
+	name varchar2(100),
+	id number,
+	sex char(1),
+	born_time date
+)
+partition by range (born_time)(
+	partition P2000000 values less than to_date('2000/01/01','yyyy-mm')
+		tablespace rptdat
+);
+
+alter table test add partition p290202 values less than to_date('2000/01/01','yyyy-mm');
+
+
+select count(*) from user_tab_partitions  t;
+
+alter table  test truncate partition p20000;
+alter table test drop partition p2000;
+
+
+ DBMS_JOB.BROKEN(R.JOB,false,TO_DATE(TO_CHAR(SYSDATE+1,'YYYY-MM-DD'),'YYYY-MM-DD')+1/24);
+ 
+ select * from user_jobs;
+ 
+ select * from user_source where name='' order by line;
+ 
+ 
+ 
+
+http://v.youku.com/v_show/id_XNjAxMTE5NjQ4.html?tpa=dW5pb25faWQ9MTAyMjEzXzEwMDAwMl8wMV8wMQ
+
+-----------------------------------------------------------------------------
+
+BEGIN TRANSACTION
+
+END 
+
+ROLLBACK

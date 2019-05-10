@@ -1,0 +1,124 @@
+﻿$("#tablename").children().eq(0).append(emement);
+
+children():获取table下所有的子元素；
+eq(0);获取table下第一个子元素；
+append方法是在元素 结尾处增加；
+
+
+实例-------------------------------------------------------------------------------
+
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+ <form>
+  <input type="text" name="name"  id="name" value="ccc"/>
+  <input type="text" name="age"  id="age" value="ccc"/>
+  <input type="text" name="sex"  id="sex" value="ccc"/><br>
+   <input type="button" name="button" value="tijiao" id="button"/>
+</form>
+ <table id="city" border="1" cellspacing="1">
+    <tbody>
+    <tr id ="name1" > <td >Value1</td><td >Value1</td> <td >Value1</td><td><a href="delete?id=Value1">Delete</a></td></tr>
+    <tr id ="name2"><td >Value2</td><td >Value2</td> <td >Value2</td> <td><a href="delete?id=Value2">Delete</a></td ></tr>
+    </tbody>
+  </table>
+  </body>
+  <script type="text/javascript">
+  $("#button").click(function(){
+  //获取输入的值
+       var name=$("#name").val();
+       var age=$("#age").val();
+       var sex=$("#sex").val();
+   //创建空的td    
+       var $name =$("<td></td>");
+       var $age =$("<td></td>");
+       var $sex =$("<td></td>");
+       var $delete =$("<td></td>");
+       var $a =$("<a></a>");
+    //将获取的值分别放到对应的td下
+       $name.text(name);
+       $age.text(age);
+       $sex.text(sex);
+       
+       $a.text("Delete");
+       $a.attr("href","delete?id="+name);
+       
+       ($delete).append($a);
+      //创建一个空的tr
+       var $tr =$("<tr></tr>");
+     //在这个tr下增加td
+       $tr.append($name);
+       $tr.append($age);
+       $tr.append($sex);
+       $tr.append($sex);
+       $tr.append($delete);
+    //将tr添加到对应的table下
+      $("#city").children().eq(0).append($tr); 
+      
+       $("a").click(function(){
+          return  dele($a);
+      });
+ });
+ 
+ function dele($a){
+//  var name = $a.attr("href");
+//  alert(name);
+    var name= $a.parent().parent().children().eq(0).text();
+    var bl = window.confirm("确认要删除用户"+name+"吗?");
+    if(!bl){
+        return false;
+    }else{
+	    $a.parent().parent().remove();
+	    return false;
+    }
+  }
+ 
+  </script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

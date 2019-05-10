@@ -1,0 +1,18 @@
+﻿在多的一方定义
+       @ManyToOne
+       @JoinColumn(name="t_id")
+	public Teacher getTeacher() {
+		return teacher;
+	}
+---------------------------------------------------------
+这种情况下，会在student表中生成一个t_id字段来映射到teacher表
+mappedBy="teacher",    --------------mappedBy属性设置时只 考虑对面的关联，不用考虑本侧的关联，只需要指定一边的关联就ok
+			   cascade={CascadeType.ALL}，  -------------如果有关联的表，那么增加此属性后，直接就可以关联，不需要在save（Student）负责 -------------增删改
+			    fetch=FetchType.EAGER /LAZY  负责get和load  前者是直接去取，积极的。EAGER 是默认的
+			 
+			)    
+			
+			
+			
+与one_2_many整好相反			
+	

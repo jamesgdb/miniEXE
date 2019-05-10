@@ -1,0 +1,32 @@
+﻿源代码：
+//固定周期单行的不提供图表功能  	
+				  	if("Y".equals(isFixed)||"Y"==isFixed||reportName=="confirmedFraudList"||
+				  	"errLeakFraudCount".equals(reportName)||reportName=="errLeakFraudCount"||
+				  	 "confirmedFraudList".equals(reportName)||reportName=="errLeakFraudCountList"||
+				  	 "transRiskDistributed".equals(reportName)||reportName=="transRiskDistributed"||
+				  	 "errLeakFraudCountList".equals(reportName)){
+				  		%><%@include file="toolbar4Report_one.jsp"%>
+				    <% 	}else{%>
+					 <%@include file="toolbar4Report.jsp"%>
+				 <% }%>
+
+
+修改为：
+	 	 	 if(reportName=="confirmedFraudList"||"confirmedFraudList".equals(reportName)||
+				  	     reportName=="transRiskDistributed"||"transRiskDistributed".equals(reportName)||
+				  	     reportName=="errLeakFraudCount"||"errLeakFraudCount".equals(reportName)||
+				  	     reportName=="errLeakFraudCountList"||"errLeakFraudCountList".equals(reportName)){%>   
+				      <%@include file="toolbar4Report_two.jsp"%> 
+				     <% }else if (reportName=="confirmedFraudTotal"||"confirmedFraudTotal".equals(reportName)||
+				    	 reportName=="authenMethodCountList"||"authenMethodCountList".equals(reportName)||
+				    	 reportName=="authenResultCountList"||"authenResultCountList".equals(reportName)||
+				    	 reportName=="ruleEffectCount"||"ruleEffectCount".equals(reportName)
+				    	){
+				    	
+				      %>  
+				       <%@include file="toolbar4Report_three.jsp"%> 
+				      }
+				        //固定周期单行的的不需要页数跳转
+				    <% }else {
+					%><%@include file="toolbar4Report_one.jsp"%>
+						    <% 	}%>

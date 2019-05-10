@@ -1,0 +1,19 @@
+﻿1，WHILE
+
+WHILE TO_DATE(VAR_DAY,'YYYY-MM-DD HH24:MI;SS')<SYSDATE  --没有分号
+
+LOOP
+	............
+	VAR_DAY:=TO_CHAR(TO_DATE(VAR_DAY,'YYYY-MM-DD')+1,'YYYY-MM-DD');
+	
+END LOOP;
+
+	
+2，	FOR
+
+BEGIN
+ FOR I IN 1..10
+	
+
+
+

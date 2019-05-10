@@ -1,0 +1,5 @@
+﻿//	select t.model_id from EDM_DM_MODEL t  where  model_id ='c9bc429b86ec46d0abb80fb9d62a8868';
+//	select t.theme_id from EDM_DM_Theme  t where t.model_id='c9bc429b86ec46d0abb80fb9d62a8868';
+//	select t.entity_id from  EDM_DM_Entity t where t.theme_id='b2d5f40f021b45c294af544b7bc71ff6';
+//	select t.field_id from EDM_DM_Field  t  where t.entity_id='a11c5d5230d34b19bff11b4e86ef253e';
+//	select * from EDM_DM_FIELD_PRODUCT t where t.field_id='4e867204aaf14ce7aa60ad128f823ac2'

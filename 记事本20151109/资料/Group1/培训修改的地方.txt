@@ -1,0 +1,22 @@
+﻿show parameter  sga /pga 会话量 20G/8G
+
+1.在oracle数据库中修改am_user，am_organ_id的值设置为“0”,即所有的用户组都都来自用户，不在属于任何分行。
+2.在AM_ORGAN 中删除分行信息。
+insert into AM_ORGAN (AM_ID, AM_CREATETIME, AM_SEQUENCE, AM_NAME, AM_PARENT_ID, ROWID)
+values ('0-0', '07-12月-11 01.56.25.328000 下午', 0, '北京分行', '0', 'AAAgvhAAAAAGOpmAAB');
+
+insert into AM_ORGAN (AM_ID, AM_CREATETIME, AM_SEQUENCE, AM_NAME, AM_PARENT_ID, ROWID)
+values ('0-1', '07-12月-11 01.57.11.609000 下午', 1, '上海分行', '0', 'AAAgvhAAAAAGOpmAAC');
+
+
+
+3.在对象管理---用户----字段管理 中修改“职务” 为“所属机构”
+
+4在AM_OPTION 中删除关于重置QA的查询
+insert into AM_OPTION (AM_ID, AM_CREATETIME, AM_SEQUENCE, AM_NAME, AM_VALUE, AM_DICTIONARY_ID, AM_PARENT_ID, ROWID)
+values ('009090435f45e5a42877077b1b42c489', '27-4月 -13 10.24.56.102000 上午', 55, '重置 QA百分比', 'ds1.group(NRU_QA_RES_PER)', '009090435f21da0000d25b68ea131194', '', 'AAAgveAAAAAGOpcAAm');
+
+insert into AM_OPTION (AM_ID, AM_CREATETIME, AM_SEQUENCE, AM_NAME, AM_VALUE, AM_DICTIONARY_ID, AM_PARENT_ID, ROWID)
+values ('009090435f45e1e836714d8f198f5572', '27-4月 -13 10.24.57.194000 上午', 56, '重置 QA数量', 'ds1.group(NRU_QA_RES_NUM)', '009090435f21da0000d25b68ea131194', '', 'AAAgveAAAAAGOpcAAn');
+
+

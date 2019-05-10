@@ -1,0 +1,179 @@
+﻿-- Create table
+create table VPDM_FD_FX_SWAP
+(
+  trans_id                VARCHAR2(30),
+  product_code            VARCHAR2(14),
+  organization_id         CHAR(8),
+  trade_date              DATE,
+  trade_group             VARCHAR2(20),
+  trade_group_nm          VARCHAR2(200),
+  cif_key                 VARCHAR2(20),
+  cif_name                VARCHAR2(200),
+  trader_id               CHAR(11),
+  trader                  VARCHAR2(200),
+  spot_buy_currency_code  CHAR(3),
+  spot_buy_amt            NUMBER(20,2),
+  spot_sell_currency_code CHAR(3),
+  spot_sell_amt           NUMBER(20,2),
+  spot_exchange_rate      NUMBER(12,6),
+  spot_fxrate_def         NUMBER,
+  spot_settle_date        DATE,
+  fwd_buy_currency_code   CHAR(3),
+  fwd_buy_amt             NUMBER(20,2),
+  fwd_sell_currency_code  CHAR(3),
+  fwd_sell_amt            NUMBER(20,2),
+  fwd_exchange_rate       NUMBER(12,6),
+  fwd_fxrate_def          NUMBER,
+  fwd_settle_date         DATE,
+  data_source             CHAR(11),
+  as_of_date              DATE,
+  acct_type               CHAR(2),
+  gl_account_num          VARCHAR2(30)
+)
+partition by range (AS_OF_DATE)
+(
+  partition P20000101 values less than (TO_DATE(' 2000-01-02 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    ),
+  partition P20140102 values less than (TO_DATE(' 2014-01-02 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    ),
+  partition P20140312 values less than (TO_DATE(' 2014-03-12 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    ),
+  partition P20140314 values less than (TO_DATE(' 2014-03-14 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    ),
+  partition P20140330 values less than (TO_DATE(' 2014-03-30 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    ),
+  partition P20140422 values less than (TO_DATE(' 2014-04-22 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    ),
+  partition P20140423 values less than (TO_DATE(' 2014-04-23 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    tablespace TBS_VPFRAME_DATA
+    pctfree 10
+    initrans 1
+    maxtrans 255
+    storage
+    (
+      initial 16K
+      next 8K
+      minextents 1
+      maxextents unlimited
+    )
+);
+-- Add comments to the table 
+comment on table VPDM_FD_FX_SWAP
+  is '外币掉期';
+-- Add comments to the columns 
+comment on column VPDM_FD_FX_SWAP.trans_id
+  is '交易编号';
+comment on column VPDM_FD_FX_SWAP.product_code
+  is '产品码';
+comment on column VPDM_FD_FX_SWAP.organization_id
+  is '核算机构';
+comment on column VPDM_FD_FX_SWAP.trade_date
+  is '交易日期';
+comment on column VPDM_FD_FX_SWAP.trade_group
+  is '投资组合代码';
+comment on column VPDM_FD_FX_SWAP.trade_group_nm
+  is '投资组合名称';
+comment on column VPDM_FD_FX_SWAP.cif_key
+  is '交易对手代码';
+comment on column VPDM_FD_FX_SWAP.cif_name
+  is '交易对手名称';
+comment on column VPDM_FD_FX_SWAP.trader_id
+  is '交易员代码';
+comment on column VPDM_FD_FX_SWAP.trader
+  is '交易员名称';
+comment on column VPDM_FD_FX_SWAP.spot_buy_currency_code
+  is '即期端买入币种代码';
+comment on column VPDM_FD_FX_SWAP.spot_buy_amt
+  is '即期端买入金额';
+comment on column VPDM_FD_FX_SWAP.spot_sell_currency_code
+  is '即期端卖出币种代码';
+comment on column VPDM_FD_FX_SWAP.spot_sell_amt
+  is '即期端卖出金额';
+comment on column VPDM_FD_FX_SWAP.spot_exchange_rate
+  is '即期买卖汇率';
+comment on column VPDM_FD_FX_SWAP.spot_fxrate_def
+  is '即期汇率定义';
+comment on column VPDM_FD_FX_SWAP.spot_settle_date
+  is '即期交割日期';
+comment on column VPDM_FD_FX_SWAP.fwd_buy_currency_code
+  is '远期端买入币种代码';
+comment on column VPDM_FD_FX_SWAP.fwd_buy_amt
+  is '远期端买入金额';
+comment on column VPDM_FD_FX_SWAP.fwd_sell_currency_code
+  is '远期端卖出币种代码';
+comment on column VPDM_FD_FX_SWAP.fwd_sell_amt
+  is '远期端卖出金额';
+comment on column VPDM_FD_FX_SWAP.fwd_exchange_rate
+  is '远期买卖汇率';
+comment on column VPDM_FD_FX_SWAP.fwd_fxrate_def
+  is '远期汇率定义';
+comment on column VPDM_FD_FX_SWAP.fwd_settle_date
+  is '远期交割日期';
+comment on column VPDM_FD_FX_SWAP.data_source
+  is '资料来源';
+comment on column VPDM_FD_FX_SWAP.as_of_date
+  is '数据日期';
+comment on column VPDM_FD_FX_SWAP.acct_type
+  is '业务类别';
+comment on column VPDM_FD_FX_SWAP.gl_account_num
+  is '系统内科目';

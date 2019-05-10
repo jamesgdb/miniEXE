@@ -1,0 +1,30 @@
+﻿select * from user_role_privs;
+select username,default_tablespace from user_users;
+
+付给权限
+
+grant select on SYS.DBA_JOBS_RUNNING to TMRPT;
+grant execute on SYS.DBMS_JOB to TMRPT;
+grant read, write on directory SYS.DUMPDIR to TMRPT;-----授权更改dumpdir文件的读写权限；DIRECTORY:供转储文件和日志文件使用的目录对象。
+grant execute on SYS.KILL_SESSION to TMRPT;
+grant select on SYS.V_$LOCKED_OBJECT to TMRPT;
+grant select on SYS.V_$SESSION to TMRPT;
+-- Grant/Revoke role privileges 
+grant connect to TMRPT;
+grant resource to TMRPT;
+-- Grant/Revoke system privileges 
+grant create sequence to TMRPT;
+grant create view to TMRPT;
+grant debug connect session to TMRPT;
+grant unlimited tablespace to TMRPT;
+
+收回权限：
+revoke bda to tmrpt;
+
+grant select any table to vpetlpg
+alter any table
+grant   drop any table  to vpetlgy?
+grant   delete any table  to vpetlgy?
+
+
+存储过程执行需要，drop any table，delete any table ，select any table

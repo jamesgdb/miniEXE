@@ -1,0 +1,2 @@
+﻿globle
+<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css">

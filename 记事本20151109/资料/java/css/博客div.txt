@@ -1,0 +1,19 @@
+﻿1.导航条，列表，内容，foot
+float:left一般是用在中间部分
+clear:both 针对footer
+开始一般用id选择器
+中间各模块总宽度要小于最上面的图片宽度
+body{
+	background-color:#2286c6;
+	margin: 0px;
+	padding:0px;
+	text-align:center;居中
+	font-size:12px;
+	font-family:Arial, Helvetica, sans-serif;
+}
+#container{
+	position:relative;
+	margin:0px auto 0px auto;
+	width:780px;总宽度
+	text-align:left;
+}

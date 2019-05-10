@@ -1,0 +1,3 @@
+﻿D:\java_team\KeplerSpace\vpframe_etlvp2.2.1
+http://192.168.1.3:6080/svn/RDCODE/application/vpetl/releases/2.2.1/main/vpetl-2.2.2-dev
+http://192.168.1.3:6080/svn/RDCODE/application/vpetl/releases/2.2.1/main/vpetl-2.2.2-dev；

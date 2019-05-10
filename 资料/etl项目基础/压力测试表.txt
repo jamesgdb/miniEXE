@@ -1,0 +1,58 @@
+﻿----非分区 vpdm_bl_bill_discount贴现表、VPDM_BL_REVERSE_REPO 回购表、
+ ---- 分区 vpdm_dt_casa 活期表、vpdm_fa_gl 总账表、vpdm_ln_loan 贷款表
+
+select   *  from vpdm_ln_loan t where
+t.as_of_date=to_date('2014-3-13','yyyy-mm-dd')  and t.currency_id='156'   and current_balance>0  and ADJUSTABLE_TYPE_CD!=1 AND NVL(REPRICE_FREQ,0)<1
+
+;
+select  as_of_date,count(1)   from  vpdm_ln_loan t group  by t.as_of_date 
+;
+
+
+update vpdm_ln_loan_clear t  set t.as_of_date = to_date('2014-02-28','yyyy-mm-dd') where   t.as_of_date = to_date('2014-03-13','yyyy-mm-dd')
+
+;
+insert into  vpdm_ln_loan_clear  select * from vpdm_ln_loan t where t.as_of_date = to_date('2014-03-13','yyyy-mm-dd')
+
+
+create table vpdm_ln_loan as select * from vpdm_ln_loan_clear;
+create table vpdm_bl_bill_discount as select * from vpdm_bl_bill_discount_clear;
+create table vpdm_dt_casa as select * from vpdm_dt_casa_clear;
+create table VPDM_BL_REVERSE_REPO as select * from VPDM_BL_REVERSE_REPO_clear;
+
+----------------------------------------
+create table vpdm_ln_loan_gdb as select * from vpdm_ln_loan;
+create table vpdm_bl_bill_discount_gdb as select * from vpdm_bl_bill_discount;
+create table vpdm_dt_casa_gdb as select * from vpdm_dt_casa;
+create table VPDM_BL_REVERSE_REPO_gdb as select * from VPDM_BL_REVERSE_REPO;
+
+insert into  vpdm_ln_loan  select * from vpdm_ln_loan_clear 
+insert into  vpdm_dt_casa  select * from vpdm_dt_casa_clear 
+
+
+drop table  vpdm_ln_loan;
+drop table vpdm_bl_bill_discount;
+drop table vpdm_dt_casa;
+drop table  VPDM_BL_REVERSE_REPO;
+
+select count(*) from vpdm_ln_loan;
+select count(*) from vpdm_bl_bill_discount;
+select count(*) from vpdm_dt_casa;
+select count(*) from VPDM_BL_REVERSE_REPO;
+
+
+ -------------------------01
+select   *  from vpdm_ln_loan t where
+   
+ t.as_of_date=to_date('2014-3-13','yyyy-mm-dd')  and t.currency_id='156'   and current_balance>0;
+
+
+
+;
+s
+
+select count(*)  from VPDM_BL_BILL_DISCOUNT_b t where t.as_of_date=to_date('2014-3-13','yyyy-mm-dd');
+insert into Vpdm_Bl_Reverse_Repo  select *  from Vpdm_Bl_Reverse_Repo_b t;
+select as_of_date,count(1)  from Vpdm_Bl_Reverse_Repo_b t   group by t.as_of_date;
+
+select as_of_date,count(1)  from Vpdm_Bl_Reverse_Repo t   group by t.as_of_date

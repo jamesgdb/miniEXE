@@ -1,0 +1,53 @@
+﻿create table test (name varchar2(50),id number not null,sex char(1));
+
+alter table test add constraint s_t check (sex='m' or sex='j')；
+
+alter table test add (height number);
+
+create table test_t as select * from test;
+
+rename  test_t to test_t2;
+
+alter table TEST_T2 rename column name2 to NAME3;
+
+
+Flashback table test_t2 to before drop
+
+drop table test_t2;
+
+delete test t where rownum<(select max(rownum) from test t2 where t2.name=t.name and t2.id=t.id)
+
+
+create table test(
+	name varchar2(100),
+	id number,
+	sex char(1),
+	born_time date
+)
+partition by range (born_time)(
+	partition P2000000 values less than to_date('2000/01/01','yyyy-mm')
+		tablespace rptdat
+);
+
+alter table test add partition p290202 values less than to_date('2000/01/01','yyyy-mm');
+
+
+select count(*) from user_tab_partitions  t;
+
+alter table  test truncate partition p20000;
+alter table test drop partition p2000;
+
+
+ DBMS_JOB.BROKEN(R.JOB,false,TO_DATE(TO_CHAR(SYSDATE+1,'YYYY-MM-DD'),'YYYY-MM-DD')+1/24);
+ 
+ select * from user_jobs;
+ 
+ select * from user_source where name='' order by line;
+ 
+ C:\oracle\product\10.2.0\flash
+_recovery_area
+ 
+ 
+ 
+
+http://v.youku.com/v_show/id_XNjAxMTE5NjQ4.html?tpa=dW5pb25faWQ9MTAyMjEzXzEwMDAwMl8wMV8wMQ

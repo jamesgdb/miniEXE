@@ -1,0 +1,34 @@
+﻿我们知道，用户拥有的role权限在存储过程是不可用的。如： 
+SQL> select * from dba_role_privs where grantee='SUK';
+GRANTEE GRANTED_ROLE ADMIN_OPTION DEFAULT_ROLE
+------------ ------------ ------------ ------------
+SUK DBA NO YES
+SUK CONNECT NO YES
+SUK RESOURCE NO YES
+--用户SUK拥有DBA这个role
+--再创建一个测试存储过程：
+create or replace procedure p_create_table 
+is
+begin
+Execute Immediate 'create table create_table(id int)';
+end p_create_table;
+--然后测试
+SQL> exec p_create_table;
+begin p_create_table; end;
+ORA-01031: 权限不足
+ORA-06512: 在"SUK.P_CREATE_TABLE", line 3
+ORA-06512: 在line 1
+--可以看到，即使拥有DBA role，也不能创建表。role在存储过程中不可用。
+--遇到这种情况，我们一般需要显式进行系统权限，如grant create table to suk;
+--但这种方法太麻烦，有时候可能需要进行非常多的授权才能执行存储过程
+--实际上，oracle给我们提供了在存储过程中使用role权限的方法：
+--修改存储过程，加入Authid Current_User时存储过程可以使用role权限。
+create or replace procedure p_create_table 
+Authid Current_User is
+begin
+Execute Immediate 'create table create_table(id int)';
+end p_create_table;
+--再尝试执行：
+SQL> exec p_create_table;
+PL/SQL procedure successfully completed
+--已经可以执行了。

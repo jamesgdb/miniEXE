@@ -1,0 +1,7 @@
+﻿login.jsp：
+	<SCRIPT type="text/javascript" src="${ctx}/dwr/engine.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="${ctx}/dwr/util.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="${ctx}/dwr/interface/LogonService"></SCRIPT>
+	
+pageHead.jsp	
+	

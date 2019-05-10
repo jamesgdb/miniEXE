@@ -1,0 +1,2 @@
+﻿同样用的2.2.3vpelt-meta包
+维护分支为：D:\java_team\KeplerSpace\vpetl-metadata-2.2.3

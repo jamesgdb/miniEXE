@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+<tiles-definitions>
+	<definition name="basePage" template="/WEB-INF/views/system/frame/basePage.jsp"></definition>
+	<definition name="blank" extends="basePage"></definition>	
+	
+	<!-- extends 跳转到的页面-->
+	<definition name="home" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="toolbar"></add-attribute>
+			<add-attribute value="tree"></add-attribute>
+			<add-attribute value="window"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="tree" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="tabbar"></add-attribute>
+			<add-attribute value="toolbar"></add-attribute>
+			<add-attribute value="tree"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="view" extends="basePage">
+		<put-attribute name="bodyContent" value="/WEB-INF/views/system/global/view.jsp" />
+		<put-list-attribute name="headers">
+			<add-attribute value="toolbar"></add-attribute>
+			<add-attribute value="window"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="info" extends="basePage">
+		<put-attribute name="bodyContent" value="/WEB-INF/views/system/global/info.jsp" />
+	</definition>
+	
+	<definition name="query" extends="basePage">
+		<put-attribute name="bodyContent" value="/WEB-INF/views/system/global/query.jsp" />
+		<put-list-attribute name="headers">
+			<add-attribute value="grid"></add-attribute>
+			<add-attribute value="toolbar"></add-attribute>
+			<add-attribute value="window"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="domainManage" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="tabbar"></add-attribute>
+			<add-attribute value="grid"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="groupManage" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="tabbar"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="permission" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="toolbar"></add-attribute>
+			<add-attribute value="tree"></add-attribute>
+			<add-attribute value="tabbar"></add-attribute>
+		</put-list-attribute>
+		<put-list-attribute name="dwrs">
+			<add-attribute value="Permission"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="menuPermission" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="tree"></add-attribute>
+		</put-list-attribute>
+		<put-list-attribute name="dwrs">
+			<add-attribute value="Permission"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="treeGrid" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="grid"></add-attribute>
+			<add-attribute value="toolbar"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name="search" extends="basePage">
+		<put-attribute name="bodyContent" value="/WEB-INF/views/system/search.jsp" />
+	</definition>
+	
+	<definition name="searchResultView" extends="basePage">
+		<put-list-attribute name="headers">
+			<add-attribute value="layout"></add-attribute>
+			<add-attribute value="grid"></add-attribute>
+		</put-list-attribute>
+	</definition>
+	
+	<!-- 跳转到登出页面 -->
+	<definition name="toLogoutPage" extends="basePage">
+		<put-attribute name="bodyContent" value="/WEB-INF/views/system/logon/logout.jsp" />
+	</definition>
+	
+	<!-- 修改密码 -->
+	<definition name="changePassword" extends="basePage">
+		<put-attribute name="bodyContent" value="/WEB-INF/views/system/logon/changePassword.jsp" />
+	</definition>
+	
+	<!-- ****************************************************************************************************************************** -->
+	
+	<!-- 灵活报表 -->
+	<definition name="flexibleReport" template="/report/gotoFlexibleReport.jsp"></definition>
+	
+	<!-- 固定报表 -->
+	<definition name="fixedReport" template="/report/gotoFixedReport.jsp"></definition>
+	
+	<!-- 仪表盘报表的页面 -->
+	<definition name="dashboardReport" extends="basePage">
+	    <put-attribute name="bodyContent" value="/report/dashboardReport.jsp" />
+	</definition>
+	
+	<!-- 日志管理 -->
+	<definition name="managerLog" extends="basePage">
+	    <put-attribute name="bodyContent" value="/report/logManager.jsp" />
+	</definition>
+	<!-- 汇率维护 -->
+	<definition name="exchange_rate_aintenance" extends="basePage">
+	    <put-attribute name="bodyContent" value="/report/rate_exchange.jsp" />
+	</definition>
+	<!-- 汇率申请管理 -->
+	<definition name="rate_application_management" extends="basePage">  
+	    <put-attribute name="bodyContent" value="/report/rate_application_manager.jsp" />
+	</definition>
+	
+	<definition name="design" extends="basePage">
+	    <put-attribute name="bodyContent" value="/report/design.jsp" />
+	</definition>
+	
+	<definition name="report2Dashboard" extends="basePage">
+	    <put-attribute name="bodyContent" value="/report/report2Dashboard.jsp" />
+	</definition>
+	
+	<!-- 数据批量上传页面 -->
+	<definition name="beachinsert" template="/report_other/beachinsert.jsp"></definition>
+	
+	<!-- ftp上传下载页面-->
+	<definition name="ftpUploadAndDownLoad" template="/report_other/index.jsp"></definition>
+	
+</tiles-definitions>

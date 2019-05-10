@@ -1,0 +1,60 @@
+﻿
+".profile" 28 lines, 948 characters 
+umask 022
+export ORACLE_SID=oraAOPF1
+export ORACLE_BASE=/oracle/app/oracle
+export GRID_HOME=/oracle/app/11.2.0/grid
+export ORACLE_HOME=$ORACLE_BASE/product/11.2.0/db
+export PATH=$ORACLE_HOME/bin:$GRID_HOME/bin:$PATH:$ORACLE_HOME/OPatch
+export PATH=$PATH:/bin:/usr/ccs/bin:/usr/bin/X11:.:/usr/java5/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$ORACLE_HOME/rdbms/lib:/lib:/usr/lib
+export CLASSPATH=$ORACLE_HOME/JRE:$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib:$ORA
+CLE_HOME/network/jlib
+export NLS_LANG=AMERICAN_AMERICA.AL32UTF8
+export ORACLE_OWNER=oracle
+export PS1='$LOGNAME@'`hostname`:'$PWD''$ '
+export AIXTHREAD_SCOPE=S
+export ORACLE_TERM=vt100
+export ORA_NLS33=$ORACLE_HOME/nls/data
+export TMP=/tmp
+export TMPDIR=/tmp
+export OPATCH_PLATFORM_ID=212
+export DISPLAY=3.3.3.229:0.0
+export ORA_NL10=$ORACLE_HOME/nls/data
+set -o vi
+export EDITOR=vi
+".profile" 28 lines, 948 characters
+umask 022
+export ORACLE_SID=oraAOPF1
+export ORACLE_BASE=/oracle/app/oracle
+export GRID_HOME=/oracle/app/11.2.0/grid
+export ORACLE_HOME=$ORACLE_BASE/product/11.2.0/db
+export PATH=$ORACLE_HOME/bin:$GRID_HOME/bin:$PATH:$ORACLE_HOME/OPatch
+export PATH=$PATH:/bin:/usr/ccs/bin:/usr/bin/X11:.:/usr/java5/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$ORACLE_HOME/rdbms/lib:/lib:/usr/lib
+export CLASSPATH=$ORACLE_HOME/JRE:$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib:$ORACLE_HOME/network/jlib
+export NLS_LANG=AMERICAN_AMERICA.AL32UTF8
+export ORACLE_OWNER=oracle
+export PS1='$LOGNAME@'`hostname`:'$PWD''$ '
+export AIXTHREAD_SCOPE=S
+export ORACLE_TERM=vt100
+export ORA_NLS33=$ORACLE_HOME/nls/data
+export TMP=/tmp
+export TMPDIR=/tmp
+export OPATCH_PLATFORM_ID=212
+export DISPLAY=3.3.3.229:0.0
+export ORA_NL10=$ORACLE_HOME/nls/data
+set -o vi
+export EDITOR=vi
+alias l='ls -l'
+export LANG=en_US
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+﻿1.更换jar包
+2.更换日志页面
+3.更改sql语句
+4.更改用户权限：
+grant select on v_$session to vpetl2;
+grant select on v_$ACCESS to vpetl2;
+grant alter system to vpetl2;

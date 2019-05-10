@@ -1,0 +1,131 @@
+﻿除了以上内容外，还需要在husband中增加
+  @OneToOne
+  @JoinColumns( 
+    		{ 
+    			@JoinColumn(name="wife_id",referencedColumnName="wife_id"),
+    			@JoinColumn(name="wife_name",referencedColumnName="wife_name"),
+    		}
+    		
+    		)
+	public Wife getWife() {
+		return wife;
+	}
+	来确定关联的内容。
+	
+	
+	
+	
+	wife类
+	----------------------------------------------------
+	package com.gdb.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+
+@Entity
+@IdClass(WifePK.class)
+public class Wife {
+	private int wife_id;
+	private String wife_name;
+//	private Husband husband;
+	@Id
+	@GeneratedValue
+	public int getWife_id() {
+		return wife_id;
+	}
+
+	public void setWife_id(int wife_id) {
+		this.wife_id = wife_id;
+	}
+    @Id
+	public String getWife_name() {
+		return wife_name;
+	}
+
+	public void setWife_name(String wife_name) {
+		this.wife_name = wife_name;
+	} 
+
+}
+
+wifePk类
+--------------------------------------------
+package com.gdb.entity;
+
+import java.io.Serializable;
+
+public class WifePK implements Serializable {
+	private int wife_id;
+	private String wife_name;
+	
+	public int getWife_id() {
+		return wife_id;
+	}
+
+	public void setWife_id(int wife_id) {
+		this.wife_id = wife_id;
+	}
+
+	public String getWife_name() {
+		return wife_name;
+	}
+
+	public void setWife_name(String wife_name) {
+		this.wife_name = wife_name;
+	}  
+
+}
+
+husband类
+----------------------------------------------------
+package com.gdb.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.OneToOne;
+
+@Entity
+public class Husband {
+	private int hus_id;
+	private String hus_name;
+	private Wife wife;
+	@Id
+	@GeneratedValue
+	public int getHus_id() {
+		return hus_id;
+	}
+
+	public void setHus_id(int hus_id) {
+		this.hus_id = hus_id;
+	}
+
+	public String getHus_name() {
+		return hus_name;
+	}
+
+	public void setHus_name(String hus_name) {
+		this.hus_name = hus_name;
+	}
+    @OneToOne
+    @JoinColumns( 
+    		{ 
+    			@JoinColumn(name="wife_id",referencedColumnName="wife_id"),
+    			@JoinColumn(name="wife_name",referencedColumnName="wife_name"),
+    		}
+    		
+    		)
+	public Wife getWife() {
+		return wife;
+	}
+
+	public void setWife(Wife wife) {
+		this.wife = wife;
+	}
+}

@@ -1,0 +1,4 @@
+﻿dqRuleList.jsp-----------------规则管理
+struts-edm.xml中配置了所有的  “dq”开头的  action
+
+/vpetl-web/src/main/webapp/edm/dq/dqAddRule.jsp中有新增规则

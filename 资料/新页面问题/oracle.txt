@@ -1,0 +1,1 @@
+﻿create user vpetlweb identified by vpetlweb default tablespace TBS_ETL_DATA temporary tablespace TBS_ETL_TEmp;

@@ -1,0 +1,55 @@
+﻿
+查看ORACLE最大进程数：
+
+SQL> select count(*) from v$session  #连接数
+SQL> Select count(*) from v$session where status='ACTIVE'　#并发连接数
+SQL> show parameter processes  #最大连接
+SQL> alter system set processes = value scope = spfile;重启数据库  #修改连接
+
+unix 1个用户session 对应一个操作系统 process 
+而 windows体现在线程
+
+------------------------------------------------------------------------------
+修改ORACLE最大进程数：
+使用sys，以sysdba权限登录：
+
+SQL> show parameter processes;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+aq_tm_processes                      integer     1
+db_writer_processes                  integer     1
+job_queue_processes                  integer     10
+log_archive_max_processes            integer     1
+processes                            integer     150
+
+SQL> alter system set processes=300 scope = spfile;
+
+系统已更改。
+
+SQL> show parameter processes;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+aq_tm_processes                      integer     1
+db_writer_processes                  integer     1
+job_queue_processes                  integer     10
+log_archive_max_processes            integer     1
+processes                            integer     150
+
+SQL> create pfile from spfile;
+
+文件已创建。
+ 
+
+重启数据库，
+ 
+SQL> show parameter processes;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+aq_tm_processes                      integer     1
+db_writer_processes                  integer     1
+job_queue_processes                  integer     10
+log_archive_max_processes            integer     1
+processes                            integer     300

@@ -1,0 +1,130 @@
+﻿package com.vprisk.edm.dm.dao.impl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.stereotype.Repository;
+
+import com.vprisk.edm.dm.dao.DmModelExternalDao;
+import com.vprisk.edm.dm.entity.DmModel;
+import com.vprisk.edm.dm.entity.DmModelNode;
+import com.vprisk.edm.dm.entity.DmTheme;
+import com.vprisk.rmplatform.common.dao.hibernate.BaseHibernateDao;
+
+@Repository("dmModelExternalDao")
+public class DmModelExternalDaoImpl extends
+		BaseHibernateDao<DmModelNode, String> implements DmModelExternalDao {
+
+	@Override
+	public List<DmModelNode> getDmModelNode(String organ, String baseVersion) {
+
+		List<DmModelNode> list = new ArrayList<DmModelNode>();
+
+		// 根据所属组织和主版本号查询模型信息
+		StringBuffer sql = new StringBuffer();
+
+		sql.append("select *  from edm_dm_model where  base_version=? and organ=? and status='1' ");// status='1'表示已发布
+		List<DmModel> dmModelList = super.queryForListBySql(sql.toString(),
+				DmModel.class, new Object[] { baseVersion, organ });
+
+		String modelId = "";// 模型编号
+		DmModelNode dmModelNode;
+		DmModelNode dmModelNode1;
+		DmTheme dmTheme = new DmTheme();
+
+		for (DmModel dmModel : dmModelList) {
+			modelId = dmModel.getModelId();
+			dmTheme.setModelId(modelId);
+			dmTheme.setThemeId("-1");
+			dmTheme.setIsLeaf("-2");
+			// 模型编号uuid信息 start
+			dmModelNode = new DmModelNode();
+			dmModelNode.setNodeId(modelId);
+			dmModelNode.setNodeName(dmModel.getModelCode() + "-" + dmModel.getModelName());
+			dmModelNode.setNodeType("1");
+			dmModelNode.setNodePid("");
+			// 模型编号uuid信息 end
+
+			// 模型版本号信息 start
+			dmModelNode1 = new DmModelNode();
+			dmModelNode1.setNodeId(dmModel.getModelVersion());
+			dmModelNode1.setNodeName(dmModel.getModelVersion());
+			dmModelNode1.setNodeType("2");
+			dmModelNode1.setNodePid(modelId);
+			// 模型版本号信息 end
+
+			// 构造模型信息下面的子节点
+			Set<DmModelNode> allChildren = new HashSet<DmModelNode>();
+			Set<DmModelNode> allChildren1 = new HashSet<DmModelNode>();
+			allChildren.add(dmModelNode1);
+			dmModelNode.setChilden(allChildren);
+			allChildren1.add(this.selectDmThemeBymodelId(modelId,
+					dmModel.getModelVersion()));
+			dmModelNode1.setChilden(allChildren1);
+			list.add(dmModelNode);
+
+		}
+
+		return list;
+	}
+
+	/**
+	 * 查询出主题根节点信息，构造其Children值
+	 * 
+	 * @param themeId
+	 * @param modelId
+	 * @return
+	 */
+	public DmModelNode selectDmThemeBymodelId(String modelId,
+			String modelVersion) {
+		String sql = "select *  from  edm_dm_theme where parent_theme_id= '-1'  and model_id=?";
+
+		List<DmTheme> dmThemeList = this.queryForListBySql(sql, DmTheme.class,
+				modelId);
+		if (dmThemeList.isEmpty())
+			return null;
+		DmTheme dmTheme = dmThemeList.get(0);
+
+		DmModelNode dmModelNode = new DmModelNode();
+		dmModelNode.setNodeId(dmTheme.getThemeId());
+		dmModelNode.setNodeName(dmTheme.getThemeName());
+		dmModelNode.setNodePid(modelVersion);
+		dmModelNode.setNodeType("3");
+		this.fetchChildThemes(dmTheme, dmModelNode);
+		return dmModelNode;
+	}
+
+	/**
+	 * 递归构造主题的子节点并转换成DmModelNode
+	 * 
+	 * @param t
+	 * @param dmModelNode
+	 */
+	private void fetchChildThemes(DmTheme t, DmModelNode dmModelNode) {
+		String sql = "select *  from  edm_dm_theme where parent_theme_id= ?  and model_id=?";
+		List<DmTheme> childThemes = this.queryForListBySql(sql, DmTheme.class,
+				new Object[] { t.getThemeId(), t.getModelId() });
+		List<DmModelNode> modelList = new ArrayList<DmModelNode>();
+
+		DmModelNode dmModelNodes;
+		for (DmTheme cdt : childThemes) {
+			dmModelNodes = new DmModelNode();
+			dmModelNodes.setNodeId(cdt.getThemeId());
+			dmModelNodes.setNodeName(cdt.getThemeName());
+			dmModelNodes.setNodePid(cdt.getParentThemeId());
+			dmModelNodes.setNodeType("3");
+			modelList.add(dmModelNodes);
+
+		}
+		dmModelNode.getChilden().addAll(modelList);
+		t.getChildThemes().addAll(childThemes);
+		for (int i = 0; i < childThemes.size(); i++) {
+			DmTheme cdt = childThemes.get(i);
+			DmModelNode node = modelList.get(i);
+			this.fetchChildThemes(cdt, node);
+		}
+	}
+
+}

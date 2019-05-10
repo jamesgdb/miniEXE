@@ -1,0 +1,8 @@
+﻿dm_dm_install_his_tb  是否安装历史表
+dm_dm_install_his_tb 是否是分区表
+
+
+<td class="formLabel"><h:label required="true" value="历史分区表起始日期："/></td>
+					<td >
+				 	    <input type="text" name="hisTbStartDate"   id="hisTbStartDate" value="${dmModelInstall.hisTbStartDate}"  class="easyui-datebox" />  
+					</td>

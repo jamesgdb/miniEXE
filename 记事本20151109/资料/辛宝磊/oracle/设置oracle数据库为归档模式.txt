@@ -1,0 +1,240 @@
+﻿在黑窗口执行，实验为plsql上执行不了
+
+1，查询数据库是否归档模式
+
+ 	select  log_mode from v$database;
+ 	
+ 	--------------
+ 	NOARCHIVELOG/ARCHIVELOG
+ 	
+ 2，关闭数据库
+ 
+ 	shutdown immediate;
+ 	
+ 3，将数据库启动到mount模式下
+ 
+ 	startup mount;
+ 	
+ 4，更改数据库为归档模式
+ 
+ 	alter database archivelog;		
+ 	
+ 5，打开数据库
+ 
+ 	alter database open;
+ 				
+
+ 
+ http://blog.itpub.net/24234775/viewspace-681103/				
+ 将Oracle数据库设置为归档模式 2010-12-07 16:54:25
+分类： Linux
+将Oracle数据库从非归档状态设置成归档状态。
+
+查看归档状态为非归档
+sys@JSL> select log_mode from v$database;
+LOG_MODE
+------------
+NOARCHIVELOG
+
+archive状态Disabled
+sys@JSL> archive log list
+Database log mode              No Archive Mode
+Automatic archival             Disabled
+Archive destination            USE_DB_RECOVERY_FILE_DEST
+Oldest online log sequence     2
+Current log sequence           4
+
+sys@JSL> select * from v$archive_processes;
+
+   PROCESS STATUS     LOG_SEQUENCE STAT
+---------- ---------- ------------ ----
+         0 STOPPED               0 IDLE
+         1 STOPPED               0 IDLE
+         2 STOPPED               0 IDLE
+         3 STOPPED               0 IDLE
+    ...
+    ...
+        29 STOPPED               0 IDLE
+
+修改为归档模式
+
+首先要关闭数据库，启动到mount状态。
+sys@JSL> shutdown immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+sys@JSL> startup mount
+ORACLE instance started.
+
+Total System Global Area  184549376 bytes
+Fixed Size                  1218412 bytes
+Variable Size              62916756 bytes
+Database Buffers          117440512 bytes
+Redo Buffers                2973696 bytes
+Database mounted.
+
+修改为归档模式
+sys@JSL> alter database archivelog;
+Database altered.
+
+oracle 9i还要设置log_archive_start 这是个静态参数
+alter system set log_archive_start=true scope=spfile;
+oracle 10g则不用设置了。
+
+验证修改结果
+sys@JSL> select log_mode from v$database;
+LOG_MODE
+------------
+ARCHIVELOG
+
+打开数据库
+sys@JSL> alter database open;
+Database altered.
+
+
+设置归档格式
+log_archive_format，是设置归档命名规则的静态参数，设置后重启数据库才生效。
+对log_archive_dest和log_archive_dest_n指定的归档有效。
+
+常用参数如下
+%s log sequence number
+%S log sequence number, zero filled
+%t thread number
+%T thread number, zero filled
+%a activation ID
+%d database ID
+%r resetlogs ID
+resetlogs，防止恢复的时候会报错，归档默认文件扩展名是dbf，习惯设置成arc
+例如：<dbname>_%t_%s_%r.arc
+
+sys@JSL> select name from v$database;
+NAME
+------------------------------
+JSL
+sys@JSL> alter system set log_archive_format='jsl_%t_%s_%r.arc' scope=spfile;
+System altered.
+重启数据库才生效。
+
+
+
+sys@JSL> archive log list
+Database log mode              Archive Mode
+Automatic archival             Enabled
+Archive destination            USE_DB_RECOVERY_FILE_DEST
+Oldest online log sequence     2
+Next log sequence to archive   4
+Current log sequence           4
+sys@JSL> alter system switch logfile;
+System altered.
+
+archive变成Enabled，我们没有设置归档目的地，
+默认USE_DB_RECOVERY_FILE_DEST使用DB_RECOVERY_FILE_DEST目录，也就是我们常说的闪回目录。
+sys@JSL> archive log list
+Database log mode              Archive Mode
+Automatic archival             Enabled
+Archive destination            USE_DB_RECOVERY_FILE_DEST
+Oldest online log sequence     3
+Next log sequence to archive   5
+Current log sequence           5
+
+查看当前日志组
+sys@JSL> select * from v$log;
+
+GROUP# THREAD# SEQUENCE#    BYTES  MEMBERS ARC STATUS    FIRST_CHANGE# FIRST_TIME
+------ ------- --------- -------- -------- --- --------- ------------- -----------------
+     1       1         5 52428800        1 NO  CURRENT         1565953 20101206 17:57:21
+     2       1         4 52428800        1 YES ACTIVE          1559083 20101206 15:07:00
+     3       1         3 52428800        1 YES INACTIVE        1534317 20101206 10:44:06
+
+切换日志
+alter system archive log current; --先归档再切换
+alter system switch logfile; --先切换至于能不能归档再说
+
+sys@JSL> alter system switch logfile;
+System altered.
+
+查看已经归档的信息
+sys@JSL> select RECID,NAME,DEST_ID,SEQUENCE#,RESETLOGS_CHANGE#,ARCHIVED,STATUS ,BACKUP_COUNT from v$archived_log;
+
+RECID NAME                              DEST_ID  SEQUENCE# RESETLOGS_CHANGE# ARC S BACKUP_COUNT
+----- ------------------------------ ---------- ---------- ----------------- --- - ------------
+    1 /u01/app/oracle/flash_recovery         10          1           1484108 YES A            0
+      _area/HYJT/archivelog/2010_12_
+      05/o1_mf_1_1_6hq6z3db_.arc
+    2 /u01/app/oracle/flash_recovery         10          4           1484108 YES A            0
+      _area/JSL/archivelog/2010_12_0
+      6/o1_mf_1_4_6hsdw1mv_.arc
+    3 /u01/app/oracle/flash_recovery         10          5           1484108 YES A            0
+      _area/JSL/archivelog/2010_12_0
+      6/o1_mf_1_5_6hsdx63y_.arc
+
+查看归档进程，开启了三个归档进程
+sys@JSL> select * from v$archive_processes;
+
+   PROCESS STATUS     LOG_SEQUENCE STAT
+---------- ---------- ------------ ----
+         0 ACTIVE                0 IDLE
+         1 ACTIVE                0 IDLE
+         2 ACTIVE                0 IDLE
+         3 STOPPED               0 IDLE
+    ...
+    ...
+        29 STOPPED               0 IDLE
+
+如果归档进程报错，8i可以使用下面命令尝试解决
+archive log stop;
+archive log start;
+
+10版本的archive log stop/start及alter system archive log stop/start命令已经不用了，只要在归档模式下就是自动归档模式
+
+
+设置归档目录
+    默认的归档目录（Archive destination）是： USE_DB_RECOVERY_FILE_DEST，
+    如果取消DB_RECOVERY_FILE_DEST参数的设置，就会找standby_archive_dest参数，
+    默认是'?/dbs/arch'但是没有真实目录存在，所以虽然能开启归档但是不能实现归档。
+设置方式：
+A: log_archive_dest_n (1-10) 这个参数与B是冲突的，可以设置本地和远程作为归档目标地址。
+    下面有十个状态参数log_archive_dest_state_n (1-10)与之对应，enable才可用。
+    例：  
+    log_archive_dest_state_1=DEFER  
+    log_archive_dest_state_2=ENABLE  
+    此参数和log_archive_dest_n参数配对使用，缺省值为ENABLE，如果想停止使用一个归档目录，只需将其对应的log_archive_dest_state_n参数值设置为DEFER。
+    log_archive_dest_n 其中n为1-5的整数，必需从低到高设置，下面举例说明：  
+    log_archive_dest_1="LOCATION=/jia/arc MANDATORY REOPEN"  
+    log_archive_dest_2="SERVICE=standby_db1 MANDATORY REOPEN=600"
+    log_archive_dest_3="LOCATION=/jia/arc2 OPTIONAL" 
+    location指的是本地目录。
+    service是tnsname里指定的名称，可以实现连接到远程。
+    MANDATORY 关键字说明联机日志文件必须要成功归档以后才能被覆盖。
+    OPTIONAL 缺省为可选（OPTIONAL），即使归档没有成功也可以覆盖。
+    在设置时应该至少有一个本地（LOCATION）强制（MANDATORY）归档目录。
+    REOPEN 关键字说明如果归档不成功时系统要重新尝试归档，缺省每300秒尝试一次直到成功。
+        reopen可以通过=n来指定尝试的时间间隔，如 log_archive_dest_2中的时间间隔为600秒，
+        而log_archive_dest_1中的时间间隔为300 秒。
+    alter system set log_archive_dest_1='location=/xxx/xxx/x/ mandatory reopen=500'; 
+    
+B: log_archive_dest和log_archive_duplex_dest 这个参数与A是冲突的，只能设置本地目录，
+    log_archive_dest可以单独存在，但是log_archive_duplex_dest必须依附于log_archive_dest
+    log_archive_dest这是一个静态参数，设置的时候要带scope=spfile
+    sys@JSL> alter system set log_archive_dest='';
+    alter system set log_archive_dest=''
+    *
+    ERROR at line 1:
+    ORA-02097: parameter cannot be modified because specified value is invalid
+    ORA-16018: cannot use LOG_ARCHIVE_DEST with LOG_ARCHIVE_DEST_n or DB_RECOVERY_FILE_DEST
+    带上scope=spfile参数就不会有上面的报错信息了
+    sys@JSL> alter system set log_archive_dest='/jia/arc' scope=spfile;        
+    System altered.
+    如果使用这种方式，则log_archive_dest是强制（MANDATORY）归档目录，而log_archive_duplex_dest为可选（OPTIONAL）目录。
+
+C: db_recovery_file_dest 这个参数还有个辅助参数db_recovery_file_dest_size控制大小。
+
+那么着三种方式是否可以同时设置，以及那个方式设置的生效呢？
+我们用下图示加以说明：
+A(n) B(y) C(y) -> oracle同时归档日志到log_archive_dest和db_recovery_file_dest指定的目录，C采用omf管理管理方式
+A(n) B(y) C(n) -> 1份归档B
+A(y) B(y) C(n) -> error A与B是冲突的
+A(y) B(n) C(y) -> 1份归档A，如果设置了A，C就失效了。
+
+在10g跟开归档跟flashback_on状态无关，但是反过来开数据库闪回功能必须先开归档。设置log_archive_dest以后重启数据库才生效。
+ 		 		 		

@@ -1,0 +1,330 @@
+﻿<%@ page language="java" contentType="text/html;charset=UTF-8"%>
+<%@ page import="com.amsoft.amp.service.impl.RateManageServiceImpl" %>
+<%@ page import="com.boc.report.*" %>
+<%@ page import="java.util.*,com.boc.util.*"%>
+<%@ page import="com.boc.report.FusionChartXML"%>
+<%@ page import="com.boc.report.DashboardReportUtil" %>
+<%@ page import="com.amsoft.amp.domain.User" %>
+<%@ page import="com.amsoft.amp.util.SysConstants" %>
+<%@ include file="/common/taglibs.jsp" %>
+<%@ taglib uri="BOC" prefix="BOC" %>
+<script language="javascript">
+	
+		function found(object){
+			
+			           document.getElementById("detail").tBodies[0].innerText="";
+			           var  bunchValue= object.id;//获取流水号行的串  
+			           var  bunchId= object.innerHTML;//获取流水号行的ID
+			           document.getElementById("bunch2java").value=bunchValue;//将此串写入到detailTable表传给页面
+			           document.getElementById("flowId2java").value=bunchId;//将此流水号写入到detailTable表传给页面
+			           var list =bunchValue.split(",");    
+                       var o=document.createElement("div"),ol; 
+	                   var table2=document.getElementById("detail");
+	                 
+	                   var head ="< tr class='info_tr'>";
+	                   var foot ="</tr>";
+	                   var end ="</td>";
+	                   
+			            for(var j=0;j<list.length;j++){  //获取单行
+			            	 var str="";
+			                 var cell="";
+			            	if(list[j]!=null&&list[j]!=""){
+			            		var   element=list[j].split(":");
+			                   for(var k=0;k<element.length;k++){	//获取单行中的单个元素
+// 			                   if(element.length==3){
+// 				                	   if(k==2){ var start ="<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='"+element[k]+"' id='"+k+"'  value='"+element[k]+"'>"+element[k]+"</td>"+
+// 				                		                    "<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='' id='' value=''>"+" ";
+// 						                                    cell=cell+start+end; 
+// 						                }else{
+// 						                     var start ="<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='"+element[k]+"' id='"+k+"' value='"+element[k]+"'>";
+// 						                     cell=cell+start+element[k]+end;   
+// 					                  }
+// 			                	 }else {
+					               var start ="<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='"+element[k]+"' id='"+k+"' value='"+element[k]+"'>";
+					                  cell=cell+start+element[k]+end;   
+// 			                       }
+			                   }
+			            	}
+			            	
+			             str =head+cell+foot;
+			            if(str.length<30){
+			               str ="<tr class='info_tr'><td class='title_tr' style='white-space: nowrap; text-align: center;' colspan='4'>"+
+			                    " <input type='button' style='white-space: nowrap; text-align: center;' class='List_Button2' value='<BOC:I18N name='agreement'/>'" +
+			                    " onClick='submitForm()'/> "+
+			                    "<input type='button' style='white-space: nowrap; text-align: center;' class='List_Button2' value='<BOC:I18N name='deny'/>' "+
+			                    "onClick='denyAll()' />"+
+// 			                    " <input type='text'  id='bunch2java' name='bunch2java' value='1233444' />"+
+// 					            " <input type='text'  id='flowId2java' name='flowId2java' value='1233444' />"+
+					            "</td></tr>";
+			            	}
+			            if(list[0].split(":").length==3){
+			            	 if(j==0){
+								   o.innerHTML="<table class='table_common' id='aaaa' cellspacing='1' cellpadding='0'>"+
+								               "<TR class='title_tr'><TH width='33%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_foreign_currency_name_upload'/></SPAN></TH>"+
+								               "<TH width='34%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_discount_price'/></SPAN></TH>"+
+								               "<TH width='33%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_rate_unit'/></SPAN></TH>"+
+								               "</TR >"+str+"</table>";  
+								    	       ol=o.childNodes[0].tBodies[0].rows;  //浏览器认为 tobody元素不存在，IE除外
+								    	       while(ol.length>0){  
+								    		    	table2.tBodies[0].appendChild(ol[0]); 
+							    		       }  
+								  } else{
+								    o.innerHTML="<table>"+str+"</table>";  
+								    ol=o.childNodes[0].tBodies[0].rows;  
+								    while(ol.length>0){  
+								    table2.tBodies[0].appendChild(ol[0]);  
+						        }  
+					        }  
+		                   }else{
+		                	   if(j==0){
+								   o.innerHTML="<table class='table_common' id='aaaa' cellspacing='1' cellpadding='0'>"+
+								               "<TR class='title_tr'><TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_foreign_currency_name'/></SPAN></TH>"+
+								               "<TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_discount_price'/></SPAN></TH>"+
+								               "<TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_rate_unit'/></SPAN></TH>"+
+								               "<TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_currency_code'/></SPAN></TH></TR >"+str+"</table>";  
+								    	       ol=o.childNodes[0].tBodies[0].rows;  //浏览器认为 tobody元素不存在，IE除外
+								    	       while(ol.length>0){  
+								    		    	table2.tBodies[0].appendChild(ol[0]); 
+							    		       }  
+								  } else{
+								    o.innerHTML="<table class='table_common'>"+str+"</table>";  
+								    ol=o.childNodes[0].tBodies[0].rows;  
+								    while(ol.length>0){  
+								    table2.tBodies[0].appendChild(ol[0]);  
+						        }  
+					        }   
+		                   }
+					  
+			   }
+	   }	
+		
+		function submitForm(){  
+			var a = confirm("你确认要同意申请吗？");
+			if(a){
+				 document.detailTable.submit();
+				 alert("修改申请已经通过！");
+			}else{
+				return false;
+			}
+		} 
+		
+		function denyAll(){  
+			var a = confirm("你确认要拒绝申请吗？");
+			if(a){
+				document.getElementById("statue").value="N";
+				document.detailTable.submit();
+				 alert("拒绝成功！");
+				 return true;
+			}else{
+				return false;
+			}
+		}   
+		
+		//删除货币类型
+		function deleteCell(object){
+			   document.getElementById("detail").tBodies[0].innerText="";
+			   var  bunchValue= object.id;//获取流水号行的串  
+	           var  bunchId= object.innerHTML;//获取流水号行的ID
+	           document.getElementById("bunch2java").value=bunchValue;//将此串写入到detailTable表传给页面
+	           document.getElementById("flowId2java").value=bunchId;//将此流水号写入到detailTable表传给页面
+	           var list =bunchValue.split(",");                
+              var o=document.createElement("div"),ol; 
+              var table2=document.getElementById("detail");
+              var head ="< tr class='info_tr'>";
+              var foot ="</tr>";
+              var end ="</td>";
+             
+	            for(var j=0;j<list.length;j++){  //获取单行
+	            	 var str="";
+	                 var cell="";
+	            	if(list[j]!=null&&list[j]!=""){
+	                   var element=list[j].split(":");
+	                  
+	                   for(var k=0;k<element.length;k++){	//获取单行中的单个元素
+	                   if(element.length==3){
+		                	   if(k==2){ var start ="<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='"+element[k]+"' id='"+k+"'  value='"+element[k]+"'>"+element[k]+"</td>"+
+		                		                    "<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='' id='' value=''>"+" ";
+				                                    cell=cell+start+end; 
+				                                    alert(cell);
+				                }else{
+				                     var start ="<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='"+element[k]+"' id='"+k+"' value='"+element[k]+"'>";
+				                     cell=cell+start+element[k]+end;   
+			                  }
+	                	 }else {
+			               var start ="<td  class='info_tr' width='10%' style='white-space: nowrap; text-align: center;' name='"+element[k]+"' id='"+k+"' value='"+element[k]+"'>";
+			                  cell=cell+start+element[k]+end;   
+	                       }
+	                   }
+	            	}
+	            	
+	             str =head+cell+foot;
+	            if(str.length<30){
+	               str ="<tr class='info_tr'><td class='title_tr' style='white-space: nowrap; text-align: center;' colspan='4'>"+
+	                    " <input type='button' style='white-space: nowrap; text-align: center;' class='List_Button2' value='<BOC:I18N name='agreement'/>'" +
+	                    " onClick='deleteAll()'/> "+
+	                    "<input type='button' style='white-space: nowrap; text-align: center;' class='List_Button2' value='<BOC:I18N name='deny'/>' "+
+	                    "onClick='denyAll()' />"+
+			            "</td></tr>";
+	            	}
+			   if(j==0){
+				   o.innerHTML="<table class='table_common' cellspacing='1' cellpadding='0'>"+
+				               "<TR class='title_tr'><TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='delete_am_foreign_currency_name'/></SPAN></TH>"+
+				               "<TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_discount_price'/></SPAN></TH>"+
+				               "<TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_rate_unit'/></SPAN></TH>"+
+				               "<TH width='10%' style='white-space: nowrap; text-align: center;'><SPAN><BOC:I18N name='am_currency_code'/></SPAN></TH></TR >"+str+"</table>";  
+				    	       ol=o.childNodes[0].tBodies[0].rows;  
+				    	       while(ol.length>0){  
+				    		    	table2.tBodies[0].appendChild(ol[0]);  
+			    		       }  
+				  } else{
+				    o.innerHTML="<table class='table_common'>"+str+"</table>";  
+				    ol=o.childNodes[0].tBodies[0].rows;  
+				    while(ol.length>0){  
+				    table2.tBodies[0].appendChild(ol[0]);  
+		        }  
+	      }
+     }
+}
+		function deleteAll(){  
+			 document.getElementById("statue").value="S";
+			var a = confirm("你确认要同意申请吗？");
+			if(a){
+				 document.detailTable.submit();
+				 alert("删除申请已经通过！");
+			}else{
+				return false;
+			}
+		} 	
+	
+</script>
+<% 
+	String am_flow_id = JParamToolkit.getParameter(request,"am_flow_id");//此次申请的流水号
+	String am_application_time = JParamToolkit.getParameter(request,"am_application_time");//申请修改时间
+	String am_bunch = JParamToolkit.getParameter(request,"bunch");//要修改的串
+	String am_application_status = JParamToolkit.getParameter(request,"am_application_status");//申请状态 
+	String bunch2java = JParamToolkit.getParameter(request, "bunch2java");//隐藏表的串
+	String statue = JParamToolkit.getParameter(request, "statue");//隐藏修改的状态 “Y”不做处理  “S” 申请删除 “N”申请修改
+	String deleteStatue = JParamToolkit.getParameter(request, "deleteStatue");//同意删除货币类型
+	String flowId2java = JParamToolkit.getParameter(request, "flowId2java");//隐藏流水号
+	
+	RateManageServiceImpl rm2 = new RateManageServiceImpl();
+	    if(bunch2java!=""&&flowId2java!=""&& "Y".equals(statue)){//进行解串，进行数据库插入或者更新并且不是拒绝申请
+	    	rm2.setAgree(bunch2java,flowId2java);
+		}else if(bunch2java!=""&&flowId2java!=""&& "S".equals(statue)){//进行解串，进行数据库删除
+	    	rm2.setDelete(bunch2java,flowId2java);
+		}
+	    else if(bunch2java!=""&&flowId2java!=""&& "N".equals(statue)){//拒绝此次修改申请
+			  rm2.setDeny(bunch2java,flowId2java);
+		}
+	ArrayList<RateManage> list2 = (ArrayList<RateManage>)rm2.getApplicationList(am_flow_id,am_application_time,am_bunch,am_application_status); 
+%>  
+<html>
+	<head>
+		<meta name="Descrīption" Content="dashboard report display page">
+		<meta name="Copyright" Content="Copyright © 2008 Yucheng Network Technologies Limited All Rights Reserved">
+		<meta name="Author" Content="Xie hui">
+		<script type="text/javascript" src="${ctx}/js/jquery.js"></script>
+		<link href="${ctx}/css/report.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/centercontent.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/admincss.css" rel="stylesheet" type="text/css"> 
+	</head>
+	<body >
+	  <div class="centercontent001">
+	  <div class="info_box">
+			<div class="title_bg">
+				汇率管理
+			</div>
+	     <div class="info_input_box">
+  	<div id="chart1div" class="images_box2">
+<!-- 		无申请信息的时候显示 -->
+       
+		<%
+		if(list2.size()==0 ){%>
+<!-- 		无申请时候显示 -->
+			
+				<table>
+					<tr class="title_tr">
+						<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN>暂时没有汇率申请信息</SPAN>！</TH>
+					</tr>
+				</table>
+	
+		<%	
+// 		有申请信息的时候显示
+		}else{
+		
+		%>
+		   
+					<table class="table_common " id="table1" cellspacing="1" cellpadding="0">
+						<TR class="title_tr">
+							<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="am_flow_id"/></SPAN></TH>
+							<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="am_application_time"/></SPAN></TH>
+<%-- 						<TH width="10%"  hidden="" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="am_bunch"/></SPAN></TH> --%>
+							<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="am_application_status"/></SPAN></TH>
+<%-- 						<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="am_application_status"/></SPAN></TH> --%>
+						</TR >
+					<% 	
+				
+				for(int i=1;i<list2.size()+1;i++){
+// 						String flow_id = "flow_id"+i;
+// 						String d_price="d_price"+i;
+// 						String bunch ="bunch"+i;
+						String afi = StringUtil.fixnull(list2.get(i-1).getAm_flow_id());//申请流水号
+						String amt = StringUtil.fixnull(list2.get(i-1).getAm_application_time());//申请时间
+						String ab = StringUtil.fixnull(list2.get(i-1).getAm_bunch());//申请的串
+						String aas = StringUtil.fixnull(list2.get(i-1).getAm_application_status());//申请状态
+						if(aas=="N"||"N".equals(aas)){
+					%>
+					
+						<tr class="info_tr">
+							<td style="white-space: nowrap; text-align: center; cursor:hand;" name="<%=afi%>" value="<%=ab%>"  id ="<%=ab%>" title="点击查看申请修改的具体内容"   onmouseover="this.style.backgroundColor='#87CEEB'" onmouseout="this.style.backgroundColor='#FFFFFF'" onclick='found(this)' ><%=afi%></td>
+							<td style="white-space: nowrap; text-align: center;"><%=amt%></td>
+						    <td style="white-space: nowrap; text-align: center;">
+<%-- 							   <input  name="bunch" id="<%=afi%>" type="hidden" size="14" value="<%=ab%>"  style="" /> --%>
+<%-- 							   <input  name="bunch" id="<%=afi%>" type="hidden" size="14" value="<%=aas%>"  style="" /> --%>
+							            申请修改
+							</td>
+						</tr>
+				<%}else {%>
+					
+					<tr class="info_tr">
+						<td style="white-space: nowrap; text-align: center;cursor:hand;" name="<%=afi%>" value="<%=ab%>"  id ="<%=ab%>" title="点击查看申请修改的具体内容" onclick="deleteCell(this)"     onmouseover="this.style.backgroundColor='#87CEEB'" onmouseout="this.style.backgroundColor='#FFFFFF'"><%=afi%></td>
+						<td style="white-space: nowrap; text-align: center;"><%=amt%></td>
+					
+					    <td style="white-space: nowrap; text-align: center;">
+<%-- 						   <input  name="bunch" id="<%=afi%>" type="hidden" size="14" value="<%=ab%>"  style="" /> --%>
+<%-- 						   <input  name="bunch" id="<%=afi%>" type="hidden" size="14" value="<%=aas%>"  style="" /> --%>
+						            申请删除
+						</td>
+					</tr>
+				<% }%>
+						
+			<% } %> 
+					</table>
+				<!-- 内容 end -->	    		
+		 	</div>
+        </div>
+			<div class="title_bg">
+				点击流水号可以查看此次申请的具体内容
+			</div>
+		
+			<div class="info_input_box">
+			    	<div id="div1" class="images_box2">
+					<!-- 所有申请的记录显示    input隐藏域直接放到form子集单位， detail table 直接 清空所有列-->
+							<form name="detailTable" method="post" action="${ctx}/manage/view/rate_application_management" >
+								<table class="table_common"  cellspacing="1"  cellpadding="0"  id="detail">
+								   <tbody>
+								
+								   </tbody>
+								</table>
+								  <input type="hidden"  id="bunch2java" name="bunch2java" />			
+								  <input type="hidden"  id="flowId2java" name="flowId2java" />			
+								  <input type="hidden"  id="statue" name="statue" value="Y" />	
+							</form>
+					<!-- 内容 end -->	
+					</div> 
+			</div><%} %>	
+	     </div>	
+    </div>	
+  </body>
+</html>

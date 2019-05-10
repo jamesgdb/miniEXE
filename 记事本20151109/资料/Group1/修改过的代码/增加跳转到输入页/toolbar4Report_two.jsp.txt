@@ -1,0 +1,29 @@
+﻿修改：
+<li class="floatRight">
+			<div style="display: inline-block; margin: 9px 4px 3px 4px; float: left;">
+				第<span id="c_page_span"></span>页/共<span id="t_page_span"></span>页&nbsp;&nbsp;
+			<input type="text" style="width:50px;"  name="atpage" id="atpage"><input type="button" value="跳转到" onclick="aa();">
+			</div>
+		</li>
+		
+		
+		
+	js中增加	
+		function aa(){
+	//获得定义ID为atpage输入框的值
+	 var tpagenum = document.getElementById("atpage").value;
+	 var pageNo = report1_getTotalPage();
+	 if(tpagenum ==""){
+		 alert("输入页码后再跳转！");
+		 return false;
+	 }else if(pageNo<tpagenum || tpagenum<1 || isNaN(tpagenum)){
+		 alert("你的输入有错误！");
+		 return false;
+	 }
+	//调用润乾内置的_toPage()函数，将获得的值传入即可实现转到某一页
+	try{report1_toPage(tpagenum);}catch(e){
+	}
+	return false;
+	
+	}
+	

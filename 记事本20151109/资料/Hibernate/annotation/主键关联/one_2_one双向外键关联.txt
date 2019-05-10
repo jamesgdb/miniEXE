@@ -1,0 +1,33 @@
+﻿在设置双向的时候必须设置mappedBy
+
+
+在wife类上面增加@entity
+之后在id上面增加 @Id
+				@GeneratedValue
+				public int getWife_id() {
+					return wife_id;
+				}
+private Husband husband;				
+				@OneToOne(mappedBy="wife")
+				
+				在mappedBy来告诉系统这个不是主导，只生成一次
+                              @JoinColumn(name="husband")
+				public Husband getHusband() {
+					return husband;
+				}
+----------------------------------------------
+在husband类上面增加@entity
+在husband的id上增加@Id
+				   @GeneratedValue
+				   public int getHus_id() {
+					return hus_id;
+				  }
+				  
+在private Wife wife;上面增加
+       @OneToOne
+	public Wife getWife() {
+		return wife;
+	}
+			  
+-------------------------------------------------------
+在save的时候要先save wife在save  husband

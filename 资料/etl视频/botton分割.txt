@@ -1,0 +1,4 @@
+﻿hasSeparator="true"；是否有分割
+disable=“true”  是否可用
+
+6215590200000419895

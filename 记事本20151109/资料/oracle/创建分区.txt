@@ -1,0 +1,41 @@
+﻿在ORACLE里如果遇到特别大的表，可以使用分区的表来改变其应用程序的性能。 
+以system身份登陆数据库，查看 v$option视图，如果其中Partition为TRUE，则支持分区功能；否则不支持。Partition有基于范围、哈希、综和三种类型。我们用的比较多的是按范围分区的表。 
+ 
+在ORACLE里如果遇到特别大的表，可以使用分区的表来改变其应用程序的性能。 
+以system身份登陆数据库，查看 v$option视图，如果其中Partition为TRUE，则支持分区功能；否则不支持。Partition有基于范围、哈希、综和三种类型。我们用的比较多的是按范围分区的表。 
+我们以一个2001年开始使用的留言版做例子讲述分区表的创建和使用： 1 、以system 身份创建独立的表空间(大小可以根据数据量的多少而定) create tablespace g_2000q4 datafile 
+'/home/oradata/oradata/test/g_2000q4.dbf' size 50M default storage (initial 100k next 100k minextents 1 maxextents unlimited pctincrease 1); create tablespace g_2001q1 datafile 
+'/home/oradata/oradata/test/g_2001q1.dbf' size 50M default storage (initial 100k next 100k minextents 1 maxextents unlimited pctincrease 1); create tablespace g_2001q2 datafile 
+'/home/oradata/oradata/test/g_2001q2.dbf' size 50M default storage (initial 100k next 100k minextents 1 maxextents unlimited pctincrease 1); 2 、用EXPORT工具把旧数据备份在guestbook.dmp中 把原来的guestbook表改名 
+alter table guestbook rename to guestbookold; 以guestbook 身份创建分区的表 
+create table guestbook(  id  number(16) primary key,  username  varchar2(64),  sex  varchar2(2),  email  varchar2(256),  expression varchar2(128),  content  varchar2(4000),  time  date,  ip  varchar2(64) )  
+  partition by range (time) 
+  (partition g_2000q4 values less than (to_date('2001-01-01','yyyy-mm-dd'))     tablespace g_2000q4 
+
+      storage(initial 100k next 100k minextents 1 maxextents unlimited pctincrease 0),  
+   partition g_2001q1 values less than (to_date('2001-04-01','yyyy-mm-dd'))     tablespace g_2001q1 
+      storage(initial 100k next 100k minextents 1 maxextents unlimited pctincrease 0), 
+   partition g_2001q2 values less than (to_date('2001-07-01','yyyy-mm-dd'))     tablespace g_2001q2 
+      storage(initial 100k next 100k minextents 1 maxextents unlimited pctincrease 0)    ); 
+(说明：分区的名称可以和表空间的名称不一致。这里是每个季度做一个分区，当然也可以每个月做一个分区) 3、IMPORT导入数据，参数ignore=y 4、分区表的扩容： 
+到了2001 年下半年，建立新的表空间： 
+create tablespace g_2001q3 datafile 
+'/home/oradata/oradata/test/g_2001q3.dbf' size 50m default storage (initial 100k next 100k minextents 1 maxextents unlimited pctincrease 1); 为表添加新分区和表空间： 
+alter table guestbook add partition g_2001q3 
+values less than (to_date('2001-10-01','yyyy-mm-dd') tablespace g_2001q3  
+storage(initial 100k next 100k minextents 1 maxextents unlimited pctincrease 0); 
+5、删除不必要的分区 
+将2000年的数据备份（备份方法见 6、EXPORT 分区），将2000年的分区删除。 
+alter table guestbook drop partion g_2000q4; 删除物理文件 
+%rm /home/oradata/oradata/test/g_2000q4.dbf 6、EXPORT 分区： 
+% exp guestbook/guestbook_password tables=guestbook:g_2000q4 rows=Y file=g_2000q4.dmp 7、IMPORT分区： 
+例如在2001 年，用户要查看2000 年的数据，先创建表空间 
+
+
+create tablespace g_2000q4 datafile 
+'/home/oradata/oradata/test/g_2000q4.dbf' size 50m default storage (initial 100k next 100k minextents 1 maxextents unlimited pctincrease 1); 为表添加新分区和表空间： 
+alter table guestbook add partition g_2000q4 
+values less than (to_date('2001-01-01','yyyy-mm-dd') tablespace g_2001q3  
+storage(initial 100k next 100k minextents 1 maxextents unlimited pctincrease 0); 导入数据 
+%imp guestbook/guestbook_password file=g_2000q4.dmp tables=(guestbook:g_2000q4) ignore=y 
+(说明：如果不指明导入的分区，imp会自动按分区定义的范围装载数据

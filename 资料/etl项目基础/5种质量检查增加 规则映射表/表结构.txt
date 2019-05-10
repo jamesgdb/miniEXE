@@ -1,0 +1,52 @@
+﻿表名：EDM_DQ_BASIC_CHECK_RULE
+
+列名：
+字段名	中文名称	类型长度	  可空	 约束	默认值	字段说明
+Check_code	检查编号	Varchar(40)	N	 PK.FK		      关联基础检查表
+Filter_code	过滤编号	Varchar(200)	Y	 FK		            关联规则表
+
+
+
+
+
+创建表：
+-- Create table
+create table EDM_DQ_BASIC_CHECK_RULE
+(
+  check_code    VARCHAR2(40) not null,
+  filter_code   VARCHAR2(200) not null,
+  check_rule_id VARCHAR2(32) not null
+)
+tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255;
+-- Add comments to the columns 
+comment on column EDM_DQ_BASIC_CHECK_RULE.check_code
+  is '检查编号';
+comment on column EDM_DQ_BASIC_CHECK_RULE.filter_code
+  is '过滤编号';
+comment on column EDM_DQ_BASIC_CHECK_RULE.check_rule_id
+  is '检查规则映射编号';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table EDM_DQ_BASIC_CHECK_RULE
+  add constraint PK_DQ_BASIC_CHECK_RULE primary key (CHECK_RULE_ID)
+  using index 
+  tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table EDM_DQ_BASIC_CHECK_RULE
+  add constraint FK_DQ_BASIC_CHECK foreign key (CHECK_CODE)
+  references EDM_DQ_CHECK_BASE (CHECK_CODE);
+alter table EDM_DQ_BASIC_CHECK_RULE
+  add constraint FK_DQ_RULE foreign key (FILTER_CODE)
+  references EDM_DQ_RULE (RULE_CODE);
+

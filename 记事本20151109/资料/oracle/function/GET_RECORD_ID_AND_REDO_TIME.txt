@@ -1,0 +1,27 @@
+﻿获取日志表里面某条数据的id和记录的时间，返回一个TIME_AND_ID；
+
+create or replace function GET_RECORD_ID_AND_REDO_TIME (
+      MIN_TIME VARCHAR2,--分钟表里面的最大的时间
+      PROC_NAME VARCHAR2 --存储过程的名称
+      )RETURN VARCHAR
+         is
+     TIME_AND_ID VARCHAR(100);
+     VAR_MIN_TIME VARCHAR(100);
+     VAR_PROC_NAME VARCHAR(100);
+--AUTHOR:王几
+--获取日志表里的某一条日志的ID和REDO_TIME
+begin
+  VAR_MIN_TIME := MIN_TIME;
+  VAR_PROC_NAME := PROC_NAME;
+  SELECT SUBSTR(OP_STATUS,0,1)||'0'||T.REDO_TIMES||T.RECORD_ID  INTO TIME_AND_ID
+  FROM RP_COLLECT_DATA_LOG T WHERE T.PROC_NAME = VAR_PROC_NAME
+  AND T.DATA_BEGIN_TIME = VAR_MIN_TIME AND ROWNUM < 2;
+  if TIME_AND_ID is null then
+     TIME_AND_ID :='N-11234';--N代表这个时间段的汇总没有被执行过，R标示正在执行，S表示已经执行成功，F表示失败
+  end if;                    --只有在R的状态下不执行汇总
+  return TIME_AND_ID;
+  exception
+  when NO_DATA_FOUND then
+   TIME_AND_ID := 'N-11234';
+   return TIME_AND_ID;
+end;

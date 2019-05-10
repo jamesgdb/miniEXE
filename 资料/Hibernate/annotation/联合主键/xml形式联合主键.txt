@@ -1,0 +1,49 @@
+﻿  1.在student.hbm.xml中配置联合主键
+  
+  <composite-id name="studentpk" class="com.gdb.entity.StudentPK">
+		            <key-property name="id"/>
+		            <key-property name="username"/>
+		    </composite-id>
+-------------------------------------------------------------------
+2.新建一个studentPK类实现implements Serializable接口。并重写equles和hashcode方法
+@Override
+	public boolean equals(Object object){
+		if(object instanceof StudentPK){
+			StudentPK spk = new StudentPK();
+			if(this.id==spk.getId()&&this.username.equals(spk.getUsername())){
+				return true;
+			}
+		}
+		return false;
+	}
+	@Override 
+	public int hashCode(){
+		return this.username.hashCode();
+	}
+----------------------------------------------------------------------------------------------------------------
+3.在student类中加入studentPk类
+4.action
+              Date now = new Date(); 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");//可以方便地修改日期格式
+		String createTime = dateFormat.format( now ); 
+         Student s= new Student();
+         StudentPK pk= new StudentPK();
+         pk.setId("1");
+         pk.setUsername("zhangsan");
+         s.setAge(1);s.setCreatetime(createTime);s.setSex("男");
+         s.setStudentpk(pk);
+         Configuration  cfg = new Configuration();
+        SessionFactory sf=   cfg.configure().buildSessionFactory();
+        Session session =sf.openSession();
+        session.beginTransaction();
+         session.save(s);
+         session.getTransaction().commit();
+         session.close();
+         sf.close();
+  ----------------------------------------------------------------------------------------------------------------------------------------       
+         
+         
+         
+         
+         
+         

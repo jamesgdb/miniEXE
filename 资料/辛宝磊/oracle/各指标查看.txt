@@ -1,0 +1,112 @@
+﻿1.查询数据库当前进程的连接数： 
+
+select count(*) from v$process; 
+
+2.查看数据库当前会话的连接数： 
+
+select count(*) from v$session; 
+
+3.查看数据库的并发连接数： 
+
+select count(*) from v$session where status='ACTIVE'; 
+
+4.查看当前数据库建立的会话情况： 
+
+select sid,serial#,username,program,machine,status from v$session; 
+
+5.查询数据库允许的最大连接数： 
+
+select value from v$parameter where name = 'processes'; 
+
+或者命令：show parameter processes; 
+
+6.修改数据库允许的最大连接数： 
+
+alter system set processes = 300 scope = spfile;
+
+
+
+查看一下数据库现有的进程数，是否已经达到参数processes的大小。
+1.select count(*) from v$process;取得数据库目前的进程数。
+2.select value from v$parameter where name = 'processes';取得进程数的上限。
+
+alter system set session_cached_c	ursors=200 scope=spfile;
+alter system set session_max_open_files=200 scope=spfile;
+alter system set sessions=20 scope=spfile;
+alter system set license_max_sessions=200 scope=spfile;
+alter system set license_sessions_warning=200 scope=spfile;
+alter system set processes=200 scope=spfile;
+
+
+2、查询Oracle游标使用情况的方法
+   select * from v$open_cursor where user_name = '用户名'；
+3、查询Oracle会话的方法
+   select * from v$sessionSELECT   /*+ ORDERED */
+         sql_text
+    FROM v$sqltext a
+   WHERE (a.hash_value, a.address) IN (
+            SELECT DECODE (sql_hash_value,
+                           0, prev_hash_value,
+                           sql_hash_value
+                          ),
+                   DECODE (sql_hash_value, 0, prev_sql_addr, sql_address)
+              FROM v$session b
+             WHERE b.paddr = (SELECT addr
+                                FROM v$process c
+                               WHERE c.spid = '&pid'))
+ORDER BY piece ASC
+/
+
+1.	查看数据库中NOW耗费资源TOP10的SQL_TXT.
+select  * from 
+(select   ses.SID, ses.username,ses.machine,ses.program,
+          sql.sql_text,sn.NAME, sest.VALUE
+from     v$session ses, v$statname sn, v$sesstat sest,
+          v$sqlarea sql
+where    ses.SID = sest.SID
+and      sn.STATISTIC# = sest.STATISTIC#
+and      ses.sql_address=sql.address
+and      sest.VALUE is not null
+and      sest.VALUE != 0  
+order by sest.value desc)
+where rownum<11;
+
+
+2.	查看数据库中现在CPU占用过高的TOP10 SESSION
+SELECT * FROM 
+(select   nvl(ss.USERNAME,'ORACLE PROC'),
+         se.SID,
+         VALUE
+from     V$session ss, V$sesstat se, V$statname sn
+where    se.STATISTIC# = sn.STATISTIC#
+and      NAME like '%CPU used by this session%'
+and      se.SID = ss.SID
+order by VALUE desc)
+WHERE ROWNUM<11;
+
+
+3.	查看耗费内存的SQPID
+select a.sid,a.serial#,a.terminal,a.program ,b.sql_text,
+b.buffer_gets 
+from v$session a ,v$sqlarea b
+ where a.sql_address=b.address  order by b.buffer_gets desc;
+此sql在oracle数据库中alter kill oracle进程所用。
+ 
+ 
+4.	根据13查询的SQPID查询正在运行的此SQPID的SQL_TXT内容
+SELECT   /*+ ORDERED */
+         sql_text
+    FROM v$sqltext a
+   WHERE (a.hash_value, a.address) IN (
+            SELECT DECODE (sql_hash_value,
+                           0, prev_hash_value,
+                           sql_hash_value
+                          ),
+                   DECODE (sql_hash_value, 0, prev_sql_addr, sql_address)
+              FROM v$session b
+             WHERE b.paddr = (SELECT addr
+                                FROM v$process c
+                               WHERE c.spid = '&pid'))
+ORDER BY piece ASC
+/
+此SQL需要首先查找到系统现有的PID，使用topas抓去占用CPU%较高的PID，使用SYS运行SQL，将被要求输入PID，结束后，后台会抓去此PID对应的后台正在运行的SQL。

@@ -1,0 +1,12 @@
+﻿增加提示bash
+ 查看硬盘使用情况：df -m
+ nmon 之后 c m d分别查看cpu memory disk读写
+ 用pwd查看完整目录
+ 
+ 在某个文件夹下查找文件
+ find /tmrpt -name "*.sql"
+ 
+ ls -lat查看所有文件的权限、大小、所属用户等。
+
+ 
+ 

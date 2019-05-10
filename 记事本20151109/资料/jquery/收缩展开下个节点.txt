@@ -1,0 +1,12 @@
+﻿  <div  class ="name1" >
+   <h1>收缩展开</h1>
+      <div> 1<br>2<br>3<br>4<br></div>
+   </div>
+
+  </body>
+  <script type="text/javascript">
+   $("h1").each(function(){
+    $(this).click(function(){
+    $(this).next().slideToggle("1000");
+   });
+ });

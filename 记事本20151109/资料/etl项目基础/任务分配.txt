@@ -1,0 +1,41 @@
+﻿高德宝：把质量检查和清理、模型安装的用例完善下。第2轮功能测试。
+
+美芒：第2轮功能测试。物理模型页面开发，2个页面。
+
+巧军：安装手册。第2轮功能测试，用例会考虑少分或不分。
+
+汤辉：第2轮功能测试，修改元数据补录页面。
+
+琼琼：第2轮功能测试。
+
+
+select count(ACCRUAL_BASIS_CD) as recordNum,
+       ACCRUAL_BASIS_CD as dataItem,
+    round(  count(ACCRUAL_BASIS_CD) /
+             (select count(*)
+                from VPDM_BL_BILL_DISCOUNT
+               where (CURRENCY_ID IS NULL)
+                 and AS_OF_DATE = to_date('2014-03-13', 'yyyy-mm-dd')) *100,4)||'%' as proportion
+  from VPDM_BL_BILL_DISCOUNT
+ where (CURRENCY_ID IS NULL)
+   and AS_OF_DATE = to_date('2014-03-13', 'yyyy-mm-dd')
+ group by ACCRUAL_BASIS_CD
+
+
+
+
+public List<DqBasicCheckResultDetail> selectReViewInfo(Map params, String condition) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select dataItem,recordNum,proportion  from ( ");
+		sql.append("select  count(" + params.get("fieldName")
+				+ ") as recordNum," + params.get("fieldName") + " as dataItem,");
+		sql.append("to_char(round((count(" + params.get("fieldName")
+				+ ")/ ( select  count(1) from " + params.get("schema") + "."
+				+ params.get("checkTable")+" where "+ condition + "))*100,4),'990.99' )||'%'  ");
+		sql.append("as proportion ");
+		sql.append("from " + params.get("schema") + "."
+				+ params.get("checkTable") + " ");
+		sql.append(" where  " +condition );
+		sql.append(" group by " + params.get("fieldName") + ") t  ");
+		sql.append("where rownum<='" + params.get("recordNum") + "' ");
+		

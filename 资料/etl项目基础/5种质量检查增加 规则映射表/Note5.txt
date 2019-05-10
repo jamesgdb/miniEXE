@@ -1,0 +1,40 @@
+﻿-- Create table
+create table EDM_DC_CLEAR_RULE
+(
+  dc_id       VARCHAR2(40) not null,
+  filter_code VARCHAR2(200),
+  dc_rule_id  VARCHAR2(32) not null
+)
+tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 16K
+    next 8K
+    minextents 1
+    maxextents unlimited
+  );
+-- Add comments to the columns 
+comment on column EDM_DC_CLEAR_RULE.dc_id
+  is '清理编号';
+comment on column EDM_DC_CLEAR_RULE.filter_code
+  is '过滤编号';
+comment on column EDM_DC_CLEAR_RULE.dc_rule_id
+  is '检查规则映射编号';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table EDM_DC_CLEAR_RULE
+  add constraint PK_EDM_DC_CLEAR_RULE primary key (DC_RULE_ID)
+  using index 
+  tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );

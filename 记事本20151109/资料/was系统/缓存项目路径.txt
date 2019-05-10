@@ -1,0 +1,2 @@
+﻿/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/config/cells/TL-VM-62Node01Cell/applications
+/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/temp/TL-VM-62Node01/server1

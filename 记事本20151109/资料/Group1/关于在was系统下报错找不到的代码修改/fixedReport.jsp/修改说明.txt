@@ -1,0 +1,28 @@
+﻿删除重复配置的css：
+	<link rel="stylesheet" type="text/css" href="${ctx}/reoprt/page.css">
+	<link rel="stylesheet" href="${ctx}/common.css">
+	<link rel="stylesheet" type="text/css" href="${ctx}/report/report.css">
+	
+	
+除此之外还增加了对导出功能增大的导出条数配置，以此来限制导出的最大量：
+ if(raqParam!="" &&!raqParam.equals("")){
+	 String[]  list = raqParam.split(";");
+	 for(int i = 0 ; i< list.length; i++){
+	  if("sql".endsWith(list[i].split("=")[0]) || "sql" == list[i].split("=")[0]){
+	        sql=  list[i].split("sql=")[1];	
+	        int count  = DBPool.countselect(sql);
+	     	 if(count>30000){
+	     		  bl ="true";
+	     	   }else{
+	     		  bl ="false"; 
+	     	   }
+		  	}	
+	}
+	} 
+// 	if(raqParam.equals("error")||raqParam=="error"){
+// 		out.print(	"<script type='text/javascript' >alert('您查询数据量过大，请缩短查询时间范围后再进行查询！');</script>");
+// 		 raqParam="";
+// 		}
+	}
+	
+		其余修改。。。。。。。。。	

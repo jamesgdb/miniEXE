@@ -1,0 +1,2 @@
+﻿INSTR方法的格式为 INSTR(源字符串, 目标字符串, 起始位置, 匹配序号) 例如：INSTR('CORPORATE FLOOR','OR', 3, 2)中，源字符串为'CORPORATE FLOOR', 目标字符串为'OR'，起始位置为3，取第2个匹配项的位置。 默认查找顺序为从左到右。当起始位置为负数的时候，从右边开始查找。
+INSTR('CORPORATE FLOOR','OR', 3, 2)的结果就是14  

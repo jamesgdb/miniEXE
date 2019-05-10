@@ -1,0 +1,289 @@
+﻿<%@ page language="java" contentType="text/html;charset=UTF-8"%>
+<%@ page import="com.amsoft.amp.service.impl.RiskServiceImpl" %>
+<%@ page import="com.boc.report.*" %>
+<%@ page import="java.util.*,com.boc.util.*"%>
+<%@ page import="com.boc.report.FusionChartXML"%>
+<%@ page import="com.boc.report.DashboardReportUtil" %>
+<%@ page import="com.amsoft.amp.domain.User" %>
+<%@ page import="com.amsoft.amp.util.SysConstants" %>
+<%@ include file="/common/taglibs.jsp" %>
+<%@ taglib uri="BOC" prefix="BOC" %>
+<script language="javascript" type="text/javascript" src="${ctx}/My97DatePicker/WdatePicker.js"></script>
+<script language="javascript">
+	function pageGuarding()
+	{
+		var xPage = document.jump.pageInt.value;
+		var maxPage = document.jump.maxPage.value;
+		var isError = false;
+		
+		for (var i=0;i<xPage.length;i++)
+		{
+			var k = xPage.charAt(i);
+			if ((k<'0') || (k>'9'))
+			{
+				isError=true;
+				break;
+			}
+		}
+		
+		if (!isError && ((xPage=="0")||(xPage=="")||parseInt(xPage)>parseInt(maxPage)|| parseInt(xPage)<1))
+		{
+			isError=true;
+		}
+
+		if (isError)
+		{
+			alert("输入页数错误，该页无法跳转！");
+			document.jump.pageInt.focus();
+			document.jump.pageInt.select();
+			return false;
+		}
+		else
+			return true;
+	}
+	
+	function submitForm(){
+		if( checkDate("dayReport") == false ){
+	    	return false;
+	    }
+		document.searchLog.submit();
+	}
+	
+	//日历页面的路径 calendar file path
+// 	var calendarUrl = "${ctx}/common/calendar.jsp";
+</script>
+<% 
+	String search_procName = JParamToolkit.getParameter(request,"search_procName");
+	String search_status = JParamToolkit.getParameter(request,"status");
+	String search_beginDay = JParamToolkit.getParameter(request,"beginDay");
+	String search_endDay = JParamToolkit.getParameter(request,"endDay");
+	String today = CalendarUtil.getCurrYearMonthDay();
+    if(search_beginDay == null || "".equals(search_beginDay)){
+    	search_beginDay = today;
+    }
+    if(search_endDay == null || "".equals(search_endDay)){
+    	search_endDay = today;
+    }
+%>  
+<html>
+	<head>
+		<meta name="Descrīption" Content="dashboard report display page">
+		<meta name="Copyright" Content="Copyright © 2008 Yucheng Network Technologies Limited All Rights Reserved">
+		<meta name="Author" Content="Xie hui">
+		<script type="text/javascript" src="${ctx}/js/jquery.js"></script>
+		<script type="text/javascript" src="${ctx}/js/calendar.js"></script>
+		<script type="text/javascript" src="${ctx}/js/reportUtil.js"></script>
+		<link href="${ctx}/css/page.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/report.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/centercontent.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/admincss.css" rel="stylesheet" type="text/css"> 
+	</head>
+	<body  >
+	<div class="centercontent001">
+	<div class="info_box">
+		<div class="title_bg">
+			日志管理
+		</div>
+			<div class="info_box_title_dash"></div>
+				<div class="info_input_box">
+					<form name="searchLog" action="${ctx}/manage/view/managerLog" method="post">
+					<input type="hidden" name="today" id="today" value="<%=today%>"/>
+					<table class="table_log" cellspacing="1" cellpadding="0">
+						<tbody>
+							<tr>
+								<td class="left_td">时间查询</td>
+								<td class="right_time_td">
+								<input class="Wdate" type="text" id="beginDay" name="beginDay" onClick="WdatePicker()" readonly value="<%=search_beginDay%> ">
+								到
+								<input class="Wdate" type="text" id="endDay" name="endDay" onClick="WdatePicker()" readonly value="<%=search_endDay%> ">
+								</td>
+								<td class="left_td">状态查询</td>
+								<td class="right_status_td">
+									<select name="status" id="status" style="width:98px;vertical-align:middle;height:23px">
+										<%-- <option value="SUCCESSFUL" <% if(search_status==""||search_status==null){ out.println("selected");}%>> </option> --%>
+										<option value="" <% if("".equals(search_status)){ out.println("selected");}%>>全部</option>
+										<option value="SUCCESSFUL" <% if("SUCCESSFUL".equals(search_status)){ out.println("selected");}%>>成功</option>
+										<option value="FAILED" <% if("FAILED".equals(search_status)){ out.println("selected");}%>>失败</option>
+									</select>
+								</td>
+								<td class="left_td">存储过程名</td>
+								<td class="right_td">
+									<input type=text name="search_procName" class="input" style="width:95%;" value="<%=search_procName%>" size=20>
+								</td>
+								<td class="other_td" align="center"><input type="button" class="List_Button2" value="<BOC:I18N name="submit"/>" onClick="submitForm()"/></td>
+							</tr>				
+						</tbody>
+					</table>
+					</form> 
+			 	
+			      	   <div id="chart1div" style="width:100%" class="images_box1">
+				
+							<!-- 内容 start -->
+							<form name="search" method="post" action="${ctx}/manage/view/managerLog" >
+								<table class="table_common" cellspacing="1" cellpadding="0">
+									<TR class="title_tr">
+										<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="procName"/></SPAN></TH>
+										<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="fromTable"/></SPAN></TH>
+										<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="toTable"/></SPAN></TH>
+										<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="BeginTime"/></SPAN></TH>
+										<TH width="10%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="EndTime"/></SPAN></TH>
+										<TH width="5%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="RecordNum"/></SPAN></TH>
+										<TH width="5%" style="white-space: nowrap; text-align: center;"><SPAN><BOC:I18N name="OpStatus"/></SPAN></TH>
+									</TR >
+								<% 	
+								RiskServiceImpl rs = new RiskServiceImpl();
+								//分页开始 paging begin
+								int totalItems = rs.getDataLogCount(search_procName,search_status,search_beginDay,search_endDay);  
+								String myPageSize =  JParamToolkit.getParameter(request,"pageSize");
+								String sessionPageSize = session.getValue("pageSize")==null?"":(String)session.getValue("pageSize");
+								if(myPageSize == null || myPageSize == ""){
+									if(sessionPageSize == null || "".equals(sessionPageSize)){
+										myPageSize = SysConstants.getCons("managerLogPageSize");
+									}else{
+										myPageSize =sessionPageSize;
+									}
+								}
+								String link = "search_procName="+search_procName+"&status="+search_status+"&beginDay="+search_beginDay+"&endDay="+search_endDay;
+								session.putValue("pageSize", myPageSize);
+								String spageInt = JParamToolkit.getParameter(request,"pageInt");
+								Page pageover = new Page();
+								pageover.setTotalnum(totalItems);
+								pageover.setPageSize(myPageSize);
+								pageover.setPageInt(spageInt);
+								int pageNext = pageover.getPageNext();
+								int pageLast = pageover.getPagePre();
+								int maxPage = pageover.getMaxPage();
+								int pageInt = pageover.getPageInt();
+								int pageSize = pageover.getPageSize(); 
+								//分页结束
+								//seesion拿到用户id
+								ArrayList<DataLog> list = (ArrayList<DataLog>)rs.getDataLog(pageover,search_procName,search_status,search_beginDay,search_endDay); 
+								int key = 0;
+								for(DataLog comm :list){
+									String id = StringUtil.fixnull(comm.getId());//id
+									String procName = StringUtil.fixnull(comm.getProcName());//id;//存储过程名称
+									String fromTable = StringUtil.fixnull(comm.getFromTable());//id;//起始表
+									String endTable = StringUtil.fixnull(comm.getEndTable());//id;//结束表
+									String beginTime = StringUtil.fixnull(comm.getBeginTime());//id;//开始时间
+									String endTime = StringUtil.fixnull(comm.getEndTime());//id;//结束时间
+									String recordNum = StringUtil.fixnull(comm.getRecordNum());//id; //存储条数
+									String opStatus = StringUtil.fixnull(comm.getOpStatus());//id;//状态
+								%>
+									<tr class="info_tr">
+										<td  style="word-break:break-all" width="10%"><%=procName%></td>
+										<td style="word-break:break-all" width="10%"><%=fromTable%></td>
+										<td style="word-break:break-all" width="10%"><%=endTable%></td>
+										<td style="word-break:break-all" width="10%"><%=beginTime%></td>
+										<td style="word-break:break-all" width="10%"><%=endTime%></td>
+										<td style="word-break:break-all" width="5%"><%=recordNum%></td>
+										<%if("SUCCESSFUL".equals(opStatus)){ %><td style="white-space: nowrap; text-align: center;">成功</td><%}else{%>
+										<td style="white-space: nowrap; text-align: center;">失败</td><%} %>
+									</tr>
+							<%} %>
+								</table>
+							</form>
+							<!-- 内容 end -->
+					  </div>
+				</div>
+				<!-- 分页 start -->
+	            <table align="center" border="0" cellpadding="0" cellspacing="0">
+		        	<tr>
+		          		<td height="48" align="center" >
+		          		<table width="96.5%" height="100%" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+							<td valign="middle"> 
+		       					<table width='100%' align="center" cellpadding='0' cellspacing='0'>
+		         					<tr> 
+		         						<% if (maxPage == 0) maxPage=1;	%>
+		          						 <th width="46" align="center" style='white-space: nowrap;padding-top:8px;'></th>
+		           						 <form name="setsize" method="post" action="${ctx}/manage/view/managerLog?<%=link%>">
+			       						 <th width='30%' style='color:#666666;white-space: nowrap;'>
+					           			<%
+					           			String servletPath = request.getRequestURI();
+					       				int j = servletPath.indexOf('?');		
+					       				if (j != -1) servletPath = servletPath.substring(0, j);
+							       		servletPath="${ctx}/manage/view/managerLog";
+										String path = servletPath + "?" + link;
+										String tmpPageSize = (String)session.getValue("pageSize");
+										
+										if (tmpPageSize == null || tmpPageSize.length() == 0 || tmpPageSize.equals("null"))
+										{
+											tmpPageSize = SysConstants.getCons("commonItemPageSize");
+											session.putValue("pageSize", tmpPageSize);
+										}
+										%> <%=pageInt %>/<%=maxPage%>页 &nbsp;&nbsp;共:<%=totalItems%>条&nbsp;每页 
+					            		<select name="pageSize" onChange="document.setsize.submit()">
+						               <%
+										String pagesizenum[] = new String[10];
+										pagesizenum[0] = "10";
+										pagesizenum[1] = "15";
+										pagesizenum[2] = "20";
+										pagesizenum[3] = "25";
+										pagesizenum[4] = "30";
+										pagesizenum[5] = "35";
+										pagesizenum[6] = "40";
+										pagesizenum[7] = "45";
+										pagesizenum[8] = "50";
+										pagesizenum[9] = "100";
+												
+										for (int i = 0; i < pagesizenum.length; i ++) {
+											if (tmpPageSize.equals(pagesizenum[i])) {	
+											%>
+												<option value="<%=pagesizenum[i]%>" selected><%=pagesizenum[i]%></option>
+											<%
+												} else {
+											%>
+												<option value="<%=pagesizenum[i]%>"><%=pagesizenum[i]%></option>
+											<%
+												}
+										}
+										%>
+										</select>
+										</th>
+										<input type="hidden" name="path" value="<%=path%>">
+										</form>
+					
+										<th width='46%' style='white-space: nowrap;'> 
+	           								<table width="70%" height="22" border="0" cellpadding="0" cellspacing="0">
+	       	    								<tr align="center"> 
+									       	    	<%
+									        	    if(pageInt==1 && maxPage>1) {
+													%>
+													<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=pageNext+"&"+link%>"  title="下一页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">下一页</span></span></a></td>
+						         					<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=maxPage+"&"+link%>" title="末页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">末页</span></span></a></td>
+									       			<%
+									       				} else if(pageInt>1 && pageInt<maxPage) {
+									       			%>
+								                 	<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=1+"&"+link%>" title="首页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">首页</span></span></a></td>
+								       				<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=pageLast+"&"+link%>" title="上一页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">上一页</span></span></a></td>
+								       				<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=pageNext+"&"+link%>" title="下一页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">下一页</span></span></a></td>
+								       				<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=maxPage+"&"+link%>" title="末页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">末页</span></span></a></td>
+								       				<%
+				       								} else if(pageInt==maxPage && pageInt>1) {
+				       								%>
+				       								<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=1+"&"+link%>" title="首页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">首页</span></span></a></td>
+				       								<td><a href="${ctx}/manage/view/managerLog?pageInt=<%=pageLast+"&"+link%>" title="上一页" class="button"><span unselectable="on" class="norm"  style="width:46px;height:15px;padding-top:3px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><span class="text">上一页</span></span></a></td>
+									       			<%
+									       				}
+									       			%>
+	     										</tr>
+	   									  	</table>
+			    						</th>
+						            	<form name="jump" method="post" action="${ctx}/manage/view/managerLog?<%=link%>" onsubmit="return pageGuarding()"> 
+								   			<th width='24%' style='color:#666666;white-space: nowrap;'>跳转到第<input name="pageInt" type="text" size="4" style="width:30px;height:16px">页<input name="maxPage" type="hidden" value=<%=maxPage%>></th>
+								   			<th width='0' style='white-space: nowrap;'><span unselectable="on" class="norm"  style="width:20px;padding-top:2px;padding-bottom:2px" onmouseover="className='over'" onmouseout="className='norm'" onmousedown="className='push'" onmouseup="className='over'"><input type="image" src="${ctx}/image/system/pageJump.png" alt="跳转" width="20" height="18" class="button"></span></th>
+							 			</form>
+		 		  					</tr>
+								</table>
+		  					</td>
+							</tr>
+						</table>
+		          		</td>  
+		      		</tr>
+	    		</table>
+	    		<!-- 分页 end -->
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,8 @@
+﻿怎样查看Oracle的数据库名称sid
+用sysdba身份登录 比如 conn / as  sysdba 匿名管理员登陆
+执行 select name form V$database; 或是执行select * from  V$database;
+不过执行第二个显示的内容太多了不好找自己想要的结果
+你也可以先用desc V$database;语句查看一下V$database都有什么字段然后选择自己想要的字段进行选择
+查看实例名称(sid)：
+select instance_name from  V$instance;
+一般默认情况下sid与你的数据库的名称是一样的！

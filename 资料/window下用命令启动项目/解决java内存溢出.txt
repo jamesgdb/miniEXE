@@ -1,0 +1,53 @@
+﻿TOMCAT出错：java.lang.OutOfMemoryError: Java heap space
+
+If Java runs out of memory, the following error occurs:
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+Java heap size can be increased as follows:
+
+java -Xms<initial heap size> -Xmx<maximum heap size>
+Defaults are:
+java -Xms32m -Xmx128m
+
+如果你用win
+/tomcat/bin/catalina.bat 加上下面的命令:
+set JAVA_OPTS=-Xms32m -Xmx256m
+
+如果你用unix/linux
+/tomcat/bin/catalina.sh 加上下面的命令:
+JAVA_OPTS="-Xms32m -Xmx256m"
+
+java.lang.OutOfMemoryError: Java heap space 
+使用Java程序从数据库中查询大量的数据时出现异常:
+java.lang.OutOfMemoryError: Java heap space 
+在JVM中如果98％的时间是用于GC且可用的 Heap size 不足2％的时候将抛出此异常信息。
+
+JVM堆的设置是指java程序运行过程中JVM可以调配使用的内存空间的设置.JVM在启动的时候会自动设置Heap size的值，其初始空间(即-Xms)是物理内存的1/64，最大空间(-Xmx)是物理内存的1/4。可以利用JVM提供的-Xmn -Xms -Xmx等选项可进行设置。
+例如：java -jar -Xmn16m -Xms64m -Xmx128m MyApp.jar
+如果Heap Size设置偏小，除了这些异常信息外，还会发现程序的响应速度变慢了。GC占用了更多的时间，而应用分配到的执行时间较少。
+Heap Size 最大不要超过可用物理内存的80％，一般的要将-Xms和-Xmx选项设置为相同，而-Xmn为1/4的-Xmx值。
+Heap size的 -Xms -Xmn 设置不要超出物理内存的大小。否则会提示“Error occurred during initialization of VM Could not reserve enough space for object heap”。
+
+还有:Java堆的管理—垃圾回收提到一下几点，很不错，或许可以作为写程序时候的准则：
+
+　　（1）不要试图去假定垃圾收集发生的时间，这一切都是未知的。比如，方法中的一个临时对象在方法调用完毕后就变成了无用对象，这个时候它的内存就可以被释放。
+　　（2）Java中提供了一些和垃圾收集打交道的类，而且提供了一种强行执行垃圾收集的方法--调用System.gc()，但这同样是个不确定的方法。Java 中并不保证每次调用该方法就一定能够启动垃圾收集，它只不过会向JVM发出这样一个申请，到底是否真正执行垃圾收集，一切都是个未知数。
+
+　　（3）挑选适合自己的垃圾收集器。一般来说，如果系统没有特殊和苛刻的性能要求，可以采用JVM的缺省选项。否则可以考虑使用有针对性的垃圾收集器，比如增量收集器就比较适合实时性要求较高的系统之中。系统具有较高的配置，有比较多的闲置资源，可以考虑使用并行标记/清除收集器。
+　　（4）关键的也是难把握的问题是内存泄漏。良好的编程习惯和严谨的编程态度永远是最重要的，不要让自己的一个小错误导致内存出现大漏洞。
+　　（5）尽早释放无用对象的引用。大多数程序员在使用临时变量的时候，都是让引用变量在退出活动域(scope)后，自动设置为null，暗示垃圾收集器来收集该对象，还必须注意该引用的对象是否被监听，如果有，则要去掉监听，然后再赋空值。
+就是说,对于频繁申请内存和释放内存的操作,还是自己控制一下比较好,但是System.gc()的方法不一定适用，最好使用finallize强制执行或者写自己的finallize方法
+
+Eclipse中出现java.lang.OutOfMemoryError: Java heap space
+错误2007-06-12 11:53java.lang.OutOfMemoryError: Java heap space错误
+在tomcat in的catalina.bat里加 
+set JAVA_OPTS=-Xms256m -Xmx512m -Djava.awt.headless=true 
+256和512分别是MIN和MAX内存 
+在eclipse中的 
+windows->preferences..->tomcat->jvm..->jvm那一个文本框里，添加-Xms256m -Xmx512m 
+这样就可以了！
+ 
+ 
+点“编辑”
+ 
+缺省VM自变量（A）：那一个文本框里添加：-Xms256m -Xmx512m
+ 

@@ -1,0 +1,35 @@
+﻿ <body>
+
+ <input type="button"  value="匹配其父元素下的第N个子或奇偶元素" id="son" ></input><br>
+ <input type="text"  value="attr" id="name" ></input><br>
+  <div id="dddd" class ="name">
+ 
+    <div id="dddd" class ="name12">123</div>
+   <div id="dddd" class ="name11">12</div>
+
+  </div>
+
+
+    
+ 
+  </body>
+  <script type="text/javascript"> 
+
+  var $phone =$("<input></input>");
+  $phone.attr("id","phone");
+  $phone.attr("type","text");
+  $phone.attr("disabled","disabled");
+  $phone.attr("value","15028949491");
+  $("#name").after($phone);
+  alert($("#phone").val());
+  alert($("#phone").attr("type"));
+  //从每一个匹配的元素中删除一个属性
+   $phone.removeAttr("disabled");
+  //删除节点 返回值是呗删除的节点，被删除的节点的后代节点将同时被删除。
+ var name=  $phone.remove();
+  alert(name.attr("type"));
+  //empty删除所有的子节点，清空元素的后代节点
+    $("#dddd").empty();
+   alert($("#dddd").attr("id"));
+
+  </script>

@@ -1,0 +1,33 @@
+﻿	<div class='simpleSearch'>
+		<h:form id='simpleForm' method='post' name='simpleForm'>
+			<table cellSpacing="0" cellpadding="0" border="0">
+				<tbody>
+					<tr>
+						<td>
+							<h:simpleSearch id='checkName' name='checkName' targetMenuId='searchMenu' tipText="检查名称"></h:simpleSearch>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</h:form>
+	</div>
+	
+	
+	
+	
+$(function(){
+	$(".datagrid-toolbar").append("<div class='simpleSearch'><h:form id='simpleForm' method='post' name='simpleForm'><table ><tbody><tr><td><h:simpleSearch id='checkName' name='checkName' targetMenuId='searchMenu' tipText='检查名称'></h:simpleSearch></td></tr></tbody></table></h:form></div>");
+});
+
+     // $(function(){
+// 	$(".datagrid-toolbar").append("<h:form id='simpleForm' method='post' name='simpleForm'><table ><tbody><tr><td><h:simpleSearch id='checkName' name='checkName' targetMenuId='searchMenu' tipText='检查名称'></h:simpleSearch></td></tr></tbody></table></h:form>");
+// });
+  
+// $(function(){
+// 	$(".datagrid-toolbar").append("  <h:text id='re_fresh' value='查询表名或者描述' style='position:absolute;top:285px;right:600px;' onkeyup=test(); />");
+// });
+      
+
+// function test(){
+// 		alert("ccc");
+// } 

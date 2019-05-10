@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+  <tree id="menu">
+					<item text="系统管理" id="fedf6113a73712cf0410fa696ffae550" child="1" im0="systemManage.png" im1="systemManage.png" im2="systemManage.png">
+								<item text="字典管理" id="query?domain=dictionary" child="0" im0="dictionary.gif" im1="dictionary.gif" im2="dictionary.gif" />
+								<item text="对象管理" id="treeGrid?domain=domain&amp;target=domain" child="0" im0="objects.png" im1="objects.png" im2="objects.png" />
+								<item text="菜单管理" id="treeGrid?domain=menu" child="0" im0="menu.png" im1="menu.png" im2="menu.png" />
+								<item text="用户组管理" id="query?domain=group" child="0" im0="groupManage.png" im1="groupManage.png" im2="groupManage.png" />
+								<item text="机构用户管理" id="tree?domain=organ&target=manage" child="0" im0="organ.png" im1="organ.png" im2="organ.png" />
+								<item text="日志管理" id="managerLog" child="0" im0="groupManage.png" im1="groupManage.png" im2="groupManage.png" />
+								<item text="汇率管理" id="fedf6113a7373b437fe0107fe3cadf4c" child="1" im0="groupManage.png" im1="groupManage.png" im2="groupManage.png">
+										<item text="汇率维护" id="exchange_rate_aintenance" child="0" im0="groupManage.png" im1="groupManage.png" im2="groupManage.png" />
+										<item text="汇率管理" id="rate_application_management" child="0" im0="groupManage.png" im1="groupManage.png" im2="groupManage.png" />
+                </item>
+      </item>
+      <item text="统计报表" id="fedf6113a73732bf42d25053e7d7e208" child="1" im0="report.png" im1="report.png" im2="report.png">
+							<item text="新注册用户报表" id="fixedReport?reportName= newRegisterCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="各省用户数量及报警情况总览表" id="fixedReport?reportName=proUsersAndAlarmCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="设备风险信息报表" id="fixedReport?reportName=deviceRiskMessageCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="用户使用设备和网络报表" id="fixedReport?reportName=clientApplyDeviceAndNetCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="总体风险数据统计表" id="fixedReport?reportName=totalRiskDataCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="客户行为分析报表" id="fixedReport?reportName=clientActionAnalyseCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="各渠道用户总体报表" id="fixedReport?reportName=ditchUserCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="认证方式及结果统计表" id="fixedReport?reportName=authenMethodAndResultCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="已确认欺诈事件汇总表" id="fixedReport?reportName=confirmedFraudTotal&detailTable=Y&isList=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="已确认欺诈事件明细表" id="fixedReport?reportName=confirmedFraudList&detailTable=Y&isList=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="交易风险情况分布统计表" id="fixedReport?reportName=transRiskDistributed&isSum=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="认证方式统计明细表" id="fixedReport?reportName=authenMethodCountList" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="认证结果明细表" id="fixedReport?reportName=authenResultCountList&isSum=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="规则效果统计表" id="fixedReport?reportName=ruleEffectCount" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="错漏报欺诈交易统计表" id="fixedReport?reportName=errLeakFraudCount&isList=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="错漏报欺诈交易明细表" id="fixedReport?reportName=errLeakFraudCountList&isList=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+							<item text="采集设备信息报表" id="fixedReport?reportName=collectDevicesCount&isFixed=Y" child="0" im0="report.png" im1="report.png" im2="report.png" />
+     </item>
+
+     <item text="仪表盘报表" id="fedf6113a7089efa0c3f56273a3be437" child="1" im0="report.png" im1="report.png" im2="report.png">
+						<item text="登陆总数量" id="dashboardReport?reportType=loginTotal" child="0" im0="report.png" im1="report.png" im2="report.png" />
+						<item text="交易总数量" id="dashboardReport?reportType=transTotal" child="0" im0="report.png" im1="report.png" im2="report.png" />
+						<item text="认证方式成功/失败数" id="dashboardReport?reportType=autherResult" child="0" im0="report.png" im1="report.png" im2="report.png" />
+						<item text="交易总数（四种状态）" id="dashboardReport?reportType=transStatusTotal" child="0" im0="report.png" im1="report.png" im2="report.png" />
+						<item text="风险分数分布" id="dashboardReport?reportType=riskTotal" child="0" im0="report.png" im1="report.png" im2="report.png" />
+						<item text="策略触发数" id="dashboardReport?reportType=ruleTotal" child="0" im0="report.png" im1="report.png" im2="report.png" />
+    </item>
+		<item text="灵活报表" id="flexibleReport" child="0" im0="systemManage.png" im1="systemManage.png" im2="systemManage.png" />
+		<item text="固定周期灵活报表" id="flexibleReport?isSettled=Y" child="0" im0="systemManage.png" im1="systemManage.png" im2="systemManage.png" />
+		
+		
+		</tree>

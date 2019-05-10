@@ -1,0 +1,18 @@
+﻿create table test
+(id number,
+name varchar2(10),
+age number,
+phone varchar2(50),
+);
+
+/*新建检查*/
+alter table test add constraint test_ck check(age>6 and age<14)；
+
+/*删除检查*/
+
+alter table test drop constraint test_ck;
+
+/*给表列增加主键*/
+
+alter table test add constraint c_t primary key (name);
+

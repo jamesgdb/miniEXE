@@ -1,0 +1,14 @@
+﻿本次修改的主要是针对本页面是否用到了框架中的dwr内容：
+      <!-- 日志管理 -->
+	<definition name="managerLog" template="/report/logManager.jsp"></definition>
+	<!-- 汇率维护 -->
+	<definition name="exchange_rate_aintenance" template="/report/rate_exchange.jsp"></definition>
+	<!-- 汇率申请管理 -->
+	<definition name="rate_application_management" template="/report/rate_application_manager.jsp"></definition>
+	
+	
+	注销登录：不在需要中间跳转页面，直接让其注销所有的信息后返回登录页面，
+	<!-- 跳转到登出页面 -->
+	<!-- 	<definition name="toLogoutPage" extends="basePage"> -->
+	<!-- 		<put-attribute name="bodyContent" value="/WEB-INF/views/system/logon/logout.jsp" /> -->
+	<!-- 	</definition> -->

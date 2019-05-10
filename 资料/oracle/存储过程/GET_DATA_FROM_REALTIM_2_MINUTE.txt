@@ -1,0 +1,492 @@
+﻿CREATE OR REPLACE PROCEDURE GET_DATA_FROM_REALTIM_2_MINUTE(
+      INPUT_TODAY_TO_MINUTE_BEGIN IN VARCHAR2,
+      INPUT_TODAY_TO_MINUTE_END IN VARCHAR2,
+      INPUT_RECORD_ID IN VARCHAR2,
+      INPUT_REDO_TIMES IN INTEGER
+ )
+AS
+ /*报表原始数据表中的最后更新时间*/
+ VAR_TODAY_TO_MINUTE_BEGIN VARCHAR2(20);
+ VAR_TODAY_TO_MINUTE_END VARCHAR2(20);
+ VAR_BEGIN_TIME DATE;
+ VAR_END_TIME DATE;
+
+ /*日志表的主键*/
+ VAR_RECORD_ID VARCHAR2(50);
+ /*插入记录数量*/
+ VAR_RECORD_NUM NUMBER;
+  /*执行动态sql*/
+ VAR_DYNAMIC_SQL VARCHAR2(12000);
+ /*辅助表中用的时间*/
+ VAR_SHORT_DATE DATE;
+
+--AUTHOR:毛小明
+--从实时交易表汇总到分钟表
+BEGIN
+
+  VAR_RECORD_NUM := 0;
+
+   --处理参数过长
+  IF LENGTH(INPUT_TODAY_TO_MINUTE_BEGIN) > 16
+      THEN
+       VAR_TODAY_TO_MINUTE_BEGIN := SUBSTR(INPUT_TODAY_TO_MINUTE_BEGIN,1,16);
+  ELSE
+       VAR_TODAY_TO_MINUTE_BEGIN := INPUT_TODAY_TO_MINUTE_BEGIN;
+  END IF;
+  IF LENGTH(INPUT_TODAY_TO_MINUTE_END) > 16
+      THEN
+       VAR_TODAY_TO_MINUTE_END := SUBSTR(INPUT_TODAY_TO_MINUTE_END,1,16);
+  ELSE
+       VAR_TODAY_TO_MINUTE_END := INPUT_TODAY_TO_MINUTE_END;
+  END IF;
+   /*数据结束时间 今天的零时零分*/
+  VAR_BEGIN_TIME := TO_DATE(VAR_TODAY_TO_MINUTE_BEGIN||'00','YYYY-MM-DD HH24:MI:SS');
+  /*数据开始时间 昨天的零时零分*/
+  VAR_END_TIME := TO_DATE(VAR_TODAY_TO_MINUTE_END||'59','YYYY-MM-DD HH24:MI:SS');
+       /*插入日志*/
+      --判断是否为重做
+      IF INPUT_REDO_TIMES = 0
+      THEN
+        --首次执行的开始，插入数据
+        INSERT_COLLECT_DATA_LOG(
+          VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+          'GET_DATA_FROM_REALTIM_2_MINUTE', --PROC_NAME 存储过程名称
+          'RP_TRANS_LOG_REALTIME',  --FROM_TABLE 来源表
+          'RP_TRANS_LOG_MINUTE',  --TO_TABLE 目标表
+          TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||'-'|| TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS') ,  --DATA_RANGE 数据范围
+          TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS'),        --DATA_BEGIN_TIME 数据开始时间
+          TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')          --DATA_END_TIME 数据开始时间
+        );
+     ELSE
+        --重复执行的开始，修改数据
+      VAR_RECORD_ID := INPUT_RECORD_ID;
+        UPDATE_COLLECT_DATA_LOG(
+            VAR_RECORD_ID,
+            SYSDATE,
+            NULL,
+            'RUNNING',
+            VAR_RECORD_NUM,
+            INPUT_REDO_TIMES
+        );
+      END IF;
+      SET TRANSACTION NAME 'GET_DATA_FROM_REALTIM_2_MINUTE';
+      /*把准备汇总的数据的HAS_USED状态转为T*/
+      UPDATE EVENT_LOG_REALTIME T SET T.HAS_USED = 'T',T.HAS_USED_TIME=T.LASTMODIFIED WHERE  T.SYS_CREATION_DATE >=  VAR_BEGIN_TIME
+      AND T.SYS_CREATION_DATE <= VAR_END_TIME AND T.HAS_USED = 'N';
+      /*抽取TM的交易数据到报表的原始数据表*/
+
+      VAR_DYNAMIC_SQL := 'INSERT INTO RP_TRANS_LOG_MINUTE
+      (
+        TRANS_TIME,
+        TRANS_PROVINCE,
+        TRANS_TYPE,
+        SCORE_RANGE,
+        RULE_NAME,
+        POLICY_ACTION,
+        /*新加字段开始*/
+        CHALLENGE_SUCCESSFUL,
+        CHALLENGE_AUTH_METHOD,
+        PRIORITY,---
+        DESCRIBE,--
+        IS_USE_DEVICE,--
+        TRANS_DITCH,
+        TRANS_OPER_SYSTEM,
+        TRANS_BROWSER,
+        FLAGGED,
+        RESOLUTION,
+        /*新加字段结束*/
+        TRANS_NUM,
+        TRIGGERED_NUM,
+        TRIGGERED_SUCCESSFUL_NUM,
+        /*新加字段开始*/
+        WEB_TRANS_NUM,
+        MOBILE_TRANS_NUM,
+        IPAD_TRANS_NUM,
+        QA_LOGIN_NUM,
+        SMS_LOGIN_NUM,
+        CC_LOGIN_NUM,
+        REGISTRAR_QA_NUM,--***
+        CREATE_CUSTOMR_FILE_NUM,
+        ALLOW_TRANS_NUM,
+        REVIEW_TRANS_NUM,
+        CHALLENGE_TRANS_NUM,
+        DENY_TRANS_NUM,
+        TOTAL_SCORE_RANGE,
+        TOTAL_AMOUNT
+        /*新加字段结束*/
+      )
+      SELECT
+      TO_DATE(SUBSTR(TO_CHAR(SYS_CREATION_DATE,''YYYY-MM-DD HH24:MI:SS''),0,16),''YYYY-MM-DD HH24:MI''),
+      get_province(IP_COUNTRY,IP_CITY,ip_region) AS TRANS_PROVINCE,
+      GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(T.EVENT_TYPE,T.USER_DEFINED_EVENT_TYPE),''eventType'') AS TRANS_TYPE,
+      GET_SCORE_RANGE(T.RISK_SCORE) AS RISK_SCORE_RANGE,
+      NVL(POLICY_RULE_ID,''FALLBACK_RULE'') AS RULE_NAME,
+      POLICY_ACTION,
+      CHALLENGE_SUCCESSFUL,
+      CHALLENGE_AUTH_METHOD,
+      SUBSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),0,INSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),''+'')-1),--优先级
+      SUBSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),INSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),''-'')+1),--描述
+      NVL(IS_DEVICE_BOUND,''N''),
+      CHANNEL_INDICATOR,
+      OPERATING_SYSTEM,
+      BROWSER_TYPE,
+      FLAGGED,
+      RESOLUTION,
+      COUNT(1) AS TRANS_NUM,
+      SUM(CASE WHEN POLICY_ACTION = ''CHALLENGE''  THEN 1 ELSE 0 END) AS TRIGGERED_NUM,
+      SUM(CASE WHEN POLICY_ACTION = ''CHALLENGE'' AND CHALLENGE_SUCCESSFUL = ''Y'' THEN 1 ELSE 0 END) AS TRIGGERED_SUCCESSFUL_NUM,
+      SUM(case WHEN CHANNEL_INDICATOR = ''WEB'' then 1 else 0 end ) AS WEB_TRANS_NUM,--WEB交易量
+      SUM(case WHEN CHANNEL_INDICATOR = ''MOBILE'' then 1 else 0 end ) AS MOBILE_TRANS_NUM,--Mobile交易量
+      SUM(case WHEN '||get_vale_from_cd1('6','4')||' = ''IPAD'' then 1 else 0 end ) AS IPDA_TRANS_NUM,--Ipad交易量
+     (SELECT SUM(CASE WHEN T1.ACSPNAME = ''QUESTION'' AND T1.STATUS = ''ACTIVE'' THEN 1 ELSE 0 END) FROM ACSPUSERACCOUNT T1 WHERE TO_DATE(to_char( T1.lastmodified,''yyyy-mm-DD HH24:MI:SS'' ),''yyyy-mm-DD HH24:MI:SS'') >  TO_DATE('''||TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'') AND TO_DATE(to_char( T1.lastmodified,''yyyy-mm-DD HH24:MI:SS'' ),''yyyy-mm-DD HH24:MI:SS'') <=  TO_DATE('''||TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'')  )AS QA_LOGIN_NUM,
+      (SELECT SUM(CASE WHEN T1.ACSPNAME = ''SMS'' AND T1.STATUS = ''ACTIVE'' THEN 1 ELSE 0 END) FROM ACSPUSERACCOUNT T1  WHERE TO_DATE(to_char( T1.lastmodified,''yyyy-mm-DD HH24:MI:SS'' ),''yyyy-mm-DD HH24:MI:SS'') >  TO_DATE('''||TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'') AND TO_DATE(to_char( T1.lastmodified,''yyyy-mm-DD HH24:MI:SS'' ),''yyyy-mm-DD HH24:MI:SS'') <=  TO_DATE('''||TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS''))AS SMS_LOGIN_NUM,
+      (SELECT SUM(CASE WHEN T1.ACSPNAME = ''CCC'' AND T1.STATUS = ''ACTIVE'' THEN 1 ELSE 0 END) FROM ACSPUSERACCOUNT T1  WHERE TO_DATE(to_char( T1.lastmodified,''yyyy-mm-DD HH24:MI:SS'' ),''yyyy-mm-DD HH24:MI:SS'') >  TO_DATE('''||TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'') AND TO_DATE(to_char( T1.lastmodified,''yyyy-mm-DD HH24:MI:SS'' ),''yyyy-mm-DD HH24:MI:SS'') <=  TO_DATE('''||TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS''))AS CC_LOGIN_NUM,
+      ''11111'',
+      (SELECT COUNT(USERNAME) FROM USERS T2 WHERE  T2.CREATED >= TO_DATE( '''||TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'')
+      AND T2.CREATED <= TO_DATE('''||TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'')  ) AS CREATE_CUSTOMR_FILE_NUM ,
+      SUM(CASE WHEN POLICY_ACTION = ''ALLOW'' then 1 else 0 end ) as ALLOW_TRANS_NUM,
+      SUM(CASE WHEN POLICY_ACTION = ''REVIEW'' then 1 else 0 end ) as REVIEW_TRANS_NUM,
+      SUM(CASE WHEN POLICY_ACTION = ''AHALLENGE'' then 1 else 0 end ) as CHALLENGE_TRANS_NUM,
+      SUM(CASE WHEN POLICY_ACTION = ''DENY'' then 1 else 0 end ) as DENY_TRANS_NUM,
+      SUM(RISK_SCORE) AS TOTAL_SCORE_RANGE,
+      SUM(GET_AMT_BY_CURRENCY(AMOUNT_ORIGINAL,AMOUNT_CURRENCY)) AS TOTAL_AMOUNT--通过汇率表和币种转换再求和
+      FROM EVENT_LOG_REALTIME T
+      WHERE SYS_CREATION_DATE >= TO_DATE('''||TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'') AND SYS_CREATION_DATE <=  TO_DATE('''||TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')||''' ,''YYYY-MM-DD HH24:MI:SS'')
+      AND HAS_USED = ''T''
+      AND T.HAS_USED_TIME=T.LASTMODIFIED
+      GROUP BY
+      TO_DATE(SUBSTR(TO_CHAR(SYS_CREATION_DATE,''YYYY-MM-DD HH24:MI:SS''),0,16),''YYYY-MM-DD HH24:MI''),
+      get_province(IP_COUNTRY,IP_CITY,ip_region) ,
+      GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(T.EVENT_TYPE,T.USER_DEFINED_EVENT_TYPE),''eventType'') ,
+      GET_SCORE_RANGE(T.RISK_SCORE) ,
+      NVL(POLICY_RULE_ID,''FALLBACK_RULE'') ,
+      POLICY_ACTION,
+      CHALLENGE_SUCCESSFUL,
+      CHALLENGE_AUTH_METHOD,
+      SUBSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),0,INSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),''+'')-1),--优先级
+      SUBSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),INSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),''-'')+1),--描述
+      NVL(IS_DEVICE_BOUND,''N''),
+      CHANNEL_INDICATOR,
+      OPERATING_SYSTEM,
+      BROWSER_TYPE,
+      FLAGGED,
+      RESOLUTION ';
+     -- insert into test (test_name) values(VAR_DYNAMIC_SQL);
+      --insert into test (test_name) values(TO_CHAR(VAR_BEGIN_TIME));
+      --insert into test (test_name) values(TO_CHAR(VAR_END_TIME));
+     -- commit;
+      execute immediate VAR_DYNAMIC_SQL;
+      -------------------------------------------------------------------------------------
+      
+            --往辅助表里增加数据
+         --获取缩短后的时间
+          SELECT MAX(TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM')) INTO VAR_SHORT_DATE
+             FROM EVENT_LOG_REALTIME T1 where  T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME
+              AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T'; 
+         --RP_ALL_OF_DEVICE_ID（交易时间、设备ID）
+        
+          INSERT INTO RP_ALL_OF_DEVICE_ID (TRANS_TIME,DEVICE_ID)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID FROM EVENT_LOG_REALTIME T1,DESKTOPS T2 WHERE T1.COOKIE = T2.PMID
+                 AND T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T';
+         --RP_BD_DEVICE_CUSTOMER_ID（客户ID、是否绑定设备、交易时间）
+         INSERT INTO RP_BD_DEVICE_CUSTOMER_ID (TRANS_TIME,CUSTOMER_ID,BOUND_DEVICE_OR_NOT)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T1.User_Id AS CUSTOMER_ID,t1.is_device_bound as BOUND_DEVICE_OR_NOT FROM EVENT_LOG_REALTIME T1 WHERE  SYS_CREATION_DATE >=  VAR_BEGIN_TIME
+                 AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T';
+         --RP_BD_DEVICE_ID（设备ID、设备类型、交易时间）
+         INSERT INTO RP_BD_DEVICE_ID (TRANS_TIME,DEVICE_ID,DEVICE_TYPE)
+             SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID ,t1.channel_indicator as DEVICE_TYPE FROM EVENT_LOG_REALTIME T1,DESKTOPS T2
+                 WHERE T1.COOKIE = T2.PMID AND T2.BINDINGS_COUNT > 0
+                 AND SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T';
+    
+    
+         --RP_CHALLENGE_FAIL_BD_DEVICE_ID（认证方式、设备ID、交易时间）
+         INSERT INTO RP_CHALLENGE_FAIL_BD_DEVICE_ID (TRANS_TIME,DEVICE_ID,CHALLENGE_AUTH_METHOD)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID,t1.Challenge_Auth_Method  FROM EVENT_LOG_REALTIME T1,DESKTOPS T2 WHERE T1.COOKIE = T2.PMID AND T2.BINDINGS_COUNT > 0
+                 AND SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T' AND T1.CHALLENGE_SUCCESSFUL = 'N';
+         --RP_COUNT_DIVICE_AMOUNT（操作系统、浏览器、设备类型、设备ID、交易时间、渠道）
+         INSERT INTO RP_COUNT_DIVICE_AMOUNT (TRANS_TIME,DEVICE_ID,OPERATIING_SYSTEM,BROWSER,DEVICE_TYPE,TRANS_DITCH)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID,T1.OPERATING_SYSTEM,T1.BROWSER_TYPE AS BROWSER, (T1.OPERATING_SYSTEM||T1.BROWSER_TYPE) AS DEVICE_TYPE,
+                 T1.Channel_Indicator as TRANS_DITCH
+                 FROM EVENT_LOG_REALTIME T1,DESKTOPS T2 WHERE T1.COOKIE = T2.PMID
+                 AND T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T';
+         --RP_COUNT_USER_AMOUNT（操作系统、浏览器、设备类型、客户ID、交易时间、渠道）
+         INSERT INTO RP_COUNT_USER_AMOUNT (TRANS_TIME,CUSTOMER_ID,OPERATIING_SYSTEM,BROWSER,DEVICE_TYPE,TRANS_DITCH)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T1.USER_ID AS CUSTOMER_ID,T1.OPERATING_SYSTEM,T1.BROWSER_TYPE AS BROWSER, (T1.OPERATING_SYSTEM||T1.BROWSER_TYPE) AS DEVICE_TYPE,
+                 T1.Channel_Indicator as TRANS_DITCH
+                 FROM EVENT_LOG_REALTIME T1 WHERE  T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T';
+         --RP_CUSTOMER_ID_IP_TRANS_PRO（客户ID、IP地址、交易省份、交易时间）
+         INSERT INTO RP_CUSTOMER_ID_IP_TRANS_PRO (TRANS_TIME,CUSTOMER_ID,IP_ADDRESS,TRANS_PROVINCE)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T1.User_Id  AS CUSTOMER_ID,t1.ip_address,  get_province(t1.IP_COUNTRY,t1.IP_CITY,t1.ip_region) AS TRANS_PROVINCE  FROM EVENT_LOG_REALTIME T1 WHERE
+                 SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T' AND T1.CHALLENGE_SUCCESSFUL = 'N';
+         --RP_ID_UNQUE（IP地址、交易时间）
+         INSERT INTO RP_IP_UNIQUE (TRANS_TIME,IP_ADDRESS)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 t1.ip_address  FROM EVENT_LOG_REALTIME T1 WHERE
+                 SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T' AND T1.CHALLENGE_SUCCESSFUL = 'N';
+         --RP_PROVINCE_CUSTOMER_AMOUNT（交易省份、客户ID、交易时间）
+         INSERT INTO RP_PROVINCE_CUSTOMER_AMOUNT (TRANS_TIME,TRANS_PROVINCE,CUSTOMER_ID)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 get_province(T1.IP_COUNTRY,T1.IP_CITY,T1.IP_REGION) AS TRANS_PROVINCE,T1.USER_ID AS CUSTOMER_ID  FROM EVENT_LOG_REALTIME T1 WHERE
+                 SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T' AND T1.CHALLENGE_SUCCESSFUL = 'N';
+         --RP_PROVINCE_DEVICEID(交易省份、设备ID、交易时间)
+         INSERT INTO RP_PROVINCE_DEVICEID (TRANS_TIME,DEVICE_ID,TRANS_PROVINCE)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID ,get_province(T1.IP_COUNTRY,T1.IP_CITY,t1.ip_region) AS TRANS_PROVINCE FROM EVENT_LOG_REALTIME T1,DESKTOPS T2 WHERE T1.COOKIE = T2.PMID
+                 AND T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T';
+         --RP_PROVINCE_DITCH_DEVICEID(交易省份、设备ID、交易时间、交易渠道)
+         INSERT INTO RP_PROVINCE_DITCH_DEVICEID (TRANS_TIME,DEVICE_ID,TRANS_PROVINCE,TRANS_DITCH)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID ,get_province(T1.IP_COUNTRY,T1.IP_CITY,t1.ip_region) AS TRANS_PROVINCE ,
+                 T1.CHANNEL_INDICATOR AS TRANS_DITCH FROM EVENT_LOG_REALTIME T1,DESKTOPS T2 WHERE T1.COOKIE = T2.PMID
+                 AND T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T';
+         --RP_TRANS_DITCH_CUSTOMER_ID(交易渠道、客户ID、交易时间)
+         INSERT INTO RP_TRANS_DITCH_CUSTOMER_ID (TRANS_TIME,TRANS_DITCH,CUSTOMER_ID)
+                  SELECT 
+                TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE, 'YYYY-MM-DD HH:MI:SS'), 0, 7), 'YYYY-MM') AS TRANS_TIME,
+                
+                (case
+                  when (get_vale_from_cd_gnpx(',' || T1.CDF_S_1 || ',' || T1.CDF_S_2 || ',' ||
+                                              T1.CDF_S_3 || ',' || T1.CDF_S_4 || ',' ||
+                                              T1.CDF_S_5 || ',' || T1.CDF_S_6 || ',' ||
+                                              T1.CDF_S_7 || ',' || T1.CDF_S_8 || ',' ||
+                                              T1.CDF_S_9 || ',' || T1.CDF_S_10 || ',' ||
+                                              T1.CDF_S_11 || ',' || T1.CDF_S_12 || ',' ||
+                                              T1.CDF_S_13 || ',' || T1.CDF_S_14 || ',' ||
+                                              T1.CDF_S_15 || ',' || T1.CDF_S_16,
+                                              '6',
+                                              '4')) = 'IPAD' THEN
+                   'IPAD'
+                  ELSE
+                   T1.CHANNEL_INDICATOR
+                END) AS TRANS_DITCH,
+                T1.USER_ID AS CUSTOMER_ID
+         
+           FROM EVENT_LOG_REALTIME T1 WHERE
+                 SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T' AND T1.CHALLENGE_SUCCESSFUL = 'N';
+         --RP_USERAMOUNT_PROVINCE_DITCH_C(交易渠道、客户ID、交易时间、省份)
+         INSERT INTO RP_USERAMOUNT_PROVINCE_DITCH_C (TRANS_TI·			ME,TRANS_DITCH,CUSTOMER_ID,TRANS_PROVINCE)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T1.CHANNEL_INDICATOR AS TRANS_DITCH,T1.USER_ID AS CUSTOMER_ID,get_province(T1.IP_COUNTRY,T1.IP_CITY,t1.ip_region) AS TRANS_PROVINCE
+                 FROM EVENT_LOG_REALTIME T1 WHERE
+                 SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND SYS_CREATION_DATE <= VAR_END_TIME AND HAS_USED = 'T';
+
+
+        --RP_DEVICE_ID_IP_TRANS_PRO( 设备ID,IP地址,交易省份,交易时间)
+
+         INSERT INTO RP_DEVICE_ID_IP_TRANS_PRO(TRANS_TIME,DEVICE_ID,IP_ADDRESS,TRANS_PROVINCE)
+          SELECT TO_DATE(SUBSTR(TO_CHAR(T1.SYS_CREATION_DATE,'YYYY-MM-DD HH:MI:SS'),0,7),'YYYY-MM') AS TRANS_TIME,
+                 T2.PMID AS DEVICE_ID ,T1.IP_ADDRESS AS IP_ADDRESS,get_province(T1.IP_COUNTRY,T1.IP_CITY,t1.ip_region) AS TRANS_PROVINCE
+                 FROM EVENT_LOG_REALTIME T1,DESKTOPS T2 WHERE T1.COOKIE = T2.PMID and
+                 T1.SYS_CREATION_DATE >=  VAR_BEGIN_TIME AND T1.SYS_CREATION_DATE <= VAR_END_TIME AND T1.HAS_USED = 'T' AND T1.CHALLENGE_SUCCESSFUL = 'N';
+
+      
+      ------------------------------------------------------------
+      INSERT INTO event_log_real_gather
+        (event_id,
+         event_time,
+         ip_address,
+         event_type,
+         user_defined_event_type,
+         risk_score,
+         policy_action,
+         challenge_auth_method,
+         challenge_successful,
+         policy_rule_id,
+         short_date,
+         sys_creation_date,
+         lastmodified,
+         user_id,
+         user_hash,
+         preliminary_score,
+         has_used,
+         has_used_time,
+         ip_country,
+         ip_city,
+         channel_indicator,
+         operating_system,
+         browser_type,
+         amount_original,
+         amount_currency,
+         user_acct_number,
+         ext_acct_number,
+         ext_acct_owner_name,
+         flagged,
+         resolution,
+         cdf_s_1,
+         cdf_s_2,
+         cdf_s_3,
+         cdf_s_4,
+         cdf_s_5,
+         cdf_s_6,
+         cdf_s_7,
+         cdf_s_8,
+         cdf_s_9,
+         cdf_s_10,
+         cdf_s_11,
+         cdf_s_12,
+         cdf_s_13,
+         cdf_s_14,
+         cdf_s_15,
+         cdf_s_16,
+         cdf_s_17,
+         cdf_s_18,
+         cdf_s_19,
+         cdf_s_20,
+         org_id,
+         is_device_bound,
+         cookie,
+         ip_region
+         )SELECT
+          event_id,
+       event_time,
+       ip_address,
+       event_type,
+       user_defined_event_type,
+       risk_score,
+       policy_action,
+       challenge_auth_method,
+       challenge_successful,
+       policy_rule_id,
+       short_date,
+       sys_creation_date,
+       lastmodified,
+       user_id,
+       user_hash,
+       preliminary_score,
+       has_used,
+       has_used_time,
+       ip_country,
+       ip_city,
+       channel_indicator,
+       operating_system,
+       browser_type,
+       amount_original,
+       amount_currency,
+       user_acct_number,
+       ext_acct_number,
+       ext_acct_owner_name,
+       flagged,
+       resolution,
+       cdf_s_1,
+       cdf_s_2,
+       cdf_s_3,
+       cdf_s_4,
+       cdf_s_5,
+       cdf_s_6,
+       cdf_s_7,
+       cdf_s_8,
+       cdf_s_9,
+       cdf_s_10,
+       cdf_s_11,
+       cdf_s_12,
+       cdf_s_13,
+       cdf_s_14,
+       cdf_s_15,
+       cdf_s_16,
+       cdf_s_17,
+       cdf_s_18,
+       cdf_s_19,
+       cdf_s_20,
+       org_id,
+       is_device_bound,
+       cookie,
+       ip_region
+  from event_log_realtime T WHERE  T.HAS_USED = 'T' AND T.HAS_USED_TIME=T.LASTMODIFIED AND  T.SYS_CREATION_DATE >=  VAR_BEGIN_TIME
+      AND T.SYS_CREATION_DATE <= VAR_END_TIME;
+      
+      ---------------------------------------------------------------
+    
+
+
+      --往已确认欺诈交易表插入欺诈数据
+      VAR_DYNAMIC_SQL := 'INSERT INTO RP_COMFIRMED_EVENT_DETAIL(
+        EVENT_ID,--ID
+        TRANS_TIME,--交易时间
+        TRANS_TYPE,--交易类型
+        TRANS_PROVINCE,--开户省份
+        CCE_CSTNO,--客户号
+        CCE_CERTTYPE,--证件类型
+        CCE_CERTNO,--证件号
+        CCE_AMT,--交易金额
+        CCE_RISK_SCORE,--不处理的风险分值
+        CCE_PAYEE_ACC,--付款人账号
+        CCE_PAYEE_NAME,--付款人姓名
+        CCE_REC_NODE,--收款人开户行
+        CCE_REC_ACC,--收款人账号
+        CCE_REC_NAME,--收款人姓名
+        RULE_NAME,--规则名称
+        CCE_RULE_NOTE,--规则描述
+        SCORE_RANGE--处理后的风险分值
+      )select
+       EVENT_ID,
+       SYS_CREATION_DATE,
+       GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(T1.EVENT_TYPE,T1.USER_DEFINED_EVENT_TYPE),''eventType'') AS TRANS_TYPE,
+      -- get_province(IP_COUNTRY,IP_CITY) AS CCE_TRANSTYPE,
+       get_vale_from_cd_p('||get_vale_from_cd1('13','5')||'),--开户省份为自定义字段
+       USER_ID,
+       '||get_vale_from_cd1('4','4')||',--证件类型为自定义字段
+       '||get_vale_from_cd1('7','4')||',--证件号为自定义字段  要转换成动态SQL
+       GET_AMT_BY_CURRENCY(AMOUNT_ORIGINAL,AMOUNT_CURRENCY),--通过汇率和币种转换
+       RISK_SCORE,
+       USER_ACCT_NUMBER,
+       '||get_vale_from_cd_g1(get_vale_from_cd_al)||',--付款人姓名
+       '||get_vale_from_cd1('11','5')||',--收款人开户行 自定义字段 需转换成动态SQL
+       EXT_ACCT_NUMBER,
+       EXT_ACCT_OWNER_NAME,
+       NVL(POLICY_RULE_ID,''FALLBACK_RULE'') AS RULE_NAME,
+       SUBSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),INSTR(GET_RULE_ORDER_ID(ORG_ID,POLICY_RULE_ID),''-'')+1),--描述
+       GET_SCORE_RANGE(RISK_SCORE) AS RISK_SCORE_RANGE
+       FROM EVENT_LOG_REALTIME T1
+       WHERE T1.SYS_CREATION_DATE >=  TO_DATE('''||TO_CHAR(VAR_BEGIN_TIME,'YYYY-MM-DD HH24:MI:SS')||''',''YYYY-MM-DD HH24:MI:SS'')
+        AND T1.SYS_CREATION_DATE <=  TO_DATE('''||TO_CHAR(VAR_END_TIME,'YYYY-MM-DD HH24:MI:SS')||''' ,''YYYY-MM-DD HH24:MI:SS'') AND T1.HAS_USED = ''T''
+       AND T1.HAS_USED_TIME=T1.LASTMODIFIED
+       AND (T1.POLICY_ACTION = ''DENY'' OR (T1.POLICY_ACTION = ''CHALLENGE'' AND T1.CHALLENGE_SUCCESSFUL=''N'' AND T1.FLAGGED=''Y'') OR ( T1.FLAGGED IS NULL AND T1.RESOLUTION=''F'' ))';
+       --insert into test (test_name) values(VAR_DYNAMIC_SQL);
+       --commit;
+       execute immediate VAR_DYNAMIC_SQL;
+
+     /*把汇总了的数据的HAS_USED字段变为Y*/
+     UPDATE EVENT_LOG_REALTIME T SET T.HAS_USED = 'Y',T.HAS_USED_TIME = SYSDATE WHERE  T.SYS_CREATION_DATE >=  VAR_BEGIN_TIME
+      AND T.SYS_CREATION_DATE <= VAR_END_TIME AND T.HAS_USED = 'T' AND T.LASTMODIFIED=T.HAS_USED_TIME;
+     UPDATE EVENT_LOG_REALTIME T SET T.HAS_USED = 'N',T.HAS_USED_TIME = SYSDATE WHERE  T.SYS_CREATION_DATE >=  VAR_BEGIN_TIME
+      AND T.SYS_CREATION_DATE <= VAR_END_TIME AND T.HAS_USED = 'T' AND T.LASTMODIFIED!=T.HAS_USED_TIME;
+      /*记录插入的数据量*/
+      VAR_RECORD_NUM := SQL%ROWCOUNT;
+      /*提交插入数据的操作*/
+
+      /*操作成功后修改日志记录*/
+      UPDATE_COLLECT_DATA_LOG(
+        VAR_RECORD_ID,
+        NULL,
+        SYSDATE,
+        'SUCCESSFUL',
+        VAR_RECORD_NUM,
+        0
+      );
+
+      COMMIT;
+  EXCEPTION
+     WHEN OTHERS
+     THEN
+         ROLLBACK;
+         VAR_RECORD_NUM := 0;
+         /*操作失败后修改日志记录*/
+         UPDATE_COLLECT_DATA_LOG(
+           VAR_RECORD_ID,
+           NULL,
+           SYSDATE,
+           'FAILED',
+           VAR_RECORD_NUM,
+           INPUT_REDO_TIMES
+         );
+
+       RETURN ;
+
+END GET_DATA_FROM_REALTIM_2_MINUTE;

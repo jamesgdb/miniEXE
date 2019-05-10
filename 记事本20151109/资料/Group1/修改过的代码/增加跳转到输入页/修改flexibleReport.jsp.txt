@@ -1,0 +1,12 @@
+﻿ 源代码： 	if("Y".equals(isSettled)||"Y"==isSettled){%>
+				  	      <%@include file="toolbar4Report_one.jsp"%>
+				     <% }else{ %>
+				           <%@include file="toolbar4Report.jsp"%>
+					  <% }%>
+ 	
+ 修改为：	
+ 				if("Y".equals(isSettled)||"Y"==isSettled){%>
+				  	      <%@include file="toolbar4Report_one.jsp"%>
+				     <% }else{ %>
+				           <%@include file="toolbar4Report_three.jsp"%>
+					  <% }%>

@@ -1,0 +1,18 @@
+﻿任美芒 10:25:01
+明熙发现有几个表的字段名不一致。主要是data_dt_field 咱们都写成了 Data_td_field
+裴晓峰 10:21:57
+还改吗，还不少
+裴晓峰 10:22:22
+裴明熙 10:19:29
+  我查一下
+裴明熙 10:19:49
+
+  edm_dq_basic_check
+
+  edm_dq_code_check
+
+  EDM_DC_CLEAR
+
+  EDM_DQ_LOGIC_CHECK
+
+  这四张表都是Data_td_field字段

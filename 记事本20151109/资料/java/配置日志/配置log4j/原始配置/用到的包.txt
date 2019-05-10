@@ -1,0 +1,7 @@
+﻿E:\Java\包\Hibernate配置的压缩包\slf4j-log4j12-1.5.8.jar
+E:\Java\包\Hibernate配置的压缩包\log4j-1.2.15.jar
+E:\Java\包\Hibernate配置的压缩包\slf4j-api-1.5.8.jar
+
+
+主要用到的是log4j和slf4j,同时用到的一个转换器就是slf4j-log4j12-1.5.8.jar
+实现了日志输出。

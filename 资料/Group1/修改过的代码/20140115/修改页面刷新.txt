@@ -1,0 +1,2 @@
+﻿在汇率维护的所有提交后面增加：opener.location.reload();
+让页面进行刷新

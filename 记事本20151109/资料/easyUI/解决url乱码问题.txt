@@ -1,0 +1,36 @@
+﻿function query(formId){
+    var tableName = $("#tableName").val();
+    var dcId  = $("#dcId").val();
+    if(tableName=='表名'){
+    	tableName="";
+    }
+	var url="dcClearTable_query.action?tableName="+tableName+"&dcId="+dcId;
+	var location  = encodeURI(url);
+	var opt = grid.getOptions();
+	opt.url=location;
+    grid.load();	
+}
+
+
+然后在页面中，转化一下
+-------------------------------------------------------------------
+@Override
+	public void query() {
+	
+		try {
+			if((super.getHttpRequest().getParameter("tableName")==null)){
+				String dcId = super.getHttpRequest().getParameter("dcId");
+				Pageable pageable = this.getPager();
+				Page<DcClearTable> page = this.dcClearTableService.queryForPage(pageable, dcId,null);
+				writeContent(convertToJson(page, null));
+			}else{
+				String  tableName = new String(super.getHttpRequest().getParameter("tableName").getBytes("ISO-8859-1"),"utf-8");
+				String dcId = super.getHttpRequest().getParameter("dcId");
+				Pageable pageable = this.getPager();
+				Page<DcClearTable> page = this.dcClearTableService.queryForPage(pageable, dcId,tableName);
+				writeContent(convertToJson(page, null));
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}

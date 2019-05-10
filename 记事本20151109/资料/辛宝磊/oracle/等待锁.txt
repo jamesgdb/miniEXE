@@ -1,0 +1,76 @@
+﻿批量解决Oracle锁等待的方法
+2013-04-11 00:00中国IT实验室佚名
+关键字：Oracle
+　　批量解决oracle锁等待的方法
+
+　　据我所知，oracle 10g之后的oracle版本不会因为使用者的操作原因，造成死锁。
+
+　　大家通常会遇到这种现象，在自己web项目首页使用用户名，密码登陆系统时，始终停留在本页面，无法进入系统，或是在执行某些操作后，系统一直处在等待状态，不出结果，后台也无任何错误提醒。此时，很大的可能就是数据库锁等待，所要查询的包含用户名和密码的表或是用户正操作的表正在被占用造成的。
+
+　　锁等待的现象：程序在执行的过程中，点击确定或保存按钮，程序没有响应，也没有出现报错。
+
+　　网上有很多人把这种现象称为死锁，我认为是不合理的。此时的oracle并未发生任何死锁现象，只是它一直在等待使用者前一个操作的提交。
+
+　　产生锁等待的原因：当对于数据库某个表的某一列做更新或删除等操作，执行完毕后该条语句不提交，另一条对于这一列数据做更新操作的语句在执行的时候就会处于等待状态，此时的现象是这条语句一直在执行，但一直没有执行成功，也没有报错。
+
+　　锁等待定位方法：
+
+　　Sql代码
+
+　　select sql_text from v$sql where hash_value in
+
+　　(select sql_hash_value from v$session where sid in
+
+　　(select session_id from v$locked_object))
+
+　　Sql代码
+
+　　SELECT s.username,l.OBJECT_ID,l.SESSION_ID,s.SERIAL#,
+
+　　l.ORACLE_USERNAME,l.OS_USER_NAME,l.PROCESS
+
+　　FROM V$LOCKED_OBJECT l,V$SESSION S WHERE l.SESSION_ID=S.SID;
+
+　　以上两种方法皆可以，不过查询出来的属性不同，可以根据个人需要选择。其中有一种方法速度较快，但我忘记是哪一种了，您若遇到数据库出现和锁等待相符的现象，可以用这两种方法查询试一下，若得到结果，则说明确实发生锁等待现象了。
+
+　　单个解决锁等待的方法：
+
+　　Sql代码
+
+　　alter system kill session 'sid, serial#'
+
+　　其中的sid和serial可以通过上面锁等待定位方法的第二个方法得到，sid对应SESSION_ID，serial#对应SERIAL#。例如：
+
+　　Sql代码
+
+　　alter system kill session '130,2';
+
+　　我通常会遇到上千个锁，实在没办法一个一个的kill掉了，所以我通常使用下述批量解锁方法。
+
+　　批量解锁方法：
+
+　　注：此方法应在plsql中运行
+
+　　Sql代码
+
+　　declare cursor mycur is
+
+　　select b.sid,b.serial#
+
+　　from v$locked_object a,v$session b
+
+　　where a.session_id = b.sid group by b.sid,b.serial#;
+
+　　begin
+
+　　for cur in mycur
+
+　　loop
+
+　　execute immediate ( 'alter system kill session '''||cur.sid || ','|| cur.SERIAL# ||''' ');
+
+　　end loop;
+
+　　end;
+
+　　若读者在使用中出现问题，可能是中英文字符转换造成的，请读者注意。

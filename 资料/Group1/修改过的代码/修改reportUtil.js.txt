@@ -1,0 +1,16 @@
+﻿在402行季度报表：
+原先：
+}else if(10<=Number(month) && Number(month)<12){
+				 quart=4;
+			}
+			
+修改后：
+}else if(10<=Number(month) && Number(month)<=12){
+				 quart=4;
+			}
+			
+	在月报表和周报表中增加对当前月份是一月份的判断，如果是一月份的话，年份向前推一年		
+			
+			if(Number(month)==1){
+	    				year =Number(year)-1;
+	    			}

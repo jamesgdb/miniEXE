@@ -1,0 +1,22 @@
+﻿@Test
+	public void testQBC() {
+		Session session = sf.openSession();
+		session.beginTransaction();
+		//criterion 标准/准则/约束
+		Criteria c = session.createCriteria(Topic.class) //from Topic
+					 
+					 .add(Restrictions.gt("id", 2)) //greater than = id > 2   
+					 .add(Restrictions.lt("id", 8)) //little than = id < 8
+					 .add(Restrictions.like("title", "t_"))
+					 .createCriteria("category")
+					 .add(Restrictions.between("id", 3, 5)) //category.id >= 3 and category.id <=5
+					 ;
+		//DetachedCriterea
+		for(Object o : c.list()) {
+			Topic t = (Topic)o;
+			System.out.println(t.getId() + "-" + t.getTitle());
+		}
+		session.getTransaction().commit();
+		session.close();
+		
+	}

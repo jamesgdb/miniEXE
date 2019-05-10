@@ -1,0 +1,385 @@
+﻿SRVE
+SRVE0011E: 非法参数异常：尝试写的字符数小于 0
+Explanation	 尝试输出大小小于 0 的缓冲区。
+Action	 仅写大小等于或大于 0 的缓冲区。
+SRVE0014E: 未捕获到 service() 异常的根本原因 {0}：{1}
+Explanation	 在 servlet 服务方法中抛出未捕获的异常。
+Action	 根据根本原因改变。
+SRVE0015E: 无法初始化 Web 应用程序 {0}
+Explanation	 无法初始化消息中指定的 Web 应用程序。查看错误日志以获取更多详细信息。
+Action	 查看错误日志以确定此问题的根本原因。
+SRVE0016E: 非法参数异常：无效头格式
+Explanation	 找到请求头的无效格式。
+Action	 检查客户机头创建。
+SRVE0021I: 已卸装 Servlet：{0}
+Explanation	 在调用破坏方法之后，已卸装指定的 servlet。
+Action	 无。
+SRVE0031E: 非法参数异常：{0} 不是目录。
+Explanation	 指定的路径不是目录。
+Action	 确保目录存在或者您正在请求正确的目录。
+SRVE0035E: WebAppSecurityCollaborator
+Explanation	 WebAppSecurityCollaborator。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0041E: 非法参数异常：未找到引导程序文件
+Explanation	 这是一个内部系统错误，而且可能是由于先前的故障导致的。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0042E: 非法参数异常：无效内容长度
+Explanation	 这是一个内部系统错误，而且可能是由于先前的故障导致的。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0053E: 非法参数异常：无效日期格式
+Explanation	 无效日期格式。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0055I: Servlet 等待毁坏超时已到期，将强制执行毁坏：{0}
+Explanation	 等待超时后正在毁坏 servlet。
+Action	 无。
+SRVE0056E: 非法参数异常：不支持的标志
+Explanation	 这是一个内部系统错误，而且可能是由于先前的故障导致的。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0058E: 未识别出由 servlet {0} 抛出的 destroy() 异常：{1}
+Explanation	 无法毁坏指定的 servlet。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0060E: 无法绑定主机名［{0}］到 servletHost［{1}］
+Explanation	 无法绑定指定的主机名到指定的 servlet 主机。
+Action	 确保已正确指定了主机名并且已在 virtualhosts.xml 中指定了 servlet 主机。
+SRVE0061E: 非法参数异常：指定的目录无效：{0}
+Explanation	 指定的目录无效。
+Action	 检查目录规范以查看错误。
+SRVE0066I: 正在等待 servlet 完成服务请求：{0}
+Explanation	 Servlet 仍在处理该请求。请等待请求完成，然后再调用破坏。
+Action	 无。
+SRVE0068E: 未捕获到 servlet {0} 的其中一个服务方法中抛出的异常。抛出的异常：{1}
+Explanation	 未捕获到该 servlet 的其中一个服务方法中抛出的异常。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0070E: 初始化下一个请求时出错
+Explanation	 内部 Web 容器错误。
+Action	 收集服务器日志并联系 IBM 服务。
+SRVE0080E: 无效内容长度
+Explanation	 内部服务器错误。
+Action	 收集日志并联系 IBM 服务。
+SRVE0086E: 非法参数异常：缺少资源引导程序属性
+Explanation	 内部服务器错误。
+Action	 收集日志并联系 IBM 服务。
+SRVE0097I: 已初始化 Servlet 卸装：{0}
+Explanation	 正在从服务卸装指定的 servlet。
+Action	 无。
+SRVE0100E: 未识别出由 servlet {0} 抛出的 init() 异常：{1}
+Explanation	 无法初始化指定的 servlet。
+Action	 确保 servlet 类文件在应用程序类路径上可用。
+SRVE0103E: 非法参数异常：脚本名必须是 URI 的第一部分
+Explanation	 这是一个内部系统错误，而且可能是由于先前的故障导致的。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0105E: Session.releaseSession() 中发生异常
+Explanation	 发布会话时发生的问题。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0108E: 非法参数异常：缺少标志值
+Explanation	 缺少标志值。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0109E: 非法参数异常：实例化的 ObjectPool 无效。
+Explanation	 这是一个内部系统错误，而且可能是由于先前的故障导致的。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0115E: 调用错误报告程序 {0} 时发生错误
+Explanation	 调用指定的错误报告程序时发生的问题。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0120E: IO 错误 {0}
+Explanation	 遇到 IO 错误。
+Action	 根据报告的根本原因改变。
+SRVE0121E: 非法参数异常：尝试写的字节数小于 0
+Explanation	 尝试输出大小小于 0 的缓冲区。
+Action	 仅写大小等于或大于 0 的缓冲区。
+SRVE0126E: 失效异常：{0} 已创建
+Explanation	 这是一个内部系统错误，而且可能是由于先前的故障导致的。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0133E: 解析参数时发生错误。{0}
+Explanation	 解析 servlet 参数时遇到问题。
+Action	 检查 web.xml 文件中的参数定义。
+SRVE0138E: postInvoke 安全性异常
+Explanation	 请求处理期间遇到安全性问题。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0139E: 安全性 preInvoke {0} 中发生异常
+Explanation	 请求处理期间遇到安全性问题。
+Action	 根据根本原因改变。
+SRVE0140E: 无法实例化安全性协作程序 {0}
+Explanation	 内部服务器错误。
+Action	 收集日志并联系 IBM 服务。
+SRVE0155E: 无法装入 encoding.properties 文件 {0}
+Explanation	 无法装入指定的文件。
+Action	 确保指定的文件存在。
+SRVE0156E: 无法装入 converter.properties 文件 {0}
+Explanation	 无法装入指定的文件。
+Action	 确保指定的文件存在。
+SRVE0157E: 第一次写入输出流／写程序之后调用了 setBufferSize()
+Explanation	 在已落实了响应后尝试设置响应缓冲区大小。
+Action	 除去 setBufferSize() 调用或者在响应落实之前将其移动到某个位置。
+SRVE0160E: 回滚 UserTransaction 时发生异常：{0}
+Explanation	 回滚指定的用户事务时遇到问题。
+Action	 检查服务器日志以确定问题的根本原因。如果没有相关消息，或者它们对于解决问题没有帮助，请与 IBM 支持人员联系。
+SRVE0161I: IBM WebSphere Application Server － Web 容器。Copyright IBM Corp. 1998-2006
+Explanation	 应用程序服务器标识。
+Action	 无。
+SRVE0162I: Servlet 规范级别：2.4
+Explanation	 应用程序服务器支持的 servlet 规范级别。
+Action	 无。
+SRVE0163I: 支持的 JSP 规范级别：Level: 2.0
+Explanation	 应用程序服务器支持的 JSP 规范级别。
+Action	 无。
+SRVE0164E: Web 应用程序 {0} 使用上下文根 {1}，它已由 Web 应用程序 {2} 使用。将不会装入 Web 应用程序 {3}。
+Explanation	 在同一虚拟主机上的两个 Web 应用程序共享同一上下文根。
+Action	 更改其中一个 Web 应用程序的上下文根或将一个 Web 应用程序移动到不同的虚拟主机上。
+SRVE0169I: 正在装入 Web 模块：{0}。
+Explanation	 WebModule 正在启动，将可用于服务。
+Action	 无。
+SRVE0180I: [{0}] [{1}] [Servlet.LOG]: {2}
+Explanation	 参考消息 {2} 是通过带有上下文根的 {1} 应用程序 {0} 中的 ServletContext.log 记录的。
+Action	 无。
+SRVE0181I: [{0}] [{1}] [Servlet.LOG]: {2}: {3}
+Explanation	 参考消息 {2} 是通过带有上下文根的 {1} 和堆栈跟踪 {3} 的应用程序 {0} 中的 ServletContext.log 记录的。
+Action	 无。
+SRVE0185E: 处理请求时出错：
+Explanation	 处理请求时发生的异常。
+Action	 查看消息以确定问题的根本原因。
+SRVE0186E: 将数据写入流之后，无法设置缓冲区大小
+Explanation	 已将某些数据写入流，因此无法再控制缓冲区大小
+Action	 写数据之前先设置缓冲区大小，或设置大小之前先复位缓冲区。
+SRVE0187E: 检查您的类路径，以确保 servlet 需要的所有类都存在。
+Explanation	 未找到必需类
+Action	 确保您的类路径反映您可以访问的所有类
+SRVE0188E: 类 {0} 未实现 servlet
+Explanation	 提及的类需要实现 javax.servlet.Servlet，或扩展某个 javax.servlet.GenericServlet 或 javax.servlet.http.HttpServlet
+Action	 提及的类需要实现 javax.servlet.Servlet，或扩展某个 javax.servlet.GenericServlet 或 javax.servlet.http.HttpServlet
+SRVE0189E: 完成请求时发生错误
+Explanation	 这是正在完成请求时发生的错误。发生此错误，可能是因为应用程序服务器中的通信错误，但应该不会影响对该请求的处理。
+Action	 无。
+SRVE0190E: 找不到文件：{0}
+Explanation	 未找到提及的文件。
+Action	 确保提及的文件在适当的位置。
+SRVE0194E: 包括的 servlet 非法
+Explanation	 在包括的 servlet/JSP 中无法执行尝试的操作（请参阅 Servlet 规范）
+Action	 无。
+SRVE0196E: 缺少必需的初始化参数：{0}
+Explanation	 具有提及名称的参数没有值。这是个必需参数。
+Action	 请为提及的参数提供值。
+SRVE0199E: 已获取了 OutputStream
+Explanation	 在已获取 ServletResponse OutputStream 之后，应用程序请求了 PrintWriter。
+Action	 查看应用程序以确定是否获取了 PrintWriter 和 OuputStream。
+SRVE0200E: Servlet [{0}]：找不到必需类 － {1}
+Explanation	 Servlet 找不到为请求提供服务所需要的必需类。
+Action	 无。
+SRVE0201E: Servlet [{0}]：不是 servlet 类
+Explanation	 提及的类需要实现 javax.servlet.Servlet，或扩展某个 javax.servlet.GenericServlet 或 javax.servlet.http.HttpServlet
+Action	 提及的类需要实现 javax.servlet.Servlet，或扩展某个 javax.servlet.GenericServlet 或 javax.servlet.http.HttpServlet
+SRVE0202E: Servlet [{0}]：找到 {1}，但已损坏：
+
+Explanation	 找到的 servlet 类是损坏的
+Action	 请重新编译该类并请重试。
+SRVE0203E: Servlet [{0}]：找到 {1}，但缺少另一个必需类。
+
+Explanation	 未找到必需类
+Action	 确保将所有必需类都放在表示类路径的 folders/Jars 中
+SRVE0204E: 尚未定义主机 {0}
+Explanation	 未找到虚拟主机
+Action	 请检查 virtualhosts.xml 文件中的虚拟主机配置，或通过管理控制台检查
+SRVE0205E: 尚未定义端口 {1} 上的主机 {0}
+Explanation	 找不到定义的虚拟主机来处理此请求 URI。
+Action	 无。
+SRVE0206E: 此错误通常意味着 servlet 最初是用服务器找不到的类来编译的。
+
+Explanation	 无。
+Action	 请用放在类路径中的所有必需组件重新编译 servlet。
+SRVE0207E: 未捕捉到 servlet 抛出的初始化异常
+Explanation	 初始化期间目标抛出异常，用户代码未捕获到此异常。
+Action	 请说明目标代码中的异常。
+SRVE0208E: 转换不受支持
+Explanation	 代码尝试执行非法头值转换。例如，从整数转换到数据，而此转换是不可能的
+Action	 无。
+SRVE0209E: 已获取了写程序
+Explanation	 已获取了此响应的写程序。请使用现有写程序
+Action	 查看应用程序以确定是否获取了 PrintWriter 和 OuputStream。
+SRVE0210I: 通过仅使用应用程序的运行时类路径中的类重新编译 servlet，可以调试此问题
+
+Explanation	 无。
+Action	 无。
+SRVE0213E: 未找到类
+Explanation	 内部异常。
+Action	 与 WebSphere 支持人员联系以获取进一步帮助。
+SRVE0214E: 计数无效
+Explanation	 内部异常。
+Action	 与 WebSphere 支持人员联系以获取进一步帮助。
+SRVE0215E: 非 HTTP 请求或响应
+Explanation	 已定义的 servlet 链只可以处理 HTTP 请求。
+Action	 无。
+SRVE0216E: post 主体包含的字节比内容长度指定的字节要少
+Explanation	 入局请求可能已损坏。
+Action	 无。
+SRVE0217E: {0} 不是有效类
+Explanation	 Web 容器尝试装入内部实现类时发生此错误。
+Action	 检查原始 WAS 类路径，确保它未被修改。
+SRVE0218E: 禁用：Web 安全性异常
+Explanation	 请求尝试访问禁用资源。
+Action	 请确保进行请求的实体有必需特权。
+SRVE0219I: 未报告错误
+Explanation	 调用了 DefaultErrorReport，但找不到错误。
+Action	 查看应用程序以确定问题的原因。
+SRVE0220I: 包含的错误 －
+Explanation	 导致问题的错误。
+Action	 无。
+SRVE0221E: 不允许提供 JSP 文件的内容。
+Explanation	 不能提供 JSP 文件的内容
+Action	 无。
+SRVE0223I: StackTrace：
+Explanation	 无。
+Action	 无。
+SRVE0224I: 目标 Servlet：
+Explanation	 无。
+Action	 无。
+SRVE0225I: 根本错误 －
+Explanation	 无。
+Action	 无。
+SRVE0227I: 1. 检查类是否驻留在正确的软件包目录中。
+
+Explanation	 资源的软件包名称与已编译类文件的软件包不匹配。
+Action	 无。
+SRVE0228I: 2. 检查在服务器中已使用正确的大小写和标准软件包定义类名。
+
+Explanation	 无。
+Action	 无。
+SRVE0229I: 3. 检查已使用二进制传送方式将类传送到文件系统。
+
+Explanation	 无。
+Action	 无。
+SRVE0230I: 4. 检查使用正确的大小写（如类定义中所定义）编译类。
+
+Explanation	 无。
+Action	 无。
+SRVE0231E: 5. 检查在编译类文件后未重命名它。
+Explanation	 无
+Action	 无
+SRVE0233E: 错误报告
+Explanation	 无
+Action	 无
+SRVE0234I: 应用程序类路径=[{0}]
+Explanation	 无
+Action	 无
+SRVE0235E: [{0}] 报告了错误
+Explanation	 请参阅报告的错误。
+Action	 无。
+SRVE0236E: 在 starting() 调用中调用初始化协调程序时出错
+Explanation	 查看 FFDC 日志以获取更多有关错误的详细信息
+Action	 查看 FFDC 日志以获取更多有关错误的详细信息
+SRVE0237E: 在 started() 调用中调用初始化协调程序时出错
+Explanation	 查看 FFDC 日志以获取更多有关错误的详细信息
+Action	 查看 FFDC 日志以获取更多有关错误的详细信息
+SRVE0238E: 资源路径应该以斜杠开头
+Explanation	 无。
+Action	 请在路径前以斜杠开头，并请重试。
+SRVE0239I: 成功注册扩展工厂［{0}］。
+Explanation	 无。
+Action	 无。
+SRVE0240I: 扩展工厂［{0}］已与模式［{1}］关联。
+Explanation	 无。
+Action	 无。
+SRVE0241I: 正在使用 [{0}] 作为 getTempDirectory() 中的服务器根。
+Explanation	 无。
+Action	 无。
+SRVE0242I: [{2}] [{1}] [{0}]: 初始化成功。
+Explanation	 目标资源的 init() 方法执行成功，并且已将目标放入服务。
+Action	 无。
+SRVE0243I: 收割线程时间间隔 [{0}] 和不活动限制 [{1}] 已启动。
+Explanation	 无。
+Action	 无。
+SRVE0244I: 收割线程正在卸装 servlet：[{0}]。
+Explanation	 如果 servlet 的不活动时间比收割不活动限制要长，则收割线程除去此 servlet。
+Action	 无。
+SRVE0245I: 收割线程正在除去 servlet [{0}] 的映射 [{0}]。
+Explanation	 如果 jsps 和其他扩展的映射的不活动时间比收割不活动限制要长，则收割线程除去此映射。
+Action	 无。
+SRVE0246I: 收割线程正在毁坏 servlet：[{0}]。
+Explanation	 无。
+Action	 无。
+SRVE0247E: 收割线程执行期间出错。
+Explanation	 处理收割线程时发生异常。
+Action	 收割处理只是垃圾回收的形式。
+SRVE0248I: 当前正在处理请求。最多等待 60 秒，然后强制执行过滤器破坏。
+Explanation	 无。
+Action	 无。
+SRVE0249W: 应用程序 {0} 已请求了 SyncToOSThread，但用于 SyncToOSThread 的服务器未启用
+Explanation	 SyncToOSThread 将 J2EE 角色身份与 OS 线程同步，这意味着请求持续期间 OS 线程标识变成等于 J2EE 角色身份。此消息表明，在应用程序已配置为使用 SyncToOSThread 功能时，安装有此应用程序的服务器未配置为支持 SyncToOSThread 功能。
+Action	 如果所讨论的服务器需要 SyncToOSThread 功能，请参阅信息中心，以获取如何启用服务器的 SyncToOSThread 的描述。
+SRVE0250I: Web 模块 {0} 已绑定到 {1}。
+Explanation	 指定的 Web 模块已关联到提到的虚拟主机，而且可通过此虚拟主机的任何主机／端口组合进行访问。
+Action	 无。
+SRVE0251W: 未使用 Web 容器下配置的线程池。
+Explanation	 Web 容器上存在线程池配置。对此配置项的任何更改将不会导致系统的更改。
+Action	 无。
+SRVE0252W: 已检测到传输和链！已将传输更改为使用新的模型。请使用迁移实用程序将传输迁移到新的模型。Web 容器下的线程池配置将不与这些传输协同使用。
+Explanation	 传输已更改为使用通道链。请参阅信息中心，以查看有关通道链，以及如何将现有传输迁移为基本通道链的信息。Web 容器下的线程池配置将不与这些传输协同使用。
+Action	 使用迁移实用程序将您的配置模型从传输迁移到新的通道链。
+SRVE0253I: [{2}] [{1}] [{0}]：毁坏成功。
+Explanation	 成功执行了目标资源的 destroy() 方法，并且已经从服务中除去了目标。
+Action	 无。
+SRVE0254E: 未能设置请求字符编码：[{0}]。
+Explanation	 在请求中指定了无效的请求编码。
+Action	 查看日志以确定指定的编码是否是有效的编码。
+SRVE0255E: 尚未定义要处理 {0} 的 Web 组／虚拟主机。
+Explanation	 找不到要处理请求的 Web 组（Web 模块）或虚拟主机。
+Action	 确保已定义并已部署 Web 组和虚拟主机。
+SRVE0256E: 尚未初始化 Web 容器。
+Explanation	 在安装应用程序之前未初始化 Web 容器。
+Action	 无。
+SRVE0257E: 不允许按星号进行过滤。
+Explanation	 由于禁止按类名处理所有 Servlet 是由 com.ibm.ws.webcontainer.disallowserveservletsbyclassname 定制属性处理的，因此不允许按星号进行过滤。
+Action	 将 com.ibm.ws.webcontainer.disallowserveservletsbyclassname 设置为 true 以便不允许按类名处理所有类。
+SRVE0258E: Servlet 位于阻塞列表中：{0}
+Explanation	 请求的 servlet 位于定制属性 com.ibm.ws.webcontainer.donotservebyclassname 所提供的阻塞列表中。
+Action	 无。
+SRVE0259W: 查询字符串中的字符无效。
+Explanation	 查询字符串中存在无效字符，已忽略该字符。
+Action	 不需要用户操作。
+SRVE0261E: 尚未定义注释帮助程序 {0}。
+Explanation	 尚未定义指定的注释帮助程序。
+Action	 请检查指定的注释帮助程序的定义并在必要时进行添加。
+SRVE0262E: 注释帮助程序 {0} 的类型不是 com.ibm.wsspi.webcontainer.AnnotationHelper。
+Explanation	 指定的注释帮助程序的类型不是期望的类型。
+Action	 请检查注释帮助程序实现类并修正该类。
+SRVE0263E: 无法实例化注释帮助程序 {0}。
+Explanation	 无法实例化指定的注释帮助程序。
+Action	 请检查异常日志以获取无法实例化注释帮助程序的原因。
+SRVE0264E: 在同一个类中找到了多个 @PostConstruct 注释：{0}
+Explanation	 要放入服务中的类包含使用同一个类中的 @PostConstruct 进行注释的多个方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0265E: 在同一个类中找到了多个 @PreDestroy 注释：{0}
+Explanation	 要放入服务中的类包含使用同一个类中的 @PreDestroy 进行注释的多个方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0266E: 使用 @PostConstruct 进行注释的方法不能带任何参数。类：{0}，方法：{1}
+Explanation	 要放入服务中的类包含使用同一个类中的 @PostConstruct 进行注释且带有多个参数的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0267E: 使用 @PreDestroy 进行注释的方法不能带任何参数。类：{0}，方法：{1}
+Explanation	 要放入服务中的类包含使用 @PreDestroy 进行注释且带有多个参数的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0268E: 使用 @PostConstruct 进行注释的方法必须具有空的返回类型。类：{0}，方法：{1}
+Explanation	 要放入服务中的类包含使用 @PostConstruct 进行注释且不具有空的返回类型的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0269E: 使用 @PreDestroy 进行注释的方法必须具有空的返回类型。类：{0}，方法：{1}
+Explanation	 要放入服务中的类包含使用@PreDestroy 进行注释且不具有空的返回类型的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0270E: 使用 @PostConstruct 进行注释的方法不能抛出异常。对象将不会放入服务。类：{0}，方法：{1}
+Explanation	 类包含使用 @PostConstruct 进行注释且抛出异常的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0271E: 使用 @PreDestroy 进行注释的方法不能抛出异常。类：{0}，方法：{1}
+Explanation	 类包含使用 @PreDestroy 进行注释且抛出异常。
+Action	 请更正类然后重新启动应用程序。
+SRVE0272E: 使用 @PostConstruct 进行注释的方法不能声明为静态。类：{0}，方法：{1}
+Explanation	 类包含使用@PostConstruct 进行注释且声明为静态的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0273E: 使用 @PreDestroy 进行注释的方法不能声明为静态。类：{0}，方法：{1}
+Explanation	 类包含使用 @PreDestroy 进行注释且声明为静态的方法。
+Action	 请更正类然后重新启动应用程序。
+SRVE0274E: 无法对类 {1} 中的注释方法 {0} 设置访问权
+{2}
+Explanation	 Java 安全管理器正在防止注释方法设置为可访问。
+Action	 请更正该方法然后重新启动应用程序或更改 Java 安全管理器设置。
+SRVE0275E: Servlet 由于无效的 @PostConstruct 方法而不可用。
+Explanation	 Servlet 不可用，因为使用 @PostConstruct 进行注释的方法抛出了异常。
+Action	 请更正 Servlet 类然后重新启动应用程序。
+SRVE0276E: 过滤器由于无效的 @PostConstruct 方法而不可用。
+Explanation	 过滤器不可用，因为使用 @PostConstruct 进行注释的方法抛出了异常。
+Action	 请更正过滤器类然后重新启动应用程序。

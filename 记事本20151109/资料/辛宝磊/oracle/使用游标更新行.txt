@@ -1,0 +1,228 @@
+﻿ Oracle 参数 游标[游标更新删除数据]
+分类： Oracle 2011-06-02 15:15 999人阅读 评论(0) 收藏 举报
+oracledeletereferencetablesql
+一、参数游标 
+   参数游标是带有参数的游标，在定义参数游标之后，当使用不同参数值多次打开游标时，可以产生不同的结果集，语法如下： 
+cursor cursor_name(parameter_name datatype) is select_statement; 
+定义参数游标时，游标参数只能指定数据类型，而不能指定长度。 
+示例如下：
+
+Oracle代码 
+1.declare   
+2.cursor temp_cursor(no number) is select name from cip_temps where id=no;   
+3.v_name cip_temps.name%type;    
+4.begin   
+5.open temp_cursor(1);   
+6.loop   
+7.fetch temp_cursor into v_name;   
+8.exit when temp_cursor%notfound;   
+9.dbms_output.put_line(v_name);   
+10.end loop;   
+11.close temp_cursor;   
+12.end;  
+declare
+cursor temp_cursor(no number) is select name from cip_temps where id=no;
+v_name cip_temps.name%type; 
+begin
+open temp_cursor(1);
+loop
+fetch temp_cursor into v_name;
+exit when temp_cursor%notfound;
+dbms_output.put_line(v_name);
+end loop;
+close temp_cursor;
+end;
+
+二、使用游标更新或删除数据 
+通过使用显示游标，不仅可以一行一行的处理select语句结果，而且也可以更新或删除当前游标的数据，注意，如果要通过游标更新或删除数据，在定义游标时一定要带有for update子句，语法如下： 
+cursor cursor_name(parameter_name datatype) is select_statement for updae [of column_reference][nowait];如上所示：for update子句用于在游标结果集数据上加行共享锁，以防止其他用户在相应行上执行DML操作，当select语句要引用到多张表是，使用of子句可以确定哪些表要加锁，如果没有of子句，则会在select语句所引用的全部表上加锁，nowait用于指定不等待锁，为了更新或删除当前游标行数据，必须在update 或delete语句中引用where current of 子句，语法如下： 
+update table_name set column=.. where current of cursor_name; 
+delete from table_name  where current of cursor_name; 
+1、使用游标更新数据
+
+Oracle代码 
+1.declare   
+2.cursor temp_cursor is select name,address,id from cip_temps for update;   
+3.v_name cip_temps.name%type;   
+4.v_address cip_temps.ADDRESS%type;   
+5.v_id cip_temps.id%type;   
+6.begin   
+7.open temp_cursor;   
+8.loop   
+9.fetch temp_cursor into v_name,v_address,v_id;   
+10.exit when temp_cursor%NOTFOUND;   
+11.if(v_id>4) then   
+12.update cip_temps set name='name'||to_char(v_id),address='address'||to_char(v_id) where current of temp_cursor;   
+13.end if;   
+14.end loop;   
+15.close temp_cursor;   
+16.end;  
+declare
+cursor temp_cursor is select name,address,id from cip_temps for update;
+v_name cip_temps.name%type;
+v_address cip_temps.ADDRESS%type;
+v_id cip_temps.id%type;
+begin
+open temp_cursor;
+loop
+fetch temp_cursor into v_name,v_address,v_id;
+exit when temp_cursor%NOTFOUND;
+if(v_id>4) then
+update cip_temps set name='name'||to_char(v_id),address='address'||to_char(v_id) where current of temp_cursor;
+end if;
+end loop;
+close temp_cursor;
+end;
+
+2、使用游标删除数据  
+
+Oracle代码 
+1.declare   
+2.cursor temp_cursor is select name,address,id from cip_temps for update;   
+3.v_name cip_temps.name%type;   
+4.v_address cip_temps.ADDRESS%type;   
+5.v_id cip_temps.id%type;   
+6.begin   
+7.open temp_cursor;   
+8.loop   
+9.fetch temp_cursor into v_name,v_address,v_id;   
+10.exit when temp_cursor%NOTFOUND;   
+11.if(v_id>2) then   
+12.delete from cip_temps where current of temp_cursor;   
+13.end if;   
+14.end loop;   
+15.close temp_cursor;   
+16.end;  
+declare
+cursor temp_cursor is select name,address,id from cip_temps for update;
+v_name cip_temps.name%type;
+v_address cip_temps.ADDRESS%type;
+v_id cip_temps.id%type;
+begin
+open temp_cursor;
+loop
+fetch temp_cursor into v_name,v_address,v_id;
+exit when temp_cursor%NOTFOUND;
+if(v_id>2) then
+delete from cip_temps where current of temp_cursor;
+end if;
+end loop;
+close temp_cursor;
+end;
+
+3、使用of子句在特定表加行共享锁。 
+如果使用子查询涉及到多张表，那么默认情况下会在所有表上加行共享锁，为了只在特定表上加行共享锁，需要在for update子句后带有of子句，of后面跟字段名，如果跟表名或游标名称，则会报错：标示符无效。示例如下：
+
+Oracle代码 
+1.declare   
+2.cursor gData is select name,address,cip_temps.id from cip_temps,cip_t    
+3.where cip_temps.id=cip_t.id for update  of address;   
+4.rs gData%rowtype;   
+5.begin   
+6.  open gData;   
+7.  loop   
+8.     fetch gData into rs;   
+9.     exit when gData%notfound;   
+10.         if rs.id=1 then   
+11.            delete from cip_temps where current of gData;    
+12.         else   
+13.            update cip_temps set name='塞北的雪' where current of gData;   
+14.         end if;   
+15.     
+16.  end loop;   
+17.  close gData;   
+18.end;  
+declare
+cursor gData is select name,address,cip_temps.id from cip_temps,cip_t 
+where cip_temps.id=cip_t.id for update  of address;
+rs gData%rowtype;
+begin
+  open gData;
+  loop
+     fetch gData into rs;
+     exit when gData%notfound;
+         if rs.id=1 then
+            delete from cip_temps where current of gData; 
+         else
+            update cip_temps set name='塞北的雪' where current of gData;
+         end if;
+  
+  end loop;
+  close gData;
+end;
+
+4、使用nowait子句 
+使用for update语句对被作用于行加锁，如果其他会话已经在被作用于行上加锁，那么默认情况下当前会话要一直等待对方释放锁，通过在for update子句中指定 nowait语句，可以避免等待锁，当指定了nowait子句之后，如果其他会话已经在被作用行加锁，那么当前会话会显示错误提示信息，并退出PL/SQL,示例如下：
+
+Oracle代码 
+1.declare   
+2.cursor gData is select name,address,cip_temps.id from cip_temps,cip_t    
+3.where cip_temps.id=cip_t.id for update  nowait;   
+4.rs gData%rowtype;   
+5.begin   
+6.  open gData;   
+7.  loop   
+8.     fetch gData into rs;   
+9.     exit when gData%notfound;   
+10.         if rs.id=1 then   
+11.            delete from cip_temps where current of gData;    
+12.         else   
+13.            update cip_temps set name='塞北的雪' where current of gData;   
+14.         end if;   
+15.     
+16.  end loop;   
+17.  close gData;   
+18.end;  
+declare
+cursor gData is select name,address,cip_temps.id from cip_temps,cip_t 
+where cip_temps.id=cip_t.id for update  nowait;
+rs gData%rowtype;
+begin
+  open gData;
+  loop
+     fetch gData into rs;
+     exit when gData%notfound;
+         if rs.id=1 then
+            delete from cip_temps where current of gData; 
+         else
+            update cip_temps set name='塞北的雪' where current of gData;
+         end if;
+  
+  end loop;
+  close gData;
+end;
+
+三、游标for循环 
+   使用游标for循环是循环游标最简单的方法，oracle会隐含打开游标、循环提取数据、关闭游标，语法如下： 
+     for record_name  in cursor_name  loop 
+           .......... 
+     end loop; 
+如上所示：cursor_name是已经定义的游标名称，record_name是oracle隐含定义的记录变量。 
+1、使用游标for循环 
+   当使用游标开发程序时，建议使用for循环，从而简化代码程序，示例如下：
+
+Oracle代码 
+1.declare   
+2.cursor temp_cursor is  select name,age,address,id from cip_temps;   
+3.begin   
+4.for emp_record in temp_cursor loop   
+5.dbms_output.put_line(temp_cursor%rowcount||'第一行数据:'||emp_record.name||':'|| emp_record.age||':'||  emp_record.address||':'|| emp_record.id);   
+6.end loop;   
+7.end;  
+declare
+cursor temp_cursor is  select name,age,address,id from cip_temps;
+begin
+for emp_record in temp_cursor loop
+dbms_output.put_line(temp_cursor%rowcount||'第一行数据:'||emp_record.name||':'|| emp_record.age||':'||  emp_record.address||':'|| emp_record.id);
+end loop;
+end;
+
+2、在游标for循环时直接使用子查询
+
+Sql代码 
+1.declare      
+2.begin      
+3.for emp_record in (select * from cip_temps) loop      
+4.dbms_output.put_line('第一行数据:'||emp_record.name||':'|| emp_record.age||':'||  emp_record.address||':'|| emp_record.id);      
+5.end loop;      
+6.end;

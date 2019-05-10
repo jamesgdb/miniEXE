@@ -1,0 +1,110 @@
+﻿<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+<body>
+  <form>
+    <input type="checkbox"  id="checkbox_checkbox" value="checkbox_checkbox"   onclick='getselect(this.id)' />全选/全部选<br>
+    <input type="checkbox"  id="checkbox_checkbox1" value="checkbox_checkbox1" onclick='getselect(this.id)'/>checkbox1
+    <input type="checkbox"  id="checkbox_checkbox2" value="checkbox_checkbox2"  onclick='getselect(this.id)'/>checkbox2
+    <input type="checkbox"  id="checkbox_checkbox3" value="checkbox_checkbox3"  onclick='getselect(this.id)'/>checkbox3
+    <input type="checkbox"  id="checkbox_checkbox4" value="checkbox_checkbox4"  onclick='getselect(this.id)'/>checkbox4
+	<input type="button"  value="checkAll" id="checkAll" ></input>
+	<input type="button"  value="checkNo" id="checkNo" ></input>
+	<input type="button"  value="checkRev" id="checkRev" ></input>
+	<input type="button"  value="提交" id="send" ></input><br>
+  </form>
+</body>
+<script type="text/javascript"> 
+ function getselect(value){
+    var list =value.split("_");
+   // 如果点击的是父类的复选框
+   if(list[0]==list[1]){
+	   //全选
+	        if(($("#"+value)[0]).checked){
+	         $("input[type=checkbox][id^="+list[0]+"]").attr("checked","checked");
+	        }else{
+	    //全部选
+	        $("input[type=checkbox][id^="+list[0]+"]").attr("checked",null);
+	       }
+   }
+     // 如果点击的子类的复选框
+     if(list[0]!=list[1]){
+       var flag= false;
+      //如果子类为选中状态，那么直接给他的父类也为选中状态
+       if(($("#"+value)[0]).checked){
+           $("input[type=checkbox][id^="+list[0]+"][id$="+list[0]+"]").attr("checked","checked");
+       }else{
+       //如果子类为非选中状态，那么判断其余的子类有选中状态的话那么父类为选中状态，
+       //var ccc= $("input[type=checkbox][id^="+list[0]+"]:not([id$="+list[0]+"])");
+        $("input[type=checkbox][id^="+list[0]+"]:not([id$="+list[0]+"])").each(function(){
+           if(this.checked){
+               flag=true;
+               return;
+     }
+   });
+      if(!flag){
+        $("input[type=checkbox][id^="+list[0]+"][id$="+list[0]+"]").attr("checked",null);
+       }
+     }
+   }
+}
+  $("#checkAll").click( function () {
+//     $("input[name=hao]").attr("checked","checked");
+      $("input[type=checkbox]").each(function(index,domElm){
+       $(domElm).attr("checked","checked");
+       
+      });
+    });
+    
+  $("#checkNo").click( function () {
+//     $("input[name=hao]").attr("checked",null);
+      $("input[type=checkbox]").each(function(index,domElm){
+       $(domElm).attr("checked",null);
+      });
+    });
+    
+     $("#checkRev").click( function () {
+//     $("input[name=hao]").attr("checked",null);
+	      $("input[type=checkbox]").each(function(index,domElm){
+	      if(this.checked){
+	          $(domElm).attr("checked",null);
+	      }else{
+	       $(domElm).attr("checked","checked");
+	      }
+	      });
+   });
+    
+ 
+   
+//    $("#checkbox_checkbox").click( function () {
+// 		if(this.checked){
+// 		 $("input[type=checkbox]").attr("checked","checked");
+// 		}else{
+// 		$("input[type=checkbox]").attr("checked",null);
+// 		}
+//     });
+  
+  </script>
+</html>

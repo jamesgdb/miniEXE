@@ -1,0 +1,5 @@
+﻿ ALTER TABLE event_log_realtime ADD PARTITION P20300101 VALUES LESS THAN(TO_DATE('2030/01/01', 'YYYY-MM-DD'));增加分区
+ alter table USER_TEST.DAM_DISPATCH_FILES_INFORMATION drop constraint DAM_DISPATCH_FILES_INFORMAT_PK; 删除主索引
+select * from  user_indexes where status <> 'VALID' 查出失效的索引
+  SELECT * FROM  USER_INDEXES T WHERE STATUS <> 'VALID' AND  STATUS <> 'N/A' AND T.TABLE_OWNER='TMRPT';
+  alter index   index_name rebuild';  重建索引

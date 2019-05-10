@@ -1,0 +1,52 @@
+﻿package com.vprisk.edm.dq.dao.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.vprisk.edm.dm.UUIDUtil;
+import com.vprisk.edm.dq.dao.DqBasicCheckRuleDao;
+import com.vprisk.edm.dq.entity.DqBasicCheck;
+import com.vprisk.edm.dq.entity.DqBasicCheckRule;
+import com.vprisk.edm.dq.entity.DqCheckReportBase;
+import com.vprisk.rmplatform.common.dao.hibernate.BaseHibernateDao;
+
+/**
+ * Program Name: DqCheckBaseDaoImpl <br>
+ * Description: 质量检查基表DaoImpl<br>
+ * 
+ * @author name: renmm <br>
+ *         Written Date: 2014-3-4 <br>
+ *         Modified By: <br>
+ *         Modified Date: <br>
+ */
+
+@Repository("dqBasicCheckRuleDao")
+public class DqCheckBaseRuleDaoImpl extends BaseHibernateDao<DqBasicCheckRule, String>
+		implements DqBasicCheckRuleDao {
+
+	@Override
+	public void deleteDqBasicCheckRule(String checkCode) {
+		String  sql = "DELETE FROM EDM_DQ_BASIC_CHECK_RULE T WHERE T.CHECK_CODE ='"+checkCode+"'"; 
+		 super.executeBySql(sql);
+	}
+
+	@Override
+	public DqBasicCheck saveDqBasicCheck(String checkCode, String[] ruleId) {
+     StringBuffer sql =new StringBuffer();
+//   "INSERT INTO EDM_DQ_BASIC_CHECK_RULE(CHECK_RULE_ID,CHECK_CODE,FILTER_CODE) VALUES ('111','','')";
+	for(int i=0;i<ruleId.length;i++){
+//	String uuid =	UUIDUtil.getUUID();
+//	 	sql.append("INSERT INTO EDM_DQ_BASIC_CHECK_RULE(CHECK_RULE_ID,CHECK_CODE,FILTER_CODE) VALUES ('"+UUIDUtil.getUUID()+",");	
+//	 	sql.append("'"+checkCode+"',");
+//	 	sql.append("'"+ruleId[i]+"'");
+//	 	sql.append(")");
+//		super.executeBySql(sql.toString());
+//		super.save(object)
+		}
+        
+		return null;
+	}
+
+
+}

@@ -1,0 +1,4 @@
+﻿ public static boolean isNum(String str)  {  //一个静态方法，判断你输入的是不是数字
+			
+				return str.matches("^[-+]?(([0-9]+)([.]([0-9]+))?|([.]([0-9]+))?)$");	
+     }  

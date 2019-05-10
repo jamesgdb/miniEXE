@@ -1,0 +1,20 @@
+﻿// 		 document.URL=location.href   ;
+// 		window.location.reload();
+		grid.reload();
+		
+		
+		
+		
+		
+$(function(){
+$(".datagrid-toolbar").append("<input type='checkbox'  id='re_fresh'  style='position:absolute;top:5px;right:500px;'  onclick=myrefresh(); /><span style='position:absolute;top:3px;right:444px;'>自动刷新</span>");
+});
+        
+function myrefresh(){
+	if($("#re_fresh")){
+		if($("#re_fresh").attr("checked")){
+		 grid.reload(); 
+		 setTimeout('myrefresh()',5000); //指定5秒刷新一次 
+		}
+	}
+}

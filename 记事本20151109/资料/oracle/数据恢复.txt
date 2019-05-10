@@ -1,0 +1,13 @@
+﻿删除表后，可以采用如下操作：
+在 user_recyclebin中找到最近操作过的表名称，然后用闪回（只能用于10G及以上版本）。
+FLASH BACK TABLE TABLE_NAME TO BEFORE DROP;
+如果是删了或修改里面的数据，可以先建立一个快表将删除修改之前状态的数据找回到这个表中：
+CREATE TABLE QUICK_TABLE AS
+SELECT * FROM TABLE_NAME AS OF TIMESTAMP SYSDATE-1/24 (一小时前的)，减去的时间可以自己定 如：select * from TABLE_NAME  AS OF TIMESTAMP  (SYSTIMESTAMP - INTERVAL '1' MINUTE)
+
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+﻿create or replace function GET_NAME_BY_CODE(
+        DATA_CODE VARCHAR2 ,--编号
+        TYPE_CODE VARCHAR2 --类型
+        ) return VARCHAR2
+         is
+     DATE_NAME VARCHAR(100);
+--AUTHOR:毛小明
+--根据数据字典里的值获得名称 如省份02返回河北
+begin
+  select O.AM_NAME
+  into DATE_NAME
+  from AM_OPTION O,AM_DICTIONARY D
+  where  O.AM_DICTIONARY_ID = D.AM_ID
+  and  D.AM_CODE = TYPE_CODE
+  and O.AM_VALUE = DATA_CODE
+  and ROWNUM < 2;
+  if DATE_NAME is null then
+     DATE_NAME := DATA_CODE;
+  end if;
+  return DATE_NAME;
+  exception
+  when NO_DATA_FOUND then
+   DATE_NAME := DATA_CODE;
+   return DATE_NAME;
+end;

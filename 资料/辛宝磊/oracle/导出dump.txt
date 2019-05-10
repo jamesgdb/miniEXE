@@ -1,0 +1,64 @@
+﻿Oracle数据库数据导出dump方式
+ 
+linux下   www.2cto.com  
+Java代码  
+[root@infodb111 ~]# su - oracle  
+[oracle@infodb111 /]$ mkdir /oracle/dump_dir  
+[oracle@infodb111 /]$ sqlplus / as sysdba  
+SQL> create directory dump_dir as '/oracle/dump_dir';  
+SQL> grant read,write on directory dump_dir to scott;  
+Grant succeeded  
+SQL> grant read,write on directory biappdump to maxthonbi;  
+ 
+创建脚本文件 
+  www.2cto.com  
+Java代码  
+   
+[root@infodb111 ~]# vim biappdbback.sh   
+  
+#!/bin/sh  
+D=maxthon_$(date +%Y%m%d);  
+export D;  
+expdp 'maxthon/maxthon@orcl' directory=biappdump dumpfile=${D}.dmp  
+  
+//保存退出  
+  
+授权：  
+  
+[root@infodb111 ~]# chown oracle:dba biappdbback.sh   
+[root@infodb111 ~]# chmod 775 biappdbback.sh   
+ 
+ 
+ 
+运行 
+Java代码  
+[root@infodb111 ~]$ ./biappdbback.sh  
+  
+Export: Release 10.2.0.4.0 - Production on Wednesday, 26 May, 2010 11:02:10  
+  
+Copyright (c) 2003, 2007, Oracle. All rights reserved.  
+  
+Connected to: Oracle Database 10g Enterprise Edition Release 10.2.0.4.0 - Production  
+With the Partitioning, OLAP, Data Mining and Real Application Testing options  
+ORA-39006: internal error  
+ORA-39213: Metadata processing is not available  
+ 
+发现有错误，查找错误原因 
+Java代码  
+[oracle@infodb111 /]$ oerr ora 39006  
+39006, 00000, "internal error"  
+// *Cause: An unexpected error occurred while processing a Data Pump job.  
+//          Subsequent messages supplied by DBMS_DATAPUMP.GET_STATUS  
+//          will further describe the error.  
+// *Action: Contact Oracle Customer Support.  
+[oracle@infodb111 /]$ oerr ora 39213  
+39213, 00000, "Metadata processing is not available"  
+// *Cause: The Data Pump could not use the Metadata API. Typically,  
+//          this is caused by the XSL stylesheets not being set up properly.  
+// *Action: Connect AS SYSDBA and execute dbms_metadata_util.load_stylesheets  
+//          to reload the stylesheets.  
+ 
+根据oerr ora 39213提示，执行exec dbms_metadata_util.load_stylesheets; 
+ 
+再进行导出正常，问题解决。 
+ 

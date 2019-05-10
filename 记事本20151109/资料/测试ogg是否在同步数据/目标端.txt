@@ -1,0 +1,22 @@
+﻿select * from event_log t where event_id = '6a57:02a2cbd31:15ec2251_TRX1'
+and short_date = '20150530';
+   
+select * from event_log_realtime t where event_id = '6a57:02a2cbd31:15ec2251_TRX1'
+ and short_date = '20150530';
+   
+   select * from event_log_update t where event_id = '6a57:02a2cbd31:15ec2251_TRX1'
+   and short_date = '20150530';
+
+   select * from acspuseraccount t where t.acspid='11213';
+
+   select * from desktops t where t.pmid='11';
+
+   select * from pm_policy t where t.id='11';
+
+   select * from pm_rule t where t.id='11';
+
+   select * from userchangehistory t where t.uhid='112111';
+
+   select * from users t where t.username='11';
+
+   select * from FACT_META_DATA t where t.id='112222';

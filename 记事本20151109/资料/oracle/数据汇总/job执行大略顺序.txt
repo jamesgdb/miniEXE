@@ -1,0 +1,45 @@
+﻿append_result_when_update, 五分钟跑一次，进行更新表用的，relatime到mintue
+batch_transfor_data, 8.汇总从小时为粒度到年的所有汇总。调用了
+		get_data_from_day_2_month, 
+		get_data_from_day_2_week, 
+		get_data_from_halfyear_2_year, 
+		get_data_from_hour_2_day, 
+create_partition, 2.每天晚上23点建立第二天的分区
+create_partition_when_setup, 1：第一次运行的时候运行建立分区，初始化运行一次
+drop_partition, 10，删除90天以前的log表。三天前real表。九十天以前的分钟和小时表
+d_p_4_sit, 删除所有分区
+get_data_2_auth_m_and_re_cc, 
+get_data_2_cli_beha_als_cc, 
+get_data_2_device_risk_i_b, 
+get_data_2_fixdate_sololine_t, 
+get_data_2_pro_informat_b, 
+get_data_from_day_2_month, 
+get_data_from_day_2_week, 
+get_data_from_halfyear_2_year, 
+get_data_from_hour_2_day, 
+get_data_from_minute_2_hour, 6.调用
+get_data_from_month_2_halfyear, 
+get_data_from_month_2_quarter, 
+get_data_from_realtim_2_minute, 4.负责从real到min并且汇总到辅助表。
+insert_collect_data_log, 除固定周期表外的所有表往里面插的。
+insert_collect_data_log_4_fix, 固定周期的报表往日志表里面插
+job_batch_transfor_data,  7.调用batch_transfor_data，还执行   
+                       get_data_2_auth_m_and_re_cc, 
+			get_data_2_cli_beha_als_cc, 
+			get_data_2_device_risk_i_b, 
+			get_data_2_fixdate_sololine_t, 
+			get_data_2_pro_informat_b,	
+job_create_partition, 创建并删除分区
+job_make_up_batch_data, 
+job_make_up_minute_2_hour, 捡漏分钟表
+job_make_up_realtime_2_minute, 11,调用的是get_data_from_realtim_2_minute 找到汇总时间最大值，然后前推到realtime的最小时间值，然后进行汇总hasused=“n”并且汇总次数小于等于三，并且汇总状态不是R（正在汇总）。
+job_minute_2_hour,   5.调用的是min_2_hour  每小时执行一次。
+job_realtime_2_minute, 3：通过这个job调用real_to_min。每五分钟执行一次
+test_ins_evt_log_rtime_4_sit, 
+test_ins_evt_log_r_u_4_uat, 
+truncate_and_drop_partition, 9.调用drop_partition
+t_xinbl_update, 
+update_collect_data_log  
+
+
+

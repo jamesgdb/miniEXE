@@ -1,0 +1,2 @@
+﻿class的属性都是以 “easyui-”开始，然后加上标签名字
+console.info($('#id'));做调试用

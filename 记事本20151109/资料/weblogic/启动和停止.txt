@@ -1,0 +1,5 @@
+﻿
+启动和停止weblogic
+/opt/Oracle/Middleware/user_projects/domains/base_domain/bin
+张巧军 15:40:30
+启动的时候：nohup ./startWeblogic.sh &

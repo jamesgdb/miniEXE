@@ -1,0 +1,9 @@
+﻿增加样式
+$("#one").attr("class","mini");
+$("#one").addClass("mini");
+移除样式
+$("#one").removeClass("mini");
+样式翻转
+$("#one").toggleClass("mini");
+判断是否含有某个样式
+$("#one").hasClass("mini");

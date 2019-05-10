@@ -1,0 +1,11 @@
+﻿CREATE OR REPLACE PROCEDURE purge_recyclebin
+       AS
+      
+       VAR_SQL VARCHAR2(2000);
+  BEGIN
+      
+               VAR_SQL :='purge recyclebin';
+               execute immediate  VAR_SQL;
+              
+
+END purge_recyclebin;

@@ -1,0 +1,69 @@
+﻿--------@Embedded注解----------------------------
+此种情况下wife不作为一个entity，而是作为husband表的一部分存在。
+create table Husband (hus_id number(10,0) not null, hus_name varchar2(255 char), wife_id number(10,0) not null, wife_name varchar2(255 char), primary key (hus_id))
+
+-----------------------------------------------------------------------------------------------------------------------
+package com.gdb.entity;
+
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+
+
+@Entity
+public class Husband {
+	private int hus_id;
+	private String hus_name;
+	private Wife wife;
+	@Id
+	@GeneratedValue
+	public int getHus_id() {
+		return hus_id;
+	}
+
+	public void setHus_id(int hus_id) {
+		this.hus_id = hus_id;
+	}
+
+	public String getHus_name() {
+		return hus_name;
+	}
+
+	public void setHus_name(String hus_name) {
+		this.hus_name = hus_name;
+	}
+	@Embedded
+	public Wife getWife() {
+		return wife;
+	}
+
+	public void setWife(Wife wife) {
+		this.wife = wife;
+}
+-------------------------------------------------------------------------------
+package com.gdb.entity;
+
+
+public class Wife {
+	private int wife_id;
+	private String wife_name;
+	public int getWife_id() {
+		return wife_id;
+	}
+
+	public void setWife_id(int wife_id) {
+		this.wife_id = wife_id;
+	}//    @Id
+	public String getWife_name() {
+		return wife_name;
+	}
+
+	public void setWife_name(String wife_name) {
+		this.wife_name = wife_name;
+	} 
+
+
+
+}

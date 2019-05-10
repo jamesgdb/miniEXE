@@ -1,0 +1,8 @@
+﻿增加：
+      <entry>
+		<resourceId>lockOrNo</resourceId>
+		<resourceName>
+		    <en_US>lock or no</en_US>
+		    <zh_CN>锁定/解锁用户数量 </zh_CN>
+	    </resourceName>
+	</entry>

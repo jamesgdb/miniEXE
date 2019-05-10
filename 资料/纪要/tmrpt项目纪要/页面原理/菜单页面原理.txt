@@ -1,0 +1,44 @@
+﻿DomainServiceImpl.java中getFacade(String id)方法调用后在item2页面中进行显示。进入的页面在view_system.xml中进行定义。
+每次点击load执行的时候会加载所有信息。
+
+
+字典管理：query.js------------页面是query.jsp
+
+
+
+用户登录过程中先执行LogonServiceImpl中的  LogonService.login()方法；之后在home.js中加载dhtmlxEvent(window,"load",function(){}事件中的 LogonService.getMenuTree("0", "menu",       "use", function(result){
+    	tree.loadXMLString(result[0]);
+    	tree.openAllItems("menu");
+    });
+    getMenuTree会调用 SystemUtilsImpl.getRepository(String)   -----》applicationContext.getBean      -----》StringUtils.uncapitalize(domainCode) 首字母小写。
+    对于菜单Menu 返回的就是menuRepository实体类
+    通过getTree（）方法拼接成一个xml（见页面下的菜单拼接页面，树状），
+    返回到home.js中tree.openAllItems("menu")做显示；
+    
+    
+    
+    tree的id为menu：通过增加systemEvent(tree, "onClick", "doOnTreeNodeClick")事件来在item3中动态的改变要显示的jsp
+    如：
+    function doOnTreeNodeClick(nodeId){
+	alert(nodeId);
+	layout.items[2].expand();
+    
+	if(nodeId.length == 32 && nodeId.indexOf("?") == -1){
+		layout.items[2].attachURL("manage/view/blank");
+	}else{
+		layout.items[2].attachURL("manage/view/"+nodeId);
+	}
+}
+    
+    .RepositoryImpl.query---------------》RepositoryImpl.setPageInfo中有info日志输出！ 他 中调用条件查询：RepositoryImpl.addQueryCondition
+    
+    菜单管理和对象管理  ----------------》 DomainService.getTreeGridData()；
+    
+    
+    
+    
+    
+    
+    
+    
+    

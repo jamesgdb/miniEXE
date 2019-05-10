@@ -1,0 +1,25 @@
+﻿1.查看是不是linux系统
+[vp@TS-VM-58 ~]$ uname -a
+Linux TS-VM-58 2.6.32-358.el6.x86_64 #1 SMP Fri Feb 22 00:31:26 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
+
+2.查看数据库是否正确安装，如果不知道具体用户的情况下，可用如下语句：
+ [oracle@TS-VM-58 ~]$ sqlplus / as sysdba
+3.相对路径的最好是给用户提示信息，可能用户下并没有此路径或者进入的初始路径并不是根目录，如：与实际路径一致即可，
+[oracle@TS-VM-58 ~]$ cd /home/oracle/sqlscript
+-bash: cd: /home/oracle/sqlscript: No such file or directory
+[oracle@TS-VM-58 ~]$ 
+
+4.建议，安装语句类的背景添加背景颜色，把执行语句字体调一致
+5.修改表空间大小的语句重复，建议这个删掉一个然后把修改的语句加到备注里面或者加上说明。
+6. ”在文件~/.bashrc中添加如下代码“  ，如果存在“NLS_LANG”应该是修改， 
+7.创建的 “TBS_EDM_IDX”表空间和 脚本@03.dms-table.sql中的表空间“TBS_DMS_IDX”不一致
+8.建议将导入的非必须初始化表数据清除 ：@05.dms-table-data.sql
+9.脚本中没有临时表，存储过程编译有错误，建议先添加临时表，然后在添加存储过程，否则数据库中存储过程无法正常编译，
+10 “09.elt-data.sql需要在ETL数据库中初始化。请联系ETL项目负责人。”  这个“09”应该改成“10” 或者确认好正确编号。
+09.elt-data.sql
+SP2-0734: unknown command beginning "09.elt-dat..." - rest of line ignored.
+11.建议安装步骤中默认点”下一步“也增加截图，引导安装者。
+12.启动的时候，提示与用户选择”为所有请求提供服务“。
+
+
+

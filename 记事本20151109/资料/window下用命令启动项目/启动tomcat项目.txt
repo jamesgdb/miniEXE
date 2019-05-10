@@ -1,0 +1,133 @@
+﻿C:\Users\Administrator>d:
+
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>cd D:\yucheng1\apache\apache-tomcat-
+6.0.35\bin
+
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>./srartup.bat
+'.' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>dir
+ 驱动器 D 中的卷是 电影之家
+ 卷的序列号是 8E62-8643
+
+ D:\yucheng1\apache\apache-tomcat-6.0.35\bin 的目录
+
+2022/09/22  15:31    <DIR>          .
+2022/09/22  15:31    <DIR>          ..
+2011/11/28  11:20            22,705 bootstrap.jar
+2011/11/28  11:20             2,374 catalina-tasks.xml
+2013/05/06  17:18            12,082 catalina.bat
+2013/05/06  17:17            12,076 catalina.bat.bak
+2011/11/28  11:20            17,708 catalina.sh
+2011/11/28  11:20           199,623 commons-daemon-native.tar.gz
+2011/11/28  11:20            24,172 commons-daemon.jar
+2011/11/28  11:20             1,342 cpappend.bat
+2011/11/28  11:20             2,108 digest.bat
+2011/11/28  11:20             1,689 digest.sh
+2011/11/28  11:20             5,062 service.bat
+2011/11/28  11:20             3,150 setclasspath.bat
+2011/11/28  11:20             4,114 setclasspath.sh
+2011/11/28  11:20             2,108 shutdown.bat
+2011/11/28  11:20             1,628 shutdown.sh
+2011/11/28  11:20             2,109 startup.bat
+2011/11/28  11:20             2,023 startup.sh
+2011/11/28  11:20         1,168,384 tcnative-1.dll
+2011/11/28  11:20            32,277 tomcat-juli.jar
+2011/11/28  11:20           249,259 tomcat-native.tar.gz
+2011/11/28  11:20            96,256 tomcat6.exe
+2011/11/28  11:20           102,400 tomcat6w.exe
+2011/11/28  11:20             3,479 tool-wrapper.bat
+2011/11/28  11:20             3,472 tool-wrapper.sh
+2011/11/28  11:20             2,113 version.bat
+2011/11/28  11:20             1,632 version.sh
+              26 个文件      1,975,345 字节
+               2 个目录 27,620,577,280 可用字节
+
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>startup.bat
+'JAVA_OPTS' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+Using CATALINA_BASE:   "D:\yucheng1\apache\apache-tomcat-6.0.35"
+Using CATALINA_HOME:   "D:\yucheng1\apache\apache-tomcat-6.0.35"
+Using CATALINA_TMPDIR: "D:\yucheng1\apache\apache-tomcat-6.0.35\temp"
+Using JRE_HOME:        "C:\Program Files\Java\jdk1.6.0_10"
+Using CLASSPATH:       "D:\yucheng1\apache\apache-tomcat-6.0.35\bin\bootstrap.ja
+r"
+'JAVA_OPTS' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+'-server' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+文件名、目录名或卷标语法不正确。
+文件名、目录名或卷标语法不正确。
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>shupdown.bat
+'shupdown.bat' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin> shutdown.bat
+'JAVA_OPTS' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+Using CATALINA_BASE:   "D:\yucheng1\apache\apache-tomcat-6.0.35"
+Using CATALINA_HOME:   "D:\yucheng1\apache\apache-tomcat-6.0.35"
+Using CATALINA_TMPDIR: "D:\yucheng1\apache\apache-tomcat-6.0.35\temp"
+Using JRE_HOME:        "C:\Program Files\Java\jdk1.6.0_10"
+Using CLASSPATH:       "D:\yucheng1\apache\apache-tomcat-6.0.35\bin\bootstrap.ja
+r"
+'JAVA_OPTS' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+'-server' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+文件名、目录名或卷标语法不正确。
+文件名、目录名或卷标语法不正确。
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>startup.bat
+'JAVA_OPTS' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+Using CATALINA_BASE:   "D:\yucheng1\apache\apache-tomcat-6.0.35"
+Using CATALINA_HOME:   "D:\yucheng1\apache\apache-tomcat-6.0.35"
+Using CATALINA_TMPDIR: "D:\yucheng1\apache\apache-tomcat-6.0.35\temp"
+Using JRE_HOME:        "C:\Program Files\Java\jdk1.6.0_10"
+Using CLASSPATH:       "D:\yucheng1\apache\apache-tomcat-6.0.35\bin\bootstrap.ja
+r"
+'JAVA_OPTS' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+'-server' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+文件名、目录名或卷标语法不正确。
+文件名、目录名或卷标语法不正确。
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>dir
+ 驱动器 D 中的卷是 电影之家
+ 卷的序列号是 8E62-8643
+
+ D:\yucheng1\apache\apache-tomcat-6.0.35\bin 的目录
+
+2022/09/22  15:31    <DIR>          .
+2022/09/22  15:31    <DIR>          ..
+2011/11/28  11:20            22,705 bootstrap.jar
+2011/11/28  11:20             2,374 catalina-tasks.xml
+2013/05/06  17:18            12,082 catalina.bat
+2013/05/06  17:17            12,076 catalina.bat.bak
+2011/11/28  11:20            17,708 catalina.sh
+2011/11/28  11:20           199,623 commons-daemon-native.tar.gz
+2011/11/28  11:20            24,172 commons-daemon.jar
+2011/11/28  11:20             1,342 cpappend.bat
+2011/11/28  11:20             2,108 digest.bat
+2011/11/28  11:20             1,689 digest.sh
+2011/11/28  11:20             5,062 service.bat
+2011/11/28  11:20             3,150 setclasspath.bat
+2011/11/28  11:20             4,114 setclasspath.sh
+2011/11/28  11:20             2,108 shutdown.bat
+2011/11/28  11:20             1,628 shutdown.sh
+2011/11/28  11:20             2,109 startup.bat
+2011/11/28  11:20             2,023 startup.sh
+2011/11/28  11:20         1,168,384 tcnative-1.dll
+2011/11/28  11:20            32,277 tomcat-juli.jar
+2011/11/28  11:20           249,259 tomcat-native.tar.gz
+2011/11/28  11:20            96,256 tomcat6.exe
+2011/11/28  11:20           102,400 tomcat6w.exe
+2011/11/28  11:20             3,479 tool-wrapper.bat
+2011/11/28  11:20             3,472 tool-wrapper.sh
+2011/11/28  11:20             2,113 version.bat
+2011/11/28  11:20             1,632 version.sh
+              26 个文件      1,975,345 字节
+               2 个目录 27,620,577,280 可用字节
+
+D:\yucheng1\apache\apache-tomcat-6.0.35\bin>

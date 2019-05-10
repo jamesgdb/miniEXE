@@ -1,0 +1,23 @@
+﻿Timestamp 时间戳
+刷新另外一个页面  window.parent.main.document.location.reload();main是一个frame的name
+获取session 
+String admin =(String)session.getAttribute("admin");
+if(admin==null||admin.equals("true")){
+response.sendRedirect("login.jsp");
+}
+设置id自增：   id       INT(20) not null AUTO_INCREMENT
+查看建表语句：show create table tablename；
+删除全表：delete from tablename；
+设置表不自动提交：conn.setAutoCommit(false);
+查看表名字：document.form["formname"].name.vlue=参数;
+立即执行javaScript语句；test();eval(test());
+链接到一个frame中的jsp：window.parent.frames["framename"].loaction.href="test.jsp";可以传递参数
+request.setCharacterEncoding("gb2312");
+request.getParameter("name");
+实现数据库分页 定义一个函数Page(pagenum,pagesize){}
+SELECT * FROM  (
+SELECT A.*, rownum r FROM
+(SELECT * FROM event_log ) A
+WHERE rownum <= 5*10
+) B
+WHERE r > 4*10

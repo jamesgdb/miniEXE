@@ -1,0 +1,90 @@
+﻿StringUtils全览 
+
+
+org.apache.commons.lang.StringUtils中常用的方法，这里主要列举String中没有，且比较有用的方法：
+
+1. 检查字符串是否为空：
+
+static boolean isBlank(CharSequence str) 判断字符串是否为空或null; 
+static boolean isNotBlank(CharSequence str) 判断字符串是否非空或非null;
+
+StringUtils.isBlank("a"); 
+返回结果为: false;
+
+2. 缩进字符串：
+
+static String abbreviate(String str, int maxWidth) 缩进字符串，第二个参数至少为4（包括...）
+
+StringUtils.abbreviate("abcdefg", 20); 
+返回结果为：abcdefg （正常显示）
+
+StringUtils.abbreviate("abcdefg", 4); 
+返回结果为：a...
+
+3. 首字母大写：
+
+static String capitalize(String str) 首字母大写 
+static String uncapitalize(String str)首字母小写
+StringUtils.capitalize("abcdefg"); 
+返回结果：Abcdefg
+
+4. 字符串显示在一个大字符串的位置：
+static String center(String str, int size); 默认以空格填充 
+static String center(String str, int size, String padString); 其余位置字符串填充 
+public static String leftPad(String str,int size); 左侧空格填充 
+public static String leftPad(String str,int size,String padStr);左侧字符串填充 
+public static String rightPad(String str,int size); 左侧空格填充 
+public static String rightPad(String str,int size,String padStr);左侧字符串填充 
+StringUtils.center("abcdefg", 20)； 
+返回结果：      abcdefg       
+StringUtils.center("abcdefg", 20,"*_"); 
+返回结果：*_*_*_abcdefg*_*_*_*
+StringUtils.leftPad("abc", 10, "*"); 
+返回结果：*******abc
+
+5. 重复字符串次数
+
+   static String repeat(String str, int repeat);
+
+   StringUtils.repeat("abc", 5); 
+返回结果：abcabcabcabcabc
+
+6. 是否全是大写，是否全是小写（3.0版本）
+
+   public static boolean isAllLowerCase(String str); 
+public static boolean isAllUpperCase(String str);
+
+   StringUtils.isAllLowerCase("abC"); 
+返回结果：false
+
+7. 是否都是由字母组成：
+
+   public static boolean isAlpha(String str); 只由字母组成 
+public static boolean isAlphaSpace(String str); 只有字母和空格组成 
+public static boolean isAlphanumeric(String str);只由字母和数字组成 
+public static boolean isAlphanumericSpace(String str);只由字母数字和空格组成 
+public static boolean isNumeric(String str);只由数字组成 
+public static boolean isNumericSpace(String str);只由数字和空格组成
+
+   StringUtils.isAlpha("a2bdefg"); 
+返回结果：false
+
+8. 小字符串在大字符串中的匹配次数
+
+public static int countMatches(String str,String sub);
+
+StringUtils.countMatches("ababsssababa", "ab"); 
+返回结果：4
+
+9. 字符串倒转
+
+   public static String reverse(String str);
+
+   StringUtils.reverse("abcdef"); 
+返回结果：fedcba
+
+10. 大小写转换，空格不动 
+public static String swapCase(String str);
+StringUtils.swapCase("I am a-A*a") 
+返回结果：i AM A-a*A
+

@@ -1,0 +1,76 @@
+﻿核心幵发接口介绍
+1	hibernate_0500_CoreAPI
+2	Hibernate API文档需要单独下载
+3	Configuration
+a)	AnnotationConfiguration
+b)	进行配置信息的管理
+c)	用来产生SessionFactory
+d)	可以在configure方法中指定hibernate配置文件
+e)	只气关注一个方法即：buildSessionFactory
+---------------------------------------------------------------------------------------------
+4	SessoinFactor
+a)	用来产生和管理Session
+b)	通常情况下每个应用只需要一个SessionFactory
+c)	除非要访间多个数据库的情况
+d)	关注两个方法即：openSession getCurrentsession
+i.	open session每次都是新的，需要close
+ii.	getCurrentsession从上下文找，如果有，用旧的，如果没有，建新的
+1.	用途，界定事务边界
+2.	事务提交自动close
+3.	上下文配置可参见xml文件中
+	    <property name="current_session_context_classs">thread</property>
+4.	current_session_context_class (jta、thread常用 managed、custom.Class少用) 
+	a) thread 使用connection 但数据库连接管理事务
+	b）jta （全称java transaction api）-java分布式事务管理（多数据库访问）
+		jta由中间件提供（jboss WebLogic等，tomcat不支持）
+5	Session
+a)	管理一个数据库的任务单元（简单说就是增 删 改 查）
+b)	方法(CRUD)
+---------------------------------------------------------------------------------------------
+i.	Save()		session.save(对象);
+ii.	Delete		session.delete(对象);
+iii.	Load		Student s1=(Student)session.load(Student.class, 1);
+iv.	Get			Student s1=(Student)session.get(Student.class, 1);
+v.	get与load的区别（面试重点，原理）
+1.	不存在对应记录时表现不一样
+2.	load返回的是代理对象，等到真正用到对象的内容时才发出sql语句
+3.	get直接从数据库加载，不会延迟
+---------------------------------------------------------------------------------------------
+vi.	updates		
+session.update(对象);
+1.	用来更新detached对象，更新完成后转为persistent状态
+2.	更新transient对象会报错
+3.	更新自己设定id的transient对象可以（数据库有对应记录）
+4.	persistent状态的对象只要设定（如:t.setName…）不同字段就会发生更新
+5.	更新部分更改的字段
+a)	xml 设定 property 标签的 update 属性，annotation 设定@Column 的 updatable
+	属性，不过这种方式很少用，因为不灵活（忘记）
+b)	使用xml中的dynamic-update，JPA1.0 Annotation 没有对应的属性，hibernate 扩
+	展？ 
+i. 同一个session可以，跨session不行，不过可以用merge()(不重要）
+c)	使用 HQL(EjBQL)(建议）
+---------------------------------------------------------------------------------------------
+vii.	saveOrUpdate()	
+	session.saveOrUpdate(对象);
+	---------------------------------------------------------------------------------------------
+viii.	clear方法			session.clear();
+1.无论是load还是get,都会首先査找缓存（一级缓存)，如果没有，才会去数据库査找，调用
+clear()方法可以强制清除session缓存
+---------------------------------------------------------------------------------------------
+ix.	flush()方法		session.flush();
+1.	当session的事务提交后,会强制将内存(session缓存)与数据库同步.默认情况下是session的事务提交(commit)时才同步!
+2.	session的FlushMode设置,可以设定在什么时候同步缓存与数据库(很少用)
+	例如: session.setFlushMode(FlushMode.AUTO)
+x.	find方法已经过时！
+6	SchemaExport (自动建表)
+	new SchemaExport(new AnnotationConfiguration().configure()).create(false, true);
+7	Query 接口
+a)	参考Hibernate査询(HQLEJBQL)的内容
+8	Note：
+a)	Hibernate中涉及很多非常非常细节的区别,但在实际应用中用得极少,请大家先享受写项目的乐
+		趣，再来探讨这些细节问题
+i.	比如save和persist的区别
+ii.	merge、evict 等方法
+iii.	比如 refresh、lock 等
+b)	建议的学习方法，动手实验
+c)	细节问题参考补充视频

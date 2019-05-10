@@ -1,0 +1,6 @@
+﻿增加对导出条数过大的情况下让其返回false，不让其导出！
+var bl = $("#bl").val();
+	 if(bl=="true"){
+		 alert("您导出的数据量过大!");
+		 return false; 
+	 }

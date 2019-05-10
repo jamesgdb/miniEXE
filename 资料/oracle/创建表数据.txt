@@ -1,0 +1,1 @@
+﻿create table A as select * from B;

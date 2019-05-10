@@ -1,0 +1,261 @@
+﻿create table VPETLPG.RL_RETAIL_PMT_PLAN_INF
+(
+  Plan_Payment_Interest NUMBER(24,6) null,
+  Data_Src VARCHAR2(10) null,
+  Plan_Payment_Principal NUMBER(24,6) null,
+  Data_Dt DATE null,
+  Load_Dt DATE null,
+  Plan_Payment_Dt DATE null,
+  Biz_Categ_Cd VARCHAR2(10) null,
+  Acct_No VARCHAR2(60) null,
+  Plan_id VARCHAR2(60) null
+)
+tablespace TBS_VPFRAME_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+partition by range (DATA_DT)(  
+  partition p20110503 
+   values less than (to_date('20110504', 'yyyyMMdd'))
+    nologging
+    nocompress
+    tablespace TBS_VPFRAME_DATA
+    pctused    40
+    pctfree    0
+    initrans   1
+    maxtrans   255
+    storage    (
+                initial          512k
+                next             512k
+                minextents       1
+                maxextents       unlimited
+                pctincrease      0
+                freelists        1
+                freelist groups  1
+                buffer_pool      default
+               )
+   )  
+;
+  
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Plan_Payment_Interest is '计划支付利息';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Data_Src is '数据来源';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Plan_Payment_Principal is '计划支付本金';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Data_Dt is '数据日期';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Load_Dt is '加载日期';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Plan_Payment_Dt is '计划还款日';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Biz_Categ_Cd is '业务类别';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Acct_No is '账号';
+comment on column VPETLPG.RL_RETAIL_PMT_PLAN_INF.Plan_id is '计划还款期数';
+COMMENT ON TABLE VPETLPG.RL_RETAIL_PMT_PLAN_INF is '零售贷款还款计划';
+
+alter table VPETLPG.RL_RETAIL_PMT_PLAN_INF
+  add constraint PK_RL_RETAIL_PMT_PLAN_INF primary key (Plan_id)
+  using index 
+  tablespace TBS_VPFRAME_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+
+create table VPETLPG.RL_RETAIL_LOAN_ACCT_INF
+(
+  Acct_Org_Cd VARCHAR2(20) null,
+  Normal_Subj_Cd VARCHAR2(10) null,
+  Overdue_Principal_Amt NUMBER(24,6) null,
+  Dull_Amt NUMBER(24,6) null,
+  Start_Dt DATE null,
+  Original_Term NUMBER(5) null,
+  Repricing_Freq NUMBER(5) null,
+  Interest_Payment_Freq NUMBER(5) null,
+  Next_Payment_Dt DATE null,
+  Next_Repricing_Dt DATE null,
+  Early_Payment_Flag CHAR(1) null,
+  Interest_Offset_Type CHAR(1) null,
+  Original_Term_Mult CHAR(1) null,
+  Residual_Maturity NUMBER(5) null,
+  Residual_Maturity_Mult CHAR(1) null,
+  Payment_Freq_Mult CHAR(1) null,
+  Repricing_Freq_Mult CHAR(1) null,
+  Interest2_Payment_Freq NUMBER(5) null,
+  Last_Repricing_Amt NUMBER(24,6) null,
+  Data_Src VARCHAR2(10) null,
+  Biz_Line_Cd VARCHAR2(10) null,
+  Accrual_Basis_Cd VARCHAR2(5) null,
+  Cur_Bal NUMBER(24,6) null,
+  Overdue_Dt DATE null,
+  Payment_Type_Cd VARCHAR2(10) null,
+  Next_Payment_Interest NUMBER(24,6) null,
+  Day_Accrued_Interest NUMBER(24,6) null,
+  Data_Dt DATE null,
+  Due_Bill_No VARCHAR2(60) null,
+  Base_Rate NUMBER(10,6) null,
+  Exercise_Interest_Rate NUMBER(10,6) null,
+  Interest_Offset_Val NUMBER(10,6) null,
+  Specific_Provision_Amt NUMBER(24,6) null,
+  Payment_Freq NUMBER(5) null,
+  Interest_Adjust_Type CHAR(1) null,
+  Last_Payment_Dt DATE null,
+  Load_Dt DATE null,
+  Assess_Org_Cd VARCHAR2(20) null,
+  Contract_Amt NUMBER(24,6) null,
+  Maturity_Dt DATE null,
+  Clear_Dt DATE null,
+  General_Provision_Amt NUMBER(24,6) null,
+  Interest2_PMT_Freq_Mult VARCHAR2(2) null,
+  Cust_Id VARCHAR2(30) null,
+  Non_Accural_Subj_Cd VARCHAR2(10) null,
+  Biz_Flag CHAR(1) null,
+  Investment_Flagustry_Cd VARCHAR2(10) null,
+  Next_Payment_Princ NUMBER(24,6) null,
+  Off_Bal_Sheet_Flag CHAR(1) null,
+  Acct_No VARCHAR2(60) null,
+  Currency_Cd VARCHAR2(10) null,
+  Acct_Status_Cd VARCHAR2(10) null,
+  Normal_Principal_Amt NUMBER(24,6) null,
+  Overdue_Interest_Rate NUMBER(10,6) null,
+  Loan_Class_Cd VARCHAR2(1) null,
+  Last_Repricing_Dt DATE null,
+  Early_Payment_Amt NUMBER(24,6) null,
+  Accrued_Interest_Amt NUMBER(24,6) null,
+  Contract_No VARCHAR2(60) null,
+  Prod_Cd VARCHAR2(20) null,
+  Overdue_Subj_Cd VARCHAR2(10) null,
+  Open_Dt DATE null,
+  Close_Dt DATE null,
+  Grace_Maturity_Dt DATE null,
+  Guarantee_Type_Cd VARCHAR2(10) null,
+  Default_Flag CHAR(1) null,
+  Interest_PMT_Freq_Mult VARCHAR2(2) null,
+  Interest_Income NUMBER(24,6) null
+)
+tablespace TBS_VPFRAME_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+partition by range (DATA_DT)(  
+  partition p20110503 
+   values less than (to_date('20110504', 'yyyyMMdd'))
+    nologging
+    nocompress
+    tablespace TBS_VPFRAME_DATA
+    pctused    40
+    pctfree    0
+    initrans   1
+    maxtrans   255
+    storage    (
+                initial          512k
+                next             512k
+                minextents       1
+                maxextents       unlimited
+                pctincrease      0
+                freelists        1
+                freelist groups  1
+                buffer_pool      default
+               )
+   )  
+;
+  
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Acct_Org_Cd is '核算机构';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Normal_Subj_Cd is '正常科目';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Overdue_Principal_Amt is '逾期本金';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Dull_Amt is '非应计金额';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Start_Dt is '起息日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Original_Term is '原始期限';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Repricing_Freq is '重定价频率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest_Payment_Freq is '本金支付频率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Next_Payment_Dt is '下次还款日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Next_Repricing_Dt is '下次重定价日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Early_Payment_Flag is '是否提前还款';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest_Offset_Type is '利率浮动方式';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Original_Term_Mult is '原始期限单位';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Residual_Maturity is '剩余期限';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Residual_Maturity_Mult is '剩余期限单位';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Payment_Freq_Mult is '还款频率单位';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Repricing_Freq_Mult is '重定价频率单位';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest2_Payment_Freq is '利息支付频率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Last_Repricing_Amt is '上次重定价金额';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Data_Src is '数据来源';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Biz_Line_Cd is '业务条线';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Accrual_Basis_Cd is '计息基础';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Cur_Bal is '当前余额';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Overdue_Dt is '逾期日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Payment_Type_Cd is '还款方式';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Next_Payment_Interest is '下次偿还利息';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Day_Accrued_Interest is '日应计利息';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Data_Dt is '数据日期';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Due_Bill_No is '借据号';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Base_Rate is '基准利率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Exercise_Interest_Rate is '执行利率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest_Offset_Val is '利率浮动值';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Specific_Provision_Amt is '专项准备金';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Payment_Freq is '还款频率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest_Adjust_Type is '利率调整方式';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Last_Payment_Dt is '上次还款日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Load_Dt is '加载日期';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Assess_Org_Cd is '考核机构';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Contract_Amt is '合同金额';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Maturity_Dt is '到期日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Clear_Dt is '结清日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.General_Provision_Amt is '一般准备金';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest2_PMT_Freq_Mult is '利息支付频率单位';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Cust_Id is '客户号';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Non_Accural_Subj_Cd is '非应计科目';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Biz_Flag is '业务标识';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Investment_Flagustry_Cd is '贷款投向';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Next_Payment_Princ is '下次偿还本金';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Off_Bal_Sheet_Flag is '表内外标识';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Acct_No is '账号';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Currency_Cd is '币种代码';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Acct_Status_Cd is '账户状态';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Normal_Principal_Amt is '正常本金';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Overdue_Interest_Rate is '逾期利率';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Loan_Class_Cd is '贷款五级分类';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Last_Repricing_Dt is '上次重定价日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Early_Payment_Amt is '提前还款金额';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Accrued_Interest_Amt is '应计利息';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Contract_No is '合同号';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Prod_Cd is '产品代码';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Overdue_Subj_Cd is '逾期科目';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Open_Dt is '开户日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Close_Dt is '销户日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Grace_Maturity_Dt is '宽限期到期日';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Guarantee_Type_Cd is '主要担保方式';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Default_Flag is '违约标志';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest_PMT_Freq_Mult is '本金支付频率单位';
+comment on column VPETLPG.RL_RETAIL_LOAN_ACCT_INF.Interest_Income is '利息收支';
+COMMENT ON TABLE VPETLPG.RL_RETAIL_LOAN_ACCT_INF is '零售贷款账户信息';
+
+alter table VPETLPG.RL_RETAIL_LOAN_ACCT_INF
+  add constraint PK_RL_RETAIL_LOAN_ACCT_INF primary key (Due_Bill_No)
+  using index 
+  tablespace TBS_VPFRAME_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );

@@ -1,0 +1,34 @@
+﻿        String  sql="";
+	String  bl ="";
+	Enumeration paramNames = request.getParameterNames();
+	if(paramNames!=null ){
+	  raqParam = ReportUtil.getReportParam4Flexible(request);
+	 if(raqParam!="" &&!raqParam.equals("")){
+		 String[]  list = raqParam.split(";");
+		 for(int i = 0 ; i< list.length; i++){
+		  if("sql".endsWith(list[i].split("=")[0]) || "sql" == list[i].split("=")[0]){
+		        sql=  list[i].split("sql=")[1];	
+		        int count  = DBPool.countselect(sql);
+		     	 if(count>30000){
+		     		  bl ="true";
+		     	   }else{
+		     		  bl ="false"; 
+		     	   }
+			  	}	
+		}
+		} 
+	}
+	
+	--------------原始设置的查询超过30000条不允许查询，修改为可以查询，但数据量过大的情况下不允许导出！
+// 	if(paramNames!=null ){
+// 		raqParam = ReportUtil.getReportParam4Flexible(request);
+// 		if(raqParam.equals("error")||raqParam=="error"){
+// 		out.print(	"<script type='text/javascript' >alert('您查询数据量过大，请缩短查询时间范围或修改查询维度数量！');</script>");
+// 		 raqParam="";
+// 		}
+// 	}
+
+
+
+在html中增加：
+	<input type="hidden" id="bl" name="bl" value="<%=bl %>">

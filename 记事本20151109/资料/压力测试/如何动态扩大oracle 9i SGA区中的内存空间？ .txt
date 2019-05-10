@@ -1,0 +1,50 @@
+﻿Oracle 9i 具有动态SGA的功能，用操作系统命令查看系统内存时，发现系统中还有空闲内存. 但为什么有时使用oracle 9i 的 
+sql > alter system set db_cache_size=xxxxM 
+命令时数据库会报告错 -- 没有足够的内存. 这是由操作系统引起的吗？ 
+
+不是，原因在于此时SGA区中没有多余空闲内存。尽管系统中有空闲内存，但未分配给SGA 区。 
+在oracle 9i 中 动态SGA的概念是无需经过 关闭实例（instance）, 修改初始化参数文件和重启实例这一过程，就可动态调整 buffer cache 和 share pool 的大小。 另外，动态SGA允许在实例运行时设置，下次启动时将有多少物理内存分配给SGA 这一数据库参数。 SGA 可用最大物理内存是由SGA_MAX_SIZE 参数来决定的。 
+在启动实例时，大小为SGA_MAX_SIZE 的内存就分配给了SGA，SGA成员（buffer cache, share pool等）根据参数值也会获得相应的内存。 
+实例启动后SGA的各成员所用内存之和可以小于SGA_MAX_SIZE。 数据库管理员通过使用 alter system 命令来调整SGA成员间的内存分配。 当SGA中有足够多的空闲内存时，增大share pool 或 buffer cache 才能完成，否则会报内存不足。 
+另外Share pool 和 buffer cache 的尺寸也可动态缩小。 当实例已启动，SGA已达到 SGA_MAX_SIZE值，可通过先减少某一成员的内存，再增加另一成员的内存来完成。 
+SGA成员间是相互独立的，在成员间分配内存时，其和一定不能大于 SGA_MAX_SIZE ， 并且db_cache_size 参数不能等于0。 
+
+在OLAP与OLTP混合型的应用环境中，利用动态SGA的功能，可以根据不同时刻应用的优先级，来动态的调整buffer cache 和 share pool 的尺寸，以提高系统的性能 ： 
+a. 当OLTP 应用 优先级高时，缩小 buffer cache 的值，增大 share pool 的值； 
+b. 当 OLAP 应用优先级高时，缩小 share pool 的值，增大buffer cache 的值。 
+
+例如： 
+1． 增大buffer cache 尺寸 
+SQL> show parameter db_cache_size; 显示当前 buffer chache 的大小 
+NAME TYPE VALUE 
+-------------------------- ----------- ----------------- 
+db_cache_size big integer 4194304 
+SQL> alter system set db_cache_size=8M; 增大buffer cache 到8MB。 
+System altered. 
+SQL> show parameter db_cache_size; 
+NAME TYPE VALUE 
+-------------------------- ----------- ----------------- 
+db_cache_size big integer 8388608 
+
+2. 调整参数 SGA_MAX_SIZE (需重启实例) 
+SQL> alter system set SGA_MAX_SIZE= 1000M scope=spfile; 
+System altered. 
+
+3． 增大shared_pool_size 尺寸 
+假设，初始参数值为： 
+SGA_MAX_SIZE=128M 
+DB_CACHE_SIZE=88M 
+SHARED_POOL_SIZE=32M 
+
+SQL>ALTER SYSTEM SET SHARED_POOL_SIZE=64M; 设置share_pool 的内存为64M 
+Error ORA-04033, insufficient memory 
+
+SQL>ALTER SYSTEM SET DB_CACHE_SIZE=56M; 减少buffer cache 的大小 
+SQL>ALTER SYSTEM SET SHARED_POOL_SIZE=64M; 
+Error ORA-04033, insufficient memory 
+需要等 buffer cache 释放完，才可扩大 share pool 的大小 
+
+SQL> select * from v$buffer_pool ; 检查内存释放是否完成。 
+
+SQL>ALTER SYSTEM SET SHARED_POOL_SIZE=64M; 
+System altered. 

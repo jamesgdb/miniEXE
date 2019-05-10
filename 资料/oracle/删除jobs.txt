@@ -1,0 +1,74 @@
+﻿create or replace procedure drop_jobs is
+begin
+  declare 
+  cursor jl is select * from user_jobs;
+begin
+  for r in jl loop
+    dbms_job.remove(r.job);    
+  end loop;
+end; 
+end drop_jobs;
+
+删除所有的表、job、存储过程、序列，方法、
+-----------------------------------------------
+-- Export file for user TMRPT                --
+-- Created by xinlei on 2013/11/12, 15:31:32 --
+-----------------------------------------------
+
+set define off
+spool product_script.log
+
+prompt
+prompt Creating procedure PRODUCT_SCRIPT
+prompt =================================
+prompt
+CREATE OR REPLACE PROCEDURE PRODUCT_SCRIPT IS
+ TABLE_SQL VARCHAR(500);
+ SEQUENCE_SQL VARCHAR(500);
+ FUNCTION_SQL VARCHAR(500);
+ PROCEDURE_SQL VARCHAR(500);
+BEGIN
+  DECLARE
+  CURSOR JL IS SELECT * FROM USER_JOBS;
+  BEGIN
+    FOR R IN JL LOOP
+      DBMS_JOB.REMOVE(R.JOB);
+    END LOOP;
+    COMMIT;
+  END;
+  
+  DECLARE
+  CURSOR JL1 IS SELECT * FROM USER_OBJECTS T WHERE T.OBJECT_NAME!='PRODUCT_SCRIPT' AND T.OBJECT_TYPE IN ('TABLE','SEQUENCE','FUNCTION','PROCEDURE') ;
+  BEGIN
+    --SELECT * FROM USER_OBJECTS T WHERE T.OBJECT_TYPE='TABLE'
+    FOR R1 IN JL1 LOOP
+      IF(R1.OBJECT_TYPE = 'TABLE') THEN
+        TABLE_SQL:='  DROP TABLE '|| R1.OBJECT_NAME ||' CASCADE CONSTRAINTS';
+        EXECUTE IMMEDIATE TABLE_SQL;
+      END IF;
+      
+      IF(R1.OBJECT_TYPE = 'SEQUENCE') THEN
+        SEQUENCE_SQL:='  DROP SEQUENCE '|| R1.OBJECT_NAME ;
+        EXECUTE IMMEDIATE SEQUENCE_SQL;
+      END IF;
+      
+      IF(R1.OBJECT_TYPE = 'FUNCTION') THEN
+        FUNCTION_SQL:='  DROP FUNCTION '|| R1.OBJECT_NAME ;
+        EXECUTE IMMEDIATE FUNCTION_SQL;
+      END IF;
+      
+      IF(R1.OBJECT_TYPE = 'PROCEDURE') THEN
+        PROCEDURE_SQL:='  DROP PROCEDURE '|| R1.OBJECT_NAME ;
+        EXECUTE IMMEDIATE PROCEDURE_SQL;
+      END IF;
+    END LOOP;
+    
+
+    
+  END;
+
+END PRODUCT_SCRIPT;
+/
+
+
+spool off

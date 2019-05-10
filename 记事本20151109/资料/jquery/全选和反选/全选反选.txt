@@ -1,0 +1,86 @@
+﻿<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+
+  
+<form>
+    <input type="checkbox"  id="all" value="Input checkbox1"/>全选/全部选<br>
+    <input type="checkbox"  name="hao" value="Input checkbox1"/>checkbox1
+    <input type="checkbox" name="hao" value="Input checkbox2"/>checkbox2
+    <input type="checkbox" name="hao" value="Input checkbox3"/>checkbox3
+    <input type="checkbox" name="hao" value="Input checkbox4"/>checkbox4
+  <input type="button"  value="checkAll" id="checkAll" ></input>
+  <input type="button"  value="checkNo" id="checkNo" ></input>
+  <input type="button"  value="checkRev" id="checkRev" ></input>
+
+
+ <input type="button"  value="提交" id="send" ></input><br>
+</form>
+ 
+ 
+  </body>
+  <script type="text/javascript"> 
+  //设置复选框的全选
+//   $("#form2").click( function () {
+//     $("input[type=checkbox]:checked").each(function(index,domElm){
+//       alert(  $(domElm).val()); }); }); 
+  
+  $("#checkAll").click( function () {
+//     $("input[name=hao]").attr("checked","checked");
+      $("input[name=hao]").each(function(index,domElm){
+       $(domElm).attr("checked","checked");
+       
+      });
+    });
+    
+  $("#checkNo").click( function () {
+//     $("input[name=hao]").attr("checked",null);
+      $("input[name=hao]").each(function(index,domElm){
+       $(domElm).attr("checked",null);
+      });
+    });
+    
+  $("#checkRev").click( function () {
+//     $("input[name=hao]").attr("checked",null);
+	      $("input[name=hao]").each(function(index,domElm){
+	      if(this.checked){
+	          $(domElm).attr("checked",null);
+	      }else{
+	       $(domElm).attr("checked","checked");
+	      }
+	      });
+   });
+   
+   $("#all").click( function () {
+		if(this.checked){
+		 $("input[name=hao]").attr("checked","checked");
+		}else{
+		$("input[name=hao]").attr("checked",null);
+		}
+    });
+  
+  </script>
+</html>

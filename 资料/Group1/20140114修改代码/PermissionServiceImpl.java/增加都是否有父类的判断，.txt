@@ -1,0 +1,5 @@
+﻿Menu  cMenu = menu1.getParent();	
+			if(cMenu!=null){
+				idss.add(cMenu.getId());
+			}
+			如果有父类的话，就把父类的id加入AM_GROUP_MENUIDS菜单。

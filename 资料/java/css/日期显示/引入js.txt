@@ -1,0 +1,4 @@
+﻿<div id="currenttime">
+			<p class="p1"><script language=javascript src="date.js"></script></p>
+			<p class="p2"><script language=javascript src="lunar.js"></script></p>
+		</div>

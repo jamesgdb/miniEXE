@@ -1,0 +1,2 @@
+﻿注释掉所有关于images路径的background：
+不存在这个路径!

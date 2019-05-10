@@ -1,0 +1,12 @@
+﻿<marquee dataformatas=HTML direction=left height=100 loop=4 scrollamount=1 scrolldelay=2 width=100% onMouseOver='this.stop()' onMouseOut='this.start()'>
+
+<table>
+	<tr>
+<td><img src="image/IMG_0139.JPG"></td>
+<td><img src="image/IMG_0140.JPG"></td>
+<td><img src="image/IMG_0139.JPG"></td>
+<td><img src="image/IMG_0139.JPG"></td>
+</tr>
+</table>
+
+</marquee>	

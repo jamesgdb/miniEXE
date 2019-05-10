@@ -1,0 +1,180 @@
+﻿oracle查看用户、权限和表空间等操作方法
+2012-03-20 14:38:35     我来说两句       收藏     我要投稿
+oracle 查看 用户，用户权限，用户表空间，用户默认表空间 
+ 
+ 
+1.查看用户和默认表空间的关系。 
+  
+  select   username,default_tablespace   from   dba_users;
+ 
+2.查看当前用户的表：
+ 
+select  table_name from  user_tables; 
+ 
+ 
+3.查看所有用户的表名：
+ 
+select table_name  from all_tables;  
+ 
+4.查看所有表名（其中包括系统表）
+ 
+select table_name  from all_tables;   
+ 
+5.查看所有的表: 
+ 
+select  *  from  tab/dba_tables/dba_objects/cat; 
+ 
+下面介绍Oracle查询用户表空间
+ 
+◆Oracle查询用户表空间：select * from user_all_tables
+ 
+◆Oracle查询所有函数和储存过程：select * from user_source
+ 
+◆Oracle查询所有用户：select * from all_users.select * from dba_users
+ 
+◆Oracle查看当前用户连接：select * from v$Session
+ 
+◆Oracle查看当前用户权限：select * from session_privs
+ 
+◆Oracle查看用户表空间使用情况：
+ 
+1.select a.file_id "FileNo",a.tablespace_name  "Tablespace_name",  a.bytes "Bytes",a.bytes-
+ 
+sum(nvl(b.bytes,0)) "Used",  sum(nvl(b.bytes,0)) "Free",  sum(nvl(b.bytes,0))/a.bytes*100 "%free"  
+ 
+from dba_data_files a, dba_free_space b  where a.file_id=b.file_id(+)  group by a.tablespace_name ,  
+ 
+a.file_id,a.bytes order by a.tablespace_name; 
+ 
+ 
+ 
+1.查看所有用户：
+ 
+  select * from dba_user;
+ 
+  select * from all_users;
+ 
+  select * from user_users;
+ 
+2.查看用户系统权限：
+ 
+  select * from dba_sys_privs;
+ 
+  select * from all_sys_privs;
+ 
+  select * from user_sys_privs;
+ 
+3.查看用户对象权限：
+ 
+  select * from dba_tab_privs;
+ 
+  select * from all_tab_privs;
+ 
+  select * from user_tab_privs;
+ 
+4.查看所有角色：
+ 
+  select * from dba_roles;
+ 
+5.查看用户所拥有的角色：
+ 
+  select * from dba_role_privs;
+ 
+  select * from user_role_privs;
+ 
+ 
+6.查看角色所拥有的权限:
+ 
+ 
+  select * from role_sys_privs;
+ 
+ 
+  select * from role_tab_privs;
+ 
+ 
+7.查看所有系统权限
+ 
+ 
+  select * from system_privilege_map; 
+ 
+ 
+8.查看所有对象权限
+ 
+ 
+  select * from table_privilege_map;
+ 
+ 
+以上是在Oracle中查看用户权限 ，
+ 
+在DB2中为：
+ 
+  select * from syscat.dbauth
+ 
+  或者
+ 
+  get authorizations
+ 
+ 
+查看sid
+ 
+  select * from v$instance
+<!-- [if gte mso 9]><xml> <w:WordDocument> <w:View>Normal</w:View> <w:Zoom>0</w:Zoom> <w:PunctuationKerning/> <w:DrawingGridVerticalSpacing>7.8 磅</w:DrawingGridVerticalSpacing> <w:DisplayHorizontalDrawingGridEvery>0</w:DisplayHorizontalDrawingGridEvery> <w:DisplayVerticalDrawingGridEvery>2</w:DisplayVerticalDrawingGridEvery> <w:ValidateAgainstSchemas/> <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid> <w:IgnoreMixedContent>false</w:IgnoreMixedContent> <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText> <w:Compatibility> <w:SpaceForUL/> <w:BalanceSingleByteDoubleByteWidth/> <w:DoNotLeaveBackslashAlone/> <w:ULTrailSpace/> <w:DoNotExpandShiftReturn/> <w:AdjustLineHeightInTable/> <w:BreakWrappedTables/> <w:SnapToGridInCell/> <w:WrapTextWithPunct/> <w:UseAsianBreakRules/> <w:DontGrowAutofit/> <w:UseFELayout/> </w:Compatibility> <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel> </w:WordDocument> </xml><![endif]--><!-- [if gte mso 9]><xml> <w:LatentStyles DefLockedState="false" LatentStyleCount="156"> </w:LatentStyles> </xml><![endif]--> <!-- /* Font Definitions */ @font-face {font-family:宋体; panose-1:2 1 6 0 3 1 1 1 1 1; mso-font-alt:SimSun; mso-font-charset:134; mso-generic-font-family:auto; mso-font-pitch:variable; mso-font-signature:3 135135232 16 0 262145 0;} @font-face {font-family:"\@宋体"; panose-1:2 1 6 0 3 1 1 1 1 1; mso-font-charset:134; mso-generic-font-family:auto; mso-font-pitch:variable; mso-font-signature:3 135135232 16 0 262145 0;} /* Style Definitions */ p.MsoNormal, li.MsoNormal, div.MsoNormal {mso-style-parent:""; margin:0cm; margin-bottom:.0001pt; text-align:justify; text-justify:inter-ideograph; mso-pagination:none; font-size:10.5pt; mso-bidi-font-size:10.0pt; font-family:"Times New Roman"; mso-fareast-font-family:宋体; mso-font-kerning:1.0pt;} /* Page Definitions */ @page {mso-page-border-surround-header:no; mso-page-border-surround-footer:no;} @page Section1 {size:595.3pt 841.9pt; margin:72.0pt 90.0pt 72.0pt 90.0pt; mso-header-margin:42.55pt; mso-footer-margin:49.6pt; mso-paper-source:0; layout-grid:15.6pt;} div.Section1 {page:Section1;} --> <!-- [if gte mso 10]> <style> /* Style Definitions */ table.MsoNormalTable {mso-style-name:普通表格; mso-tstyle-rowband-size:0; mso-tstyle-colband-size:0; mso-style-noshow:yes; mso-style-parent:""; mso-padding-alt:0cm 5.4pt 0cm 5.4pt; mso-para-margin:0cm; mso-para-margin-bottom:.0001pt; mso-pagination:widow-orphan; font-size:10.0pt; font-family:"Times New Roman"; mso-fareast-font-family:"Times New Roman"; mso-ansi-language:#0400; mso-fareast-language:#0400; mso-bidi-language:#0400;} </style> <![endif]-->
+获取表：
+ 
+select table_name from user_tables; // 当前用户的表      
+ 
+select table_name from all_tables; // 所有用户的表  
+ 
+select table_name from dba_tables; // 包括系统表
+ 
+select table_name from dba_tables where owner=' 用户名 '
+ 
+user_tables ：
+ 
+table_name,tablespace_name,last_analyzed 等
+ 
+dba_tables ：
+ 
+ower,table_name,tablespace_name,last_analyzed 等
+ 
+all_tables ：
+ 
+ower,table_name,tablespace_name,last_analyzed 等
+ 
+all_objects ：
+ 
+ower,object_name,subobject_name,object_id,created,last_ddl_time,timestamp,status 等
+ 
+获取表字段：
+ 
+select * from user_tab_columns where Table_Name=' 用户表 ';
+ 
+select * from all_tab_columns where Table_Name=' 用户表 ';
+ 
+select * from dba_tab_columns where Table_Name=' 用户表 ';
+ 
+user_tab_columns ：
+ 
+table_name,column_name,data_type,data_length,data_precision,data_scale,nullable,column_id 等
+ 
+all_tab_columns ：
+ 
+ower,table_name,column_name,data_type,data_length,data_precision,data_scale,nullable,column_id 等
+ 
+dba_tab_columns ：
+ 
+ower,table_name,column_name,data_type,data_length,data_precision,data_scale,nullable,column_id 等
+ 
+获取表注释：
+ 
+select * from user_tab_comments
+ 
+user_tab_comments ： table_name,table_type,comments
+ 
+-- 相应的还有 dba_tab_comments ， all_tab_comments ，这两个比 user_tab_comments 多了 ower 列。
+ 
+获取字段注释：
+ 
+select * from user_col_comments
+ 
+user_col_comments ： table_name,column_name,comments

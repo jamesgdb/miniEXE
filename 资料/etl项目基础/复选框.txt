@@ -1,0 +1,29 @@
+﻿ <td class="formLabel"><h:label required="true" value="安装产品："/></td>
+ <td >
+ <r:combobox id="productModel" name="productModel" panelHeight="200px" 
+  required="true" -----------------------为必填项
+  url="${pageContext.request.contextPath}/dmModelInstall_initproduct.action?modelVersion=${entity.modelId}" -------------------值的来源
+   missingMessage="请选择安装产品"  -----------------------当信息为空的时候的提示信息
+  valueField="productCode"     ----------------------------组件的值所对应的对象的字段名称
+  textField="productName"      -----------------------------组件所显示信息所对应的字段名称
+multiple="true"  			-------------------------是否可多选	    
+style="width:156px;" />
+   </td>
+   ----------------------------------------------------------------------------------------------------
+   <td class="formLabel"><h:label required="true" value="模型版本号："/></td>
+<td>
+<r:combobox id="modelVersion"  name="modelVersion" 
+ panelHeight="200px" 
+ required="true" 
+missingMessage="请选择模型版本号" url="${pageContext.request.contextPath}/dmModel_initModelVersionName.action?organ=${entity.organ}" 
+valueField="modelId"
+textField="modelVersion,modelName"  --------------------上面显示值的（多个值）
+ innerSeparator="--"                 -------------------------------值之间用“--”连接
+ value="${entity.modelId}" 	
+onChange="initThemeTree()" 
+style="width:200px;"  
+ linkId="productModel" ---------------------------------------被动关联下拉框的标签id
+  linkKey="modelVersion"  ------------------------------------该下拉框的值绑定到被关联下拉框而作为查询条件的参数
+ 名称
+   />
+</td>

@@ -1,0 +1,28 @@
+﻿
+增加：
+if (reportName=="authenResultCountList"||"authenResultCountList".equals(reportName)){
+             			 sql=sql+" and t.policy_action='CHALLENGE' and  CHALLENGE_SUCCESSFUL is not null ";
+             		 };
+             		 if (reportName=="transRiskDistributed"||"transRiskDistributed".equals(reportName)){
+             			 sql=sql+" and t. TRANS_PROVINCE is not null ";
+             		 };
+             		 
+             		 
+             		 
+修改：
+
+             				if(i==0){      					
+             						sqlWhere = sqlWhere + " t." + item.getDataValue() + " = " + "'" + (conditions[i].split(":"))[1] + "'";
+             				}else{
+             						sqlWhere = sqlWhere + " or t." + item.getDataValue() + " = " + "'" + (conditions[i].split(":"))[1] + "'";	
+             				 }
+             			     			  
+        改为：
+        	if(!conditions[i].equals(":") ){
+             				if(i==0){      					
+             						sqlWhere = sqlWhere + " t." + item.getDataValue() + " = " + "'" + (conditions[i].split(":"))[1] + "'";
+             				}else{
+             						sqlWhere = sqlWhere + " or t." + item.getDataValue() + " = " + "'" + (conditions[i].split(":"))[1] + "'";	
+             				 }
+             			  }
+             		 

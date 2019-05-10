@@ -1,0 +1,1 @@
+﻿Nvl(FieldName,2)意思是如果FieldName为Null，那么返回2，否则返回FieldName的值。

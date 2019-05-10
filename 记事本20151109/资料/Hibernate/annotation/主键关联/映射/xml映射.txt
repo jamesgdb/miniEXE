@@ -1,0 +1,6 @@
+﻿
+映射的关系。直接把一个类映射到husband类中，字段配置为property 属性。
+<component name="wife"> 
+	<property name="wifeName"/> 
+	<property name="age"/> 
+</component>

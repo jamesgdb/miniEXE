@@ -1,0 +1,408 @@
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ include file="/common/loading.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>数据清理策略</title>
+<%@ include file="/common/common.jsp"%> 
+
+</head>
+<body>
+	<h:hidden id="operateType" name="operateType" value="${requestScope.operateType}"/>
+	<div class="bodyStyle">
+	<c:set var="entity" value="${requestScope.entity}"/>
+		<h:form id="form" method="post" styleClass="form_style" name="form" style="padding: 1px 1px 1px 1px;height: 400px;overflow-y: scroll;position: relative;">
+			<table class="formTableStyle" cellpadding="0" cellspacing="0" border="0">
+			    <tr>
+					<td class="formLabel"><h:label required="true" value="所属组织："/></td>
+					<td colspan="3">
+						<r:dictCombobox id="organ" nullText="" editable="false" name="organ" dictId="dm_model_organ" value="${entity.organ}" style="width:156px;" required="true" missingMessage="请选择所属组织" defaultValue="VP"/>
+					</td>
+				</tr>
+			   <tr>
+					<td class="formLabel"><h:label required="true" value="清理编号："/></td>
+					<td colspan="3">
+					    <h:hidden name="dcId" id="dcId" value="${entity.dcId}"/>
+					    <c:out value="${entity.dcId}"></c:out>
+					</td>
+				</tr>
+				<tr>
+					<td class="formLabel"><h:label required="true" value="清理名称："/></td>
+					<td colspan="3">
+					    <h:text name="dcName" id="dcName" value="${entity.dcName}" required="true" validType="length[0,50]"  style="width:486px" />
+					</td>
+				</tr>
+				<tr>
+					<td class="formLabel"><h:label required="true" value="检查表名："/></td>
+					<td colspan="3">
+						 <input id="tableName" name="tableName" value="${entity.tableName}"  textValue="${entity.tableName}"  /> 
+					</td>
+					
+				</tr>
+				<tr>
+				    <td class="formLabel"><h:label value="表所属schema："/></td>
+					<td>
+					    <h:hidden name="dbSchema" id="dbSchema" value="${entity.dbSchema}"/>
+					    <h:text name="schema_text" id="schema_text" value="${entity.dbSchema}"  disabled="true"/>
+					</td>
+					<td class="formLabel"><h:label value="表描述："/></td>
+					<td>
+					    <h:hidden name="tableDesc" id="tableDesc" value="${entity.tableDesc}"/>
+					    <h:text name="table_text" id="table_text" value="${entity.tableDesc}" disabled="true"/>
+					</td>
+				</tr>
+				<tr>
+				    <td class="formLabel"><h:label required="true" value="是否分区表："/></td>
+					<td >
+					   <r:dictCombobox id="partitionFlg"  editable="false" name="partitionFlg" dictId="dc_partition_flg" value="${entity.partitionFlg}" style="width:156px;" required="true" missingMessage="请选择是否分区表"  defaultValue="1"/>
+				 	</td>
+			 	    <td class="formLabel"><h:label required="true" value="清理模式："/></td>
+				    <td >
+					  <r:dictCombobox id="clearMode"  editable="false" name="clearMode" dictId="dm_dc_clear_mode" value="${entity.clearMode}"  style="width:156px;" required="true" missingMessage="请选择清理模式"  defaultValue="1" onChange="check()"/>
+				 	</td>
+				</tr>
+				<tr id="hiddenOrNo">
+				<td class="formLabel"><h:label value="过滤规则："/></td>
+					<td colspan="3" >
+						<r:popWindow width="410" winHeight="440" winWidth="480" id="filterCode" name="filterCode" 
+						idField="ruleCode" textField="ruleName" winTitle="规则信息" 
+						value="${entity.filterCode}" textValue="${entity.filterCode}" 
+						queryUrl="${pageContext.request.contextPath}/dqRule_queryForSelected.action&checksum=10&useFlag=8&dcId=${entity.dcId}"         
+						targetUrl="${pageContext.request.contextPath}/edm/dq/dqCheckRuleList.jsp" />
+				</td>
+				</tr>
+				<tr id="nameHiddenOrNo">
+					<td class="formLabel"><h:label  value="过滤规则名称："/></td>
+					<td colspan="3">
+						<h:textarea name="filterCode_name" id="filterCode_name" disabled="true" cols="68" rows="3">${entity.filterName}</h:textarea>
+					</td>
+				</tr>
+				
+				<tr >
+					<td class="formLabel"><h:label required="true" value="数据日期字段："/></td>
+					<td>
+					    <r:combobox id="dataTdField" name="dataTdField" panelHeight="180px"  panelWidth="280px" width="280px" editable="true" defaultValue="${entity.dataTdField}"  valueField="columnName" textField="columnName,columnComment" separator="--" required="true" missingMessage="请先选择检查表名,再选择数据日期字段" />
+					</td> 
+					<td class="formLabel"><h:label required="true" value="数据日期参数："/></td>
+					<td>
+					    <r:combobox id="dataDtParamId" name="dataDtParamId" panelHeight="180px"   defaultValue="${entity.dataDtParamId}" 
+					    
+					     valueField="paramId" textField="paramName" required="true" missingMessage="请选择数据日期参数"  style="width:156px"
+					     url="${pageContext.request.contextPath}/dmCommonParam_getCommonParam.action?paramType=1&status=1"/>
+					</td> 
+				  
+				</tr>
+				
+				<tr id ="hiddenDate2" >
+					<td class="formLabel"><h:label required="true" value="日数据保留时间："/></td>
+					<td>
+					    <h:text id="dayData" name="dayData" value="${entity.dayData}"  required="true" validType="dayData"></h:text>
+					    <r:dictCombobox id="dayUnit"  editable="false" name="dayUnit" dictId="dc_day_unit" value="${entity.dayUnit}" style="width:60px;" required="true" missingMessage="请选择执行状态" defaultValue="D"/>
+					</td> 
+					<td class="formLabel"><h:label required="true" value="月末数据保留时间："/></td>
+					<td>
+					<h:text id="endMonthData" name="endMonthData" value="${entity.endMonthData}"  required="true" validType="endMonthData"></h:text>&nbsp;月
+					</td> 
+				</tr>
+				<tr id="hiddenDate1">
+					<td class="formLabel"><h:label required="true" value="年末数据保留时间："/></td>
+					<td colspan="3">
+					 <h:text id="endYearData" name="endYearData" value="${entity.endYearData}" required="true" validType="endYearData"></h:text>&nbsp;年
+					</td> 
+				</tr>
+				<tr>
+				    <td class="formLabel"><h:label  value="清理描述："/></td>
+					<td colspan="3">
+					<h:textarea id="clearDesc" name="clearDesc" maxlength="200" cols="73" rows="3"><c:out value="${entity.clearDesc}"></c:out> </h:textarea>
+					</td>
+				</tr>
+				<tr>
+					<td class="formLabel"><h:label required="true" value="状态："/></td>
+					<td >
+					  <r:dictCombobox id="status" editable="false" name="status" dictId="dc_status" value="${entity.status}" style="width:156px;" required="true" missingMessage="请选择执行状态" defaultValue="1" />
+				    </td> 
+				    <td class="formLabel"><h:label required="true" value="客户化标志："/></td>
+					<td >
+					 <r:dictCombobox id="customFlg"  editable="false" name="customFlg" dictId="dm_customFlg" value="${entity.customFlg}" style="width:156px;" required="true" missingMessage="请选择是否客户化标志" defaultValue="1"/>
+				    </td> 
+				</tr>
+			</table>
+		</h:form>
+	</div>
+	<center class="formToolBtn">
+		<h:linkButton value="保存" iconCls="icon-save" onclick="save('dcClear_save.action?operateType=${operateType}');" id="saveButton"></h:linkButton>
+		<h:linkButton value="关闭" iconCls="icon-cancel" onclick="closeModalCenter()"></h:linkButton>
+	</center>
+</body>
+<script type="text/javascript">
+
+function check(){
+	var  partitionFlg =$("#partitionFlg").combobox('getValue');
+	var  clearMode =$("#clearMode").combobox('getValue');
+	    if(partitionFlg==1){
+	    	 $('#hiddenDate1').show(); 
+	    	 $('#hiddenDate2').show(); 
+	    	 $('#dayData').val("");
+	    	 $('#endMonthData').val("");
+	    	 $('#endYearData').val("");
+             $("#clearMode").combobox('setValue','1');
+	    	 $('#clearMode').combobox('disable');
+	    	 $('#filterCode').val("");
+		     $('#filterCode_text').val("");
+	    	 $('#hiddenOrNo').hide();
+	    	 $('#nameHiddenOrNo').hide();
+	      }else {
+	    	 
+	    	  if(clearMode==1){
+		    	  $('#hiddenDate1').hide(); 
+		    	  $('#hiddenDate2').hide(); 
+		    	  $('#dayData').val("0");
+		    	  $('#endMonthData').val("0");
+		    	  $('#endYearData').val("0");
+	    		  $('#clearMode').combobox('enable');
+	    		  $('#filterCode').val("");
+	 		      $('#filterCode_text').val("");
+	    		  $('#hiddenOrNo').hide();  
+	    		  $('#nameHiddenOrNo').hide();
+	    	  }else{
+	    		  $('#hiddenDate1').show(); 
+	 	    	  $('#hiddenDate2').show(); 
+	 	    	  $('#dayData').val("");
+	 	    	  $('#endMonthData').val("");
+	 	    	  $('#endYearData').val("");
+	    		  $('#clearMode').combobox('enable');
+	    		  $('#hiddenOrNo').show(); 
+	    		  $('#nameHiddenOrNo').show();
+	    		 
+	    	  }
+	      }
+}
+
+$(function(){
+    //初始化数据日期字段 
+    //数据日期字段下拉框赋值
+      var tableName=$("#tableName").val();
+      var dbSchema= $("#dbSchema").val();
+      var partitionFlg =$("#partitionFlg").combobox('getValue');
+      var clearMode =$("#clearMode").combobox('getValue');
+      $('#partitionFlg').combobox('disable');
+      if(partitionFlg==1){
+    	 $('#clearMode').combobox('disable');
+    	 $('#hiddenOrNo').hide();
+    	 $('#nameHiddenOrNo').hide();
+       }else {
+    	  if(clearMode==1){
+    		  $('#hiddenDate1').hide(); 
+       	      $('#hiddenDate2').hide();
+    		  $('#hiddenOrNo').hide();  
+    		  $('#nameHiddenOrNo').hide();
+    	  }else{
+    		  $('#hiddenOrNo').show(); 
+    		  $('#nameHiddenOrNo').show();
+    	  }
+       }
+    dataTdField.reload("${pageContext.request.contextPath}/dqBasicCheck_getDataFieldCloumn.action?textField=columnName&valueField=columnName$columnComment&innerSeparator=--&schema="+dbSchema+"&tableName="+tableName);
+    
+});
+
+$.fn.popWindow.methods = {
+        setValue: function(target, value){
+        	/**
+        	 * 设置隐藏域保存对象的id值
+        	 */
+        	var id = "";
+        	var name = "";
+        	var code="";
+        	if(value.length>0){
+        		for(var i=0;i<value.length;i++){
+        			id += value[i].id + ",";
+        			name += value[i].name + ",";
+        			code=value[i].code;
+        		}
+        		id = id.substring(0, id.lastIndexOf(","));
+        		name = name.substring(0, name.lastIndexOf(","));
+        	}else{
+        		id = value.id;
+        		name = value.name;
+        		code=value.code;
+        	}
+        	
+        	if(code=="rule"){ //选择过滤编号
+        		$("#filterCode").val(id);
+            	/**
+            	 * 设置文本框回显对象的text值
+            	 */
+                $("#filterCode_text").val(id);
+                $("#filterCode_name").val(name); 
+        	}
+            
+        }
+	};
+
+$(function(){
+    //检查表名弹出树
+    $("#tableName").popWindow({
+		url:"${pageContext.request.contextPath}/dqBasicCheck_getTable.action",
+		targetUrl:"${pageContext.request.contextPath}/edm/dq/dqCheckTableList.jsp",
+		idField:"entityTable",
+		textField:"entityName",
+		width:"136",
+		winWidth:"500",
+		winHeight:"440",
+		winTitle:"表信息",
+		required:true,
+		disabled:false,
+		onlyLeaf:false,
+		multiple:true,
+		enable:true,
+		connection:false,
+		callBackFun:function(value){
+			if (value){
+		    	var id = "";
+	        	var name = "";
+	        	var sch="";
+	        	if(value.length>0){
+	        		for(var i=0;i<value.length;i++){
+	        			id += value[i].entityTable + ",";
+	        			name += value[i].entityName + ",";
+	        			sch += value[i].installSchema + ",";
+	        		}
+	        		id = id.substring(0, id.lastIndexOf(","));
+	        		name = name.substring(0, name.lastIndexOf(","));
+	        		sch = sch.substring(0, sch.lastIndexOf(","));
+	        	}else{
+	        		id = value.entityTable;
+	        		name = value.entityName;
+	        		sch=value.installSchema;
+	        	}
+	        	var data ="id="+id+"&name="+name+"&sch="+sch ;
+	    		var url="dcClear_getPatition.action";
+	    		$.ajax({
+	    	       	dataType: 'text',
+	    			url: url,
+	    			data: data,
+	    			type: 'post',
+	    			success: function(date){
+	    					  if(date==1){
+	    						     $("#partitionFlg").combobox('setValue','1');
+	    					    	 $('#partitionFlg').combobox('disable');
+	    					    	 $("#clearMode").combobox('setValue','1');
+		    					     $('#clearMode').combobox('disable');
+	    					    	 $('#hiddenDate1').show(); 
+	    					    	 $('#hiddenDate2').show(); 
+	    					    	 $('#dayData').val("");
+	    					    	 $('#endMonthData').val("");
+	    					    	 $('#endYearData').val("");
+	    					    	 $('#filterCode').val("");
+	    						     $('#filterCode_text').val("");
+	    					    	 $('#hiddenOrNo').hide();
+	    					    	 $('#nameHiddenOrNo').hide();
+	    					      }else {
+	    					    	  $("#partitionFlg").combobox('setValue','0');
+		    					      $('#partitionFlg').combobox('disable');
+		    					      $("#clearMode").combobox('setValue','2');
+	    					    	  $('#hiddenDate1').show(); 
+	    					 	      $('#hiddenDate2').show(); 
+	    					 	      $('#dayData').val("");
+	    					 	      $('#endMonthData').val("");
+	    					 	      $('#endYearData').val("");
+	    					          $('#clearMode').combobox('enable');
+	    					    	  $('#filterCode').val("");
+	    					 	  $('#filterCode_text').val("");
+	    					      }	
+	    			 }
+	    		});
+	        		$("#tableName").val(id);
+	        		$("#tableName_text").val(id);
+	            	/**
+	            	 * 设置文本框回显对象的text值
+	            	 */
+	                $("#tableDesc").val(name);	
+	                $("#dbSchema").val(sch);	
+	                
+	                $("#table_text").val(name);	
+	                $("#schema_text").val(sch);
+	                //数据日期字段下拉框赋值
+	                dataTdField.reload("${pageContext.request.contextPath}/dqBasicCheck_getDataFieldCloumn.action?textField=columnName&valueField=columnName$columnComment&innerSeparator=--&schema="+sch+"&tableName="+id);
+			};
+		}
+	}); 
+	
+	});
+	
+	
+$(function() {
+	$.extend($.fn.validatebox.defaults.rules,{ 
+		dayData: {
+		        validator: function (value) {
+		        		if(!new RegExp("^[0-9]*$").test(value)) {
+							  $.fn.validatebox.defaults.rules.dayData.message ="日数据保留时间为数字！";
+							    return false;
+					       } else if (value.length > 10 ){
+					    	   alert(value.length);
+					    	   $.fn.validatebox.defaults.rules.dayData.message ="日数据保留时间长度不能大于10！";
+							    return false;
+					       } else{
+					        	$.fn.validatebox.defaults.rules.dayData.message ="";
+					            return true;
+						    }
+		    	},
+		    	message:'请输入数字'
+	 		},
+	 		endMonthData: {
+		        validator: function (value) {
+		        		if(!new RegExp("^[0-9]*$").test(value)) {
+							  $.fn.validatebox.defaults.rules.endMonthData.message ="月末数据保留时间为数字！";
+							    return false;
+					    	  
+					       } else if (value.length > 10 ){
+					    	   $.fn.validatebox.defaults.rules.endMonthData.message ="月末数据保留时间长度不能大于10！";
+							    return false;
+					       }else{
+					        	$.fn.validatebox.defaults.rules.endMonthData.message ="";
+					            return true;
+						    }
+		    	},
+		   		message:'请输入数字'
+	 		},
+	 		endYearData: {
+		        validator: function (value) {
+		        		if(!new RegExp("^[0-9]*$").test(value)) {
+							  $.fn.validatebox.defaults.rules.endYearData.message ="年末数据保留时间为数字！";
+							    return false;
+					    	  
+					       } else if (value.length > 10 ){
+					    	   $.fn.validatebox.defaults.rules.endYearData.message ="年末数据保留时间长度不能大于10！";
+							    return false;
+					       } else{
+					        	$.fn.validatebox.defaults.rules.endYearData.message ="";
+					            return true;
+						    }
+		    	},
+		   		message:'请输入数字'
+	 		}
+		 }); 
+	});
+//end 插件拓展
+
+function save(url, formId) {
+		var form = formId ? $("#" + formId) : $("#form");
+		$('#clearMode').combobox('enable');
+		$('#partitionFlg').combobox('enable');
+		if (!form.form("validate")) {
+			return;
+		}
+		
+		$("#saveButton").linkbutton('disable');
+		ajaxRequest(url, form.serialize(), function() {
+			closeModalCenter("success");
+		});
+	}
+
+//对于页面弹出框禁止输入
+$(function(){
+	$(".popWindow-text").attr("readonly","readonly");
+});
+</script>
+</html>

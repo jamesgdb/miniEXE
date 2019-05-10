@@ -1,0 +1,1 @@
+﻿changePassword.jsp页面中通过调用UserRepository.formatToMD5对新密码加密。与旧密码比对，如果一致的话调用UserRepository.changPassword做密码修改。

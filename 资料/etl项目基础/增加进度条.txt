@@ -1,0 +1,29 @@
+﻿	$.messager.confirmSelf('系统提示','你确定要对选中记录进行删除操作吗?',function(btn){
+					if(btn){
+						var obj = new Object();
+						obj.title = "系统提示";
+						obj.msg = "正在删除模型！";
+						obj.text;
+						obj.interval = 400;
+						messager.progress(obj);
+						$.ajax({
+							dataType:'json',
+							url:'dmModel_modelRemove.action',
+							data:{'rowId':str},
+							type:'post',
+							success:function(data,status){
+								messager.close();
+								var result=data;
+								if(result=="1") {
+								messager.alert("模型删除成功！","success");
+								$('#grid').datagrid('unselectAll');
+								$('#grid').datagrid('reload');
+								$('#grid').datagrid("clearSelections");
+							  }
+							}
+						});
+					}else{
+						
+						return false;
+					}
+				});

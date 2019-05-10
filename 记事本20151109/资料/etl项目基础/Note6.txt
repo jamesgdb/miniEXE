@@ -1,0 +1,28 @@
+﻿$(function(){
+    //初始化数据日期字段 
+    //数据日期字段下拉框赋值
+      var partitionFlg =$("#partitionFlg").combobox('getValue');
+      var clearMode =$("#clearMode").combobox('getValue');
+   
+      if(partitionFlg==1){
+    	 $('#partitionFlg').combobox('disable');
+    	 $('#clearMode').combobox('disable');
+    	 $('#hiddenOrNo').hide();
+    	 $('#nameHiddenOrNo').hide();
+       }else if(partitionFlg==0) {
+    	  if(clearMode==1){
+    		  $('#partitionFlg').combobox('disable');
+    		  $('#clearMode').combobox('disable');
+    		  $('#hiddenDate1').hide(); 
+       	      $('#hiddenDate2').hide();
+    		  $('#hiddenOrNo').hide();  
+    		  $('#nameHiddenOrNo').hide();
+    	  }else if(clearMode==2){
+    		  $('#partitionFlg').combobox('disable');
+    		  $('#clearMode').combobox('disable');
+    		  $('#hiddenOrNo').show(); 
+    		  $('#nameHiddenOrNo').show();
+    	  }
+       }
+    
+});

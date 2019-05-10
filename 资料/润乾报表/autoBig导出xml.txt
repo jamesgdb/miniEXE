@@ -1,0 +1,3 @@
+﻿	function report1_saveAsXml() {
+		document.getElementById( "group_saveAs_frame").src = "${ctx}/ExportToXml";
+	}

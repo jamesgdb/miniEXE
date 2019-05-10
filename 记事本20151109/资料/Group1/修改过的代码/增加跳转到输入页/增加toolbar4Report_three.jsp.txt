@@ -1,0 +1,118 @@
+﻿<%@ page language="java" contentType="text/html;charset=UTF-8"%>
+<div class="btnBar" >
+	<ul class="left">
+		<li class="toggleBg borderRight">
+			<ul class="fileOper">
+				<li>
+					<a class="ICOhover" href="#"
+						onclick=javascript:if(confirm('打印需要相应的java环境并且为横向打印。是否打印')){firstFlagForTool("report1_print");}return false;><span title=" 打印" class="print"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onclick=javascript:if(confirm('是否导出Excel')){firstFlagForTool("report1_saveAsExcel");}return  false;><span title="导出excel" class="excel"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onclick=javascript:if(confirm('是否导出Pdf')){firstFlagForTool("report1_saveAsPdf");}return false;><span title="导出pdf" class="pdf"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onclick=javascript:if(confirm('是否导出Word')){firstFlagForTool("report1_saveAsWord");}return  false;><span title="导出word" class="word"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onclick=javascript:if(confirm('是否导出Xml')){firstFlagForTool("report1_saveAsXml");}return  false;><span title="导出xml" class="xml"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onclick=javascript:if(confirm('是否导出Html')){firstFlagForTool("report1_saveAsHtml");}return  false;><span title="导出html" class="html"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onclick="javascript:if(confirm('是否生成图表')){report1_toChartPage();}return  false;"><span title="生成图表" class="chart"></span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		<li class="floatRight borderLeft">
+			<ul class="fileOper">
+				<li>
+					<a class="ICOhover" href="#"
+						onClick="try{report1_toPage( 1 );}catch(e){}return false;"><span title="首页" class="begin"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onClick="try{report1_toPage(report1_getCurrPage()-1);}catch(e){}return false;"><span title="上一页" class="pre"></span>
+					</a>
+				</li>
+				<Li>
+					<a class="ICOhover" href="#"
+						onClick="try{report1_toPage(report1_getCurrPage()+1);}catch(e){}return false;"><span title="下一页" class="next"></span>
+					</a>
+				</li>
+				<li>
+					<a class="ICOhover" href="#"
+						onClick="try{report1_toPage(report1_getTotalPage());}catch(e){}return false;"><span title="尾页" class="end"></span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		<li class="floatRight">
+			<div style="display: inline-block; margin: 9px 4px 3px 4px; float: left;">
+				第<span id="c_page_span"></span>页/共<span id="t_page_span"></span>页&nbsp;&nbsp;
+			<input type="text" style="width:50px;"  name="atpage" id="atpage"><input type="button" value="跳转到" onclick="aa();">
+			</div>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript">
+function firstFlagForTool (exportType){
+	 var firstFlag4Tool = $("#firstFlag4Tool").val();
+	 if(firstFlag4Tool == "N"){
+		 if(exportType.indexOf("print") >= 0 ){
+			 report1_print();
+		 }else if(exportType.indexOf("Excel") >= 0 ){
+			 report1_saveAsExcel();
+		 }else if(exportType.indexOf("Pdf") >= 0 ){
+			 report1_saveAsPdf();
+		 }else if(exportType.indexOf("Word") >= 0 ){
+			 report1_saveAsWord();
+		 }else if(exportType.indexOf("Xml") >= 0 ){
+			 report1_saveAsXml();
+		 }else if(exportType.indexOf("Html") >= 0 ){
+			 report1_saveAsHtml();
+		 }else{
+			 return false;
+		 } 
+	 }else {
+		 alert("当前无数据可导出,请查询报表后再导出!");
+		 return false;
+	 }
+}
+
+
+function aa(){
+	//获得定义ID为atpage输入框的值
+	 var tpagenum = document.getElementById("atpage").value;
+	 var pageNo = report1_getTotalPage();
+	 if(tpagenum ==""){
+		 alert("输入页码后再跳转！");
+		 return false;
+	 }else if(pageNo<tpagenum || tpagenum<1 || isNaN(tpagenum)){
+		 alert("你的输入有错误！");
+		 return false;
+	 }
+	//调用润乾内置的_toPage()函数，将获得的值传入即可实现转到某一页
+	try{report1_toPage(tpagenum);}catch(e){
+	}
+	return false;
+	
+	}
+</script>

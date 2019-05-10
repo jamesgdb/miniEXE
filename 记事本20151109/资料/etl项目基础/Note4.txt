@@ -1,0 +1,33 @@
+﻿create table VPDM_BL_BILL_DISCOUNT
+(
+  account_id         VARCHAR2(50) not null,
+  bill_id            VARCHAR2(30),
+  as_of_date         DATE not null,
+  gl_account_id      VARCHAR2(30),
+  currency_id        VARCHAR2(15),
+  organization_id    VARCHAR2(10),
+  cur_book_bal       NUMBER(20,2) not null,
+  org_book_bal       NUMBER(20,2) not null,
+  maturity_date      DATE not null,
+  org_term           NUMBER,
+  org_term_mult      VARCHAR2(1),
+  origination_date   DATE not null,
+  accrual_basis_cd   NUMBER not null,
+  current_rate       NUMBER(12,6) not null,
+  cur_net_rate       NUMBER(12,6),
+  adjustable_type_cd NUMBER not null,
+  custom_id          VARCHAR2(20),
+  data_source        VARCHAR2(20) not null,
+  business_id        VARCHAR2(10) not null,
+  ib_discount_date   DATE,
+  ib_discount_rate   NUMBER(12,6),
+  ib_discount_amt    NUMBER(20,2),
+  product_id         VARCHAR2(14),
+  custom_attr        CHAR(1),
+  acc_int            NUMBER(20,2) not null,
+  acct_type          CHAR(2) not null,
+  kj_account_id      VARCHAR2(30)
+)
+partition by range (AS_OF_DATE)
+(
+  partition P20000101 values less than (TO_DATE(' 2000-01-02 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')))

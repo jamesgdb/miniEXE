@@ -1,0 +1,31 @@
+﻿try {
+		    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:MM:SS");
+			Date endTime=format.parse(dcClearStatus.getEndTm());
+			Date StartTime=format.parse(dcClearStatus.getRunTm());
+			int a =StartTime.compareTo(endTime);
+			dcClearLog.setTimeInterval(a+"");
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		 success: function(data){
+					 alert(data);
+					 if(data==1){
+						 var partitionFlg =$("#partitionFlg").combobox('getValue');
+					       $('#partitionFlg').combobox('enable');
+							  if(partitionFlg==1){
+							      $('#clearMode').combobox('disable');
+							      alert("222");
+							  }else{
+								  $('#clearMode').combobox('enable');
+								  alert("3333");
+							  }
+					 }
+					 messager.alert("数据删除成功！","success"); 
+					 $("#del").linkbutton("enable");
+					 grid.load();
+				  }

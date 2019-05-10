@@ -1,0 +1,20 @@
+﻿判断规则是否可以删除：
+ 
+select count(1) from (
+select t.check_code, t.filter_code as rule_code from edm_dq_basic_check_rule  t
+union 
+select  t.check_code, t.filter_code as rule_code from edm_dq_logic_check_rule t
+union 
+select  t.check_code, t.rule_code as rule_code from edm_dq_logic_check_rule t
+union 
+select  t.check_code, t.cktb_rule_code as rule_code from edm_dq_code_check t
+union 
+select  t.check_code, t.cotable_rule_code as rule_code from edm_dq_code_check t
+union 
+select  t.check_code, t.filter_code as rule_code from edm_dq_gs_bal_detail_rule t
+union 
+select  t.check_code, t.filter_code as rule_code from edm_dq_gs_rate_detail_rule t
+) 
+where rule_code = 'rule_001'
+ 
+--传递规则编号 给该sql语句，返回记录数大于0，则表示该规则被使用了。

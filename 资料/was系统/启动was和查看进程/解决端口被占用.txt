@@ -1,0 +1,27 @@
+﻿#killall -9 httpd
+#service httpd start
+
+查看被占用的端口
+ netstat -Aan|grep 
+找到该端口连接对应的PCB/ADDR和连接的协议类型。
+2. 如果是tcp连接，则rmsock  tcpcb
+如果是udp连接，则rmsock  inpcb
+下面我们以telnet服务所使用的23号端口为例，说明该方法：
+#netstat -Aan|grep 23
+f1000200019ce398 tcp 0 0 *.23 *.* LISTEN
+可以看到PCB/ADDR为f1000200019ce398，且协议类型为tcp。
+#rmsock f1000200019ce398 tcpcb
+The socket 0x19ce008 is being held by proccess 185006 (inetd).
+命令报告该端口正在被inetd进程使用，PID为185006。
+
+
+wait情况下，可能是硬盘下内存已经满了。在此期间要禁止生成分析日志，
+
+1. 打开管理控制台，依次选择：服务器 > 应用服务器 > 需要更改的服务器名称 > 进程定义 > 环境条目 
+2. 新建如下的2个条目： 
+Name Value 
+IBM_HEAPDUMP_OUTOFMEMORY false 
+IBM_JAVADUMP_OUTOFMEMORY false 
+3. 保存配置的更改，重新启动WAS 
+
+

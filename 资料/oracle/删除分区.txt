@@ -1,0 +1,21 @@
+﻿清空分区的数据：
+alter table RP_TRANS_LOG_MINUTE truncate partition P2013102900；
+删除分区
+alter table RP_TRANS_LOG_MINUTE drop partition P2013102900 UPDATE GLOBAL INDEXES
+
+增加分区：
+ALTER TABLE event_log ADD PARTITION "P2013103000" VALUES LESS THAN(TO_DATE('2013-10-30 01', 'YYYY-MM-DD HH24'))
+
+
+查看是不是分区表
+
+
+select * from user_tables  t  where t.PARTITIONED='YES'；
+
+SELECT count(1) FROM USER_TAB_PARTITIONS WHERE TABLE_NAME = 'VPDM_FD_INTERBANK_DUE';
+
+SELECT * FROM USER_TAB_PARTITIONS ;
+
+select * from dba_part_tables where owner ='scheme名称' ;
+
+select * from dba_part_col_statistics 

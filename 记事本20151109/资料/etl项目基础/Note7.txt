@@ -1,0 +1,94 @@
+﻿-- Create table
+create table EDM_DC_CLEAR
+(
+  dc_id            VARCHAR2(32) not null,
+  organ            VARCHAR2(40) not null,
+  dc_name          VARCHAR2(100) not null,
+  partition_flg    CHAR(1),
+  data_dt_field    VARCHAR2(50) not null,
+  data_dt_param_id VARCHAR2(40) not null,
+  day_data         NUMBER(10),
+  day_unit         CHAR(1),
+  end_month_data   NUMBER(10),
+  end_year_data    NUMBER(10),
+  status           CHAR(1) not null,
+  clear_desc       VARCHAR2(100),
+  creater          VARCHAR2(50) not null,
+  creater_name     VARCHAR2(50) not null,
+  created_tm       CHAR(19) not null,
+  modifier         VARCHAR2(50),
+  modifier_name    VARCHAR2(50),
+  modified_tm      CHAR(19),
+  custom_flg       CHAR(1),
+  clear_mode       VARCHAR2(1)
+)
+tablespace TBS_VPFRAME_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64
+    next 8
+    minextents 1
+    maxextents unlimited
+  );
+-- Add comments to the table 
+comment on table EDM_DC_CLEAR
+  is '数据清理策略表';
+-- Add comments to the columns 
+comment on column EDM_DC_CLEAR.dc_id
+  is '清理编号';
+comment on column EDM_DC_CLEAR.organ
+  is '所属组织';
+comment on column EDM_DC_CLEAR.dc_name
+  is '清理名称';
+comment on column EDM_DC_CLEAR.partition_flg
+  is '是否分区表';
+comment on column EDM_DC_CLEAR.data_dt_field
+  is '数据日期字段';
+comment on column EDM_DC_CLEAR.data_dt_param_id
+  is '数据日期参数';
+comment on column EDM_DC_CLEAR.day_data
+  is '日数据保留时间';
+comment on column EDM_DC_CLEAR.day_unit
+  is '日数据保留时间单位';
+comment on column EDM_DC_CLEAR.end_month_data
+  is '月末保留时间';
+comment on column EDM_DC_CLEAR.end_year_data
+  is '年底保留数据';
+comment on column EDM_DC_CLEAR.status
+  is '状态1启用2停用3删除';
+comment on column EDM_DC_CLEAR.clear_desc
+  is '清理描述';
+comment on column EDM_DC_CLEAR.creater
+  is '创建人';
+comment on column EDM_DC_CLEAR.creater_name
+  is '创建人姓名';
+comment on column EDM_DC_CLEAR.created_tm
+  is '创建时间';
+comment on column EDM_DC_CLEAR.modifier
+  is '修改人';
+comment on column EDM_DC_CLEAR.modifier_name
+  is '修改人姓名';
+comment on column EDM_DC_CLEAR.modified_tm
+  is '修改时间';
+comment on column EDM_DC_CLEAR.custom_flg
+  is '客户化标志';
+comment on column EDM_DC_CLEAR.clear_mode
+  is '清理模式';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table EDM_DC_CLEAR
+  add constraint PK_EDM_DC_CLEAR primary key (DC_ID)
+  using index 
+  tablespace TBS_VPFRAME_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );

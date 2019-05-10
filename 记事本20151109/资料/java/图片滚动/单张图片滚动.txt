@@ -1,0 +1,2 @@
+﻿ <MARQUEE scrollAmount=4 scrollDelay=60 width=740 height=190><IMG src="http://image35.360doc.com/DownloadImg/2011/09/0217/16919204_18.jpg" width=150  border=0></MARQUEE>
+			    

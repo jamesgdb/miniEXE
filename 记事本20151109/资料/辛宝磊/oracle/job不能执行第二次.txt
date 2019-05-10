@@ -1,0 +1,8 @@
+﻿job_queue_process 表示oracle能够并发的job的数量，可以通过语句
+	show parameter job_queue_process;
+	来查看oracle中job_queue_process的值，当值为0的时候表示全部停止oracle的job
+	
+	可以通过语句：
+		alter system set job_queue_process=10；
+		
+		不过这种修改是动态的，当oracle重新启动job_queue_process的值将仍然从\%oracle_home%\admin\mydb\pfile\init.ora

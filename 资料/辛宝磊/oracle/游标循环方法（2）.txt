@@ -1,0 +1,153 @@
+﻿Declare 
+Cursor MyCursor Is Select * From table;
+   myRow MyCursor%Rowtype;
+Begin
+      For myRow In MyCursor Loop
+      
+      Update pptj_drumbeating Set PJ_description=myRow.reamrk2 Where PJ_ID=myRow.PJ_ID;
+   End Loop;
+End;
+
+
+
+
+
+。。。。。。。。。。。。。。。。。。。。。。。。
+http://blog.sina.com.cn/s/blog_67618c860100j0kh.html
+
+
+[转载]Oracle数据库游标使用方法(转) (2010-06-08 21:36:17)转载▼
+标签： 转载	分类： 数据库
+原文地址：Oracle数据库游标使用方法(转)作者：点点
+　游标有两种类型：显式游标和隐式游标。游标一旦打开，数据就从数据库中传送到游标变量中，然后应用程序再从游标变量中分解出需要的数据，并进行处理。本文中将对游标的使用进行一下讲解,希望可以和大家共同学习进步。
+
+　　SQL是用于访问Oracle数据库的语言，PL/SQL扩展和加强了SQL的功能，它同时引入了更强的程序逻辑, 下面在本文中将对游标的使用进行一下讲解,希望可以和大家共同学习进步。
+　　游标字面理解就是游动的光标。游标是SQL的一个内存工作区，由系统或用户以变量的形式定义。在某些情况下，需要把数据从存放在磁盘的表中调到计算机内存中进行处理，最后将处理结果显示出来或最终写回数据库。这样数据处理的速度才会提高，否则频繁的磁盘数据交换会降低效率。用数据库语言来描述游标就是映射在结果集中一行数据上的位置实体，有了游标，用户就可以访问结果集中的任意一行数据了，将游标放置到某行后，即可对该行数据进行操作，例如提取当前行的数据等。
+　　游标有两种类型：显式游标和隐式游标。游标一旦打开，数据就从数据库中传送到游标变量中，然后应用程序再从游标变量中分解出需要的数据，并进行处理。
+　　当系统使用一个隐式游标时，可以通过隐式游标的属性来了解操作的状态和结果，进而控制程序的流程。隐式游标可以使用名字SQL来访问，但要注意，通过SQL游标名总是只能访问前一个处理操作或单行SELECT操作的游标属性。所以通常在刚刚执行完操作之后，立即使用SQL游标名来访问属性。游标的属性有四种,分别是SQL %ISOPEN，SQL %FOUND，SQL %NOTFOUND，SQL %ROWCOUNT。
+　　SQL%ISOPEN返回的类型为布尔型,判断游标是否被打开，如果打开%ISOPEN等于true,否则等于false,即执行过程中为真,结束后为假。
+　　SQL%NOTFOUND返回值为布尔型,判断游标所在的行是否有效，如果有效，则%FOUNDD等于true，否则等于false,即与%FOUND属性返回值相反。
+　　SQL%FOUND返回值的类型为布尔型，值为TRUE代表插入 删除 更新或单行查询操作成功。
+　　SQL%ROWCOUNT返回值类型为整型，返回当前位置为止游标读取的记录行数,即成功执行的数据行数。 示例代码如下：
+ 
+    set serveroutput on;
+　　declare
+　　varno varchar2(20);
+　　varprice varchar2(20);
+　　CURSOR mycur(vartype number) is
+　　select emp_no,emp_zc from cus_emp_basic
+　　where com_no = vartype;
+　　begin
+　　if mycur%isopen = false then
+　　open mycur(043925);
+　　end if;
+　　fetch mycur into varno,varprice;
+　　while mycur%found
+　　loop
+　　dbms_output.put_line(varno||','||varprice);
+　　if mycur%rowcount=2 then
+　　exit;
+　　end if;
+　　fetch mycur into varno,varprice;
+　　end loop;
+　　close mycur;
+　　end;
+ 
+　　记录并不保存在数据库中，它与变量一样，保存在内存空间中，在使用记录时候，要首先定义记录结构，然后声明记录变量。可以把PL/SQL记录看作是一个用户自定义的数据类型。
+　　游标for循环是显示游标(非显式游标)的一种快捷使用方式，它使用for循环依次读取结果集中的行数据，当form循环开始时，游标自动打开(不需要open)，每循环一次系统自动读取游标当前行的数据(不需要fetch)，当退出for循环时，游标被自动关闭(不需要使用close)。使用游标for循环的时候不能使用open语句，fetch语句和close语句，否则会产生错误。
+ 
+ 
+      set serveroutput on;
+　　declare
+　　cursor mycur(vartype number)is
+　　select emp_no,emp_zc from cus_emp_basic
+　　where com_no=vartype;
+　　begin
+　　for person in mycur(000627) loop
+　　dbms_output.put_line('编号:'||person.emp_no||',住址:'||person.emp_zc);
+　　end loop;
+　　end;
+ 
+　　显式游标的使用总共分4个步骤：
+　　1.声明游标
+　　在DECLEAR部分按以下格式声明游标：
+　　CURSOR 游标名[(参数1 数据类型[参数2 数据类型...])]
+　　IS SELECT语句;
+　　参数是可选部分，所定义的参数可以出现在SELECT语句的WHERE子句中。如果定义了参数，则必须在打开游标时传递相应的实际参数。
+　　SELECT语句是对表或视图的查询语句，甚至也可以是联合查询。可以带WHERE条件、ORDER BY或GROUP BY等子句，但不能使用INTO子句。在SELECT语句中可以使用在定义游标之前定义的变量。
+　　例：
+ 
+      DELCARE
+　　CURSOR C_EMP IS SELECT empno,ename,salary
+　　FROM emp 　　WHERE salary>1500
+　　ORDER BY ename;
+　　........
+　　BEGIN
+ 
+　　在游标定义中SELECT语句中不一定非要表可以是视图，也可以从多个表或视图中选择.
+　　2.打开游标
+　　使用游标中的值之前应该首先打开游标，打开游标初始化查询处理。打开游标的语法
+　　OPEN 游标名[(实际参数1[实际参数2，...])];
+　　打开游标时，SELECT语句的查询结果就被传送到了游标工作区。
+　　例：　　OPEN C_EMP;
+　　3.提取数据
+　　从游标得到一行数据使用FETCH命令。每一次提取数据后，游标都指向结果集的下一
+　　FETCH cursor_name INTO variable[,variable,...]
+　　对于SELECT定义的游标的每一列，FETCH变量列表都应该有一个变量与之相对应，变
+　　在可执行部分，按以下格式将游标工作区中的数据取到变量中。提取操作必须在打开游标之后进行。
+　　FETCH 游标名 INTO 变量名1[变量名2，...];
+　　或
+　　FETCH 游标名 INTO 记录变量;
+　　游标打开后有一个指针指向数据区，FETCH语句一次返回指针所指的一行数据，要返回多行需重复执行，可以使用循环语句来实现。控制循环可以通过判断游标的属性来进行。
+　　下面对这两种格式进行说明：
+　　第一种格式中的变量名是用来从游标中接收数据的变量，需要事先定义。变量的个数和类型应与SELECT语句中的字段变量的个数和类型一致。
+　　第二种格式一次将一行数据取到记录变量中，需要使用%ROWTYPE事先定义记录变量，这种形式使用起来比较方便，不必分别定义和使用多个变量。
+　　定义记录变量的方法如下：
+　　变量名 表名|游标名%ROWTYPE;
+　　其中的表必须存在，游标名也必须先定义。例如：
+create or replace procedure update_regioncity is
+  v_nUpdated     INT := 0;
+  c_nCommitCount int := 1000;
+  v_memberid     int;
+  v_mobile       int;
+  v_regioncityid   int;
+  cursor pv_region is
+    select t.id v_memberid, t.mobile v_mobile
+      from t_home_members t
+     where t.mobile is not null;
+  HO        pv_region%ROWTYPE;
+begin
+  open pv_region;
+  loop
+    fetch pv_region into HO;
+    exit when pv_region%notfound;
+    begin
+       select r.id into v_regioncityid
+       from t_sys_mobilearea m, t_sys_regions r
+      where r.region_name = m.city and m.num = substr(HO.v_mobile, 1, 7);
+    exception when no_data_found then
+      v_regioncityid := '';
+   end;
+   update t_home_members h set h.regioncity_id=v_regioncityid where h.id=HO.v_memberid;
+   v_nUpdated := v_nUpdated + 1;
+   if v_nUpdated = c_nCommitCount then
+     insert into insert_log(a) values (1);
+     commit;
+  end if;
+  end loop;
+  CLOSE PV_REGION; 
+  commit;
+end update_regioncity;
+
+begin... exception... end 是配套使用的，exception是捕捉begin开始的语句的错误的，这样的话，如果select执行没有结果，那么就会让v_regioncityid赋值为空
+ 
+4.关闭游标
+　　CLOSE 游标名;
+　　例：
+　　CLOSE C_EMP;
+　　显式游标打开后，必须显式地关闭。游标一旦关闭，游标占用的资源就被释放，游标变成无效，必须重新打开才能使用。
+　　Oracle支持动态SELECT语句和动态游标，动态的方法大大扩展了程序设计的能力。
+　　对于查询结果为一行的SELECT语句，可以用动态生成查询语句字符串的方法，在程序执行阶段临时地生成并执行，语法是：
+　　execute immediate 查询语句字符串 into 变量1[,变量2，...];
+　　在变量声明部分定义的游标是静态的，不能在程序运行过程中修改。虽然可以通过参数传递来取得不同的数据，但还是有很大的局限性。通过采用动态游标，可以在程序运行阶段随时生成一个查询语句作为游标。要使用动态游标需要先定义一个游标类型，然后声明一个游标变量，游标对应的查询语句可以在程序的执行过程中动态地说明。
+ 以上部分摘自：http://database.ctocio.com.cn/tips/286/8265286.shtml

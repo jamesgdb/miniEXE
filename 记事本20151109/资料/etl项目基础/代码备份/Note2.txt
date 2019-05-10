@@ -1,0 +1,14 @@
+﻿function removes(){
+	var selected = grid.getSelectedIdString() ;
+	var url="dqCheckBase_removes.action";
+	ajaxRequest(url, selected, function(isSuccess) {
+		if (isSuccess) {
+			messager.alert("数据删除成功！","success");
+			grid.unselectAll();
+			grid.load();
+		} else {
+			messager.alert("数据删除失败！","error");
+		}
+		$("#del").linkbutton("enable");
+	});
+}

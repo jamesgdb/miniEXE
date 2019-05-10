@@ -1,0 +1,80 @@
+﻿
+linux
+下启动停止
+WebSphere  
+
+1.以root用户身份登陆，进入websphere安装目录的bin目录下，
+# cd /opt/WebSphere/AppServer/bin(此路径根据WebSphere具体安装路径确定)
+//启动服务[root@localhost bin]$ 
+ ./startServer.sh server1 
+//停止服务
+
+[root@localhost bin]$ ./stopServer.sh server1 
+
+[root@localhost bin]$ 
+如果是集群可能的路径是
+/opt/WebSphere/AppServer/bin 
+
+//启动服务
+[root@localhost bin]$  ./startManager.sh 
+
+//停止服务
+[root@localhost bin]$ ./stopManager.sh 
+如果启动时出现这样的错误信息：
+
+ADMU0118E: 日至文件无法写到位置
+           /opt/WebSphere/AppServer/logs/server1/startServer.log
+
+请使用   -logfile 
+
+指定不同的位置
+ADMU3100I: 
+
+正在从服务器读取配置
+
+server1 
+
+ADMU0111E: 
+
+程序退出，带有错误。
+
+           com.ibm.ws.process.exception.InvalidFileException:  
+
+           PROC0007E: Some files required by the process or the process 
+
+           definition were unaccessable.  Please check the standard in, out, 
+
+           and error file redirects and directories.  Process could not be 
+
+           created. 
+
+ADMU0211I: 
+
+在文件
+           /opt/WebSphere/AppServer/logs/server1/startServer.log 
+
+中可看到错误的详细信息
+
+ADMU1211I: 
+
+要获取故障的全部跟踪，使用
+
+ -trace 
+
+选项可能是登陆的用户没有足够的权限，需要使用有权限的用户启动。
+2.服务启动后进入管理控制台
+
+http://localhost:9090/admin进入
+/WebSphere/AppServer/firststeps/
+使用命令
+[root@tc10 firststeps]# ./firststeps.sh
+
+可以打开
+
+WAS
+
+第一步。
+
+  
+
+  

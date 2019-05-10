@@ -1,0 +1,47 @@
+﻿package com.amsoft.amp.util;
+/**
+ * <p> Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2007</p>
+ * <p>Company: 北京宇信易诚网络技术有限公司</p>
+ * <p>Date: 2011-12-18</p>
+ * @author 毛小明
+ * @version 1.0
+ */
+import java.security.MessageDigest;
+import java.sql.*;
+import java.text.*;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+public class GeneralUtils
+{
+  /**
+   * 将字符串md5加密
+   * @param test
+   * @return
+   * @throws Exception
+   */
+  public static String formatToMD5(String test) throws Exception {
+	  MessageDigest md = MessageDigest.getInstance("MD5");
+	  md.update(test.getBytes());
+	  
+	  byte b[] = md.digest(); 
+	  int i; 
+
+	  StringBuffer buf = new StringBuffer(""); 
+	  for (int offset = 0; offset < b.length; offset++) { 
+		  i = b[offset]; 
+		  if(i<0) i+= 256; 
+		  if(i<16) 
+		  buf.append("0"); 
+		  buf.append(Integer.toHexString(i)); 
+	  }
+
+	  return buf.toString();
+  }
+}
+
+  
+  
+  调用：ciphertext = GeneralUtils.formatToMD5(password);

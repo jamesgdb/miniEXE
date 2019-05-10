@@ -1,0 +1,150 @@
+﻿测试环境 ：http://192.168.6.58:7001/vpetl-web2/
+                    http://192.168.6.58:7001/vpetl-web2pg/
+泛鹏天地研发项目管理系统 ：https://vprisk.8800.org:8443/redmine 
+泛鹏天地研发项目管理系统帐号：https://124.207.179.2:8443/redmine/login
+本地服务：http://localhost:8080/vpetl-web/；
+testlink：http://192.168.1.3:6080/testlink/index.php；
+SVN地址：http://192.168.5.253:6080/svn；
+公司邮箱地址：http://mail.vprisk.com/；
+weblogic 服务器地址：http://192.168.6.58:7001/console/login/LoginForm.jsp；  weblogic/weblogic1234
+报工系统网址：http://192.168.1.30/hr/
+产品管理发布平台 http://192.168.6.59:8080/vppmrp/  000101/111111     
+------------------------------------------------------------------------------------------------------------------------------------------------       
+       https://192.168.6.58:9043/ibm/console/login.do
+       weblogic地址：http://192.168.6.58:7001/console
+       
+       第二轮测试数据库  vplet/vplet
+       测试环境    etl_gy/etl_gy
+       ssh :vp/wVwrpBdb
+       vpetlhh/vpetlhh
+       192.168.6.58
+       vp/wVwrpBdb
+      操作系统的用户
+       oracle用户：oracle/tgddMrZe	  、连接用户  sys/DSxvtzVJ
+
+jdbc.driverClassName=oracle.jdbc.driver.OracleDriver
+jdbc.url=jdbc:oracle:thin:@192.168.6.58:1521:orcl
+jdbc.username=vpetl2
+jdbc.password=vpetl2 
+系统用户
+ system
+ DSxvtzVJ
+ 
+ 
+ ------------------------192.168.5.200--------------------
+ vp	32OMjDSu
+oracle	EFQagg3T
+
+export ORACLE_SID=devvpframe
+ -----------------------------------------------------------------------------------------------------------------------------      
+项目组etl测试地址：
+http://192.168.6.58:7001/vpetl-web2pg/
+ 
+项目组dm测试地址：
+http://192.168.6.58:7001/vpetl-web2pg/
+ 
+总部dm测试地址：
+http://192.168.6.58:7001/vpedm-web2/ 
+发布平台修改为连接该地址。
+http://192.168.6.58:7001/vpedm-web
+http://192.168.6.58:7001/vpedm-webpg
+http://192.168.6.58:7001/vpetl-web
+产品发布平台：
+http://192.168.6.58:7001/vppmrp/
+产品申请用户：sysadmin/000000
+产品下载用户：000101/111111
+
+-----------------------------------------------------------------------------------------------------------------------------
+压力测试
+http://192.168.6.54:7001/vpedm-webpg/secMenu_toIndex.action?flag=1 ；项目组
+http://192.168.6.54:7001/vpedm-web/secMenu_toIndex.action?flag=1； 总部
+http://192.168.6.54:7001/vpetl-web/secMenu_toIndex.action?flag=1调度
+数据库：etladmin/etladmin
+192.168.6.200:1521/orcl
+
+vp/bfmqkcat	Weblogic 、Websphere使用此用户	
+ssh
+192.168.6.200
+oracle/gdqpzjoz	Oracle操作系统用户
+--------------------------------------------------------------------------------------------------------------------------------
+DB2的数据库测试
+http://192.168.6.58:9080/vpetl-webdb2/secMenu_toIndex.action?flag=1
+http://192.168.6.58:7001/vpetl-db2/secMenu_toIndex.action?flag=1；
+dbvisualizer 中登陆DB2用户名密码：vpetl/azrdcmxe
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+ http://192.168.6.58:7001/vpetl-web-2.2.2-sec223-db2；
+
+
+产品发布平台db2数据库：
+jdbc.url=jdbc:db2://192.168.6.58:50000/DEVETL:currentSchema=DEVPMRP;
+jdbc.username=vpetl
+jdbc.password=azrdcmxe
+-----------------------------------------------------------------------------------------------------------------------------------
+http://www.xiaomi.cn/index.html
+237600578793
+
+
+MQ服务：
+/home/vp/mq/apache-activemq-5.9.0/bin/linux-x86-64
+张巧军 15:13:02
+http://192.168.6.58:8161/admin/queues.jsp
+客户端
+/home/vp/etl/etlclient
+
+http://192.168.6.58:7001/vpetl-2.2.2-sec223-oracle/secMenu_toIndex.action?flag=1
+
+http://192.168.6.58:7001/vpetl-2.2.2-sec223-oracle/secMenu_toIndex.action?flag=1
+
+
+http://localhost:8080/vpetl-web/secMenu_toIndex.action?flag=1
+
+alter database datafile '/data/oradata/orcl/ GDB_TEST _idx01.dbf' offline drop;
+drop tablespace GDB_TEST_idx  including contents;
+
+-----------------------------------
+项目组问题
+
+http://192.168.6.58:9080//vpetlMetadata
+
+http://www.ibm.com/developerworks/apps/download/index.jsp?contentid=461366&filename=CXFSampleOnWAS_Sample.ear&method=http&locale=
+
+
+<IMG src="file:///C:\Users\Administrator\AppData\Roaming\feiq\RichOle\1531858782.bmp">
+
+程序冰并发
+
+任务组。前新加一个任务组，------------------------
+机构树--是不是用逗号分隔；
+
+
+
+
+项目组下log日志输出，需要删除的包----------------------
+log4j-1.2.15.jar
+slf4j-log4j12-1.6.6.jar
+
+
+-----------------------------------------------------------------------------------
+逻辑检查：UAT_逻辑校验_到期日小于等于数据日期
+基础检查：gdb_检查贴现表_币种为人民币
+代码表：gqq_代码检查2
+总分余额检查：T-检查总分余额
+总分利息：gdb_贷款__总额利息
+
+-----------------------------------------------------------------------
+
+http://192.168.6.58:7001/vpdms-fini-base/login.jsp；
+http://192.168.6.58:7001/vpdms-fini/；
+http://192.168.6.58:7001/vppmrp/
+
+黄河银行项目中
+http://192.168.6.58:9080/vpetl-hh/secMenu_toIndex.action?flag=1
+
+
+-----------------------------------------------
+从需求、开发、测试等各个环节所需要的时间比较多，
+
+
+
+

@@ -1,0 +1,4 @@
+﻿2、关机DOS命令 
+at 17:00 shutdown -s
+shutdown -f -s 3600  3600即3600s=1H
+shutdown -s -t 1800

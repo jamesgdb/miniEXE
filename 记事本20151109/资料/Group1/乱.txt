@@ -1,0 +1,48 @@
+﻿18601221584 翟亮（框架）
+
+
+宽度：293.77
+256.05536可 A4210*297-50毫米
+262.97577过大
+
+18701374987  赵英  润乾报表
+1336812870
+15110103061
+
+187服务器
+http://22.188.132.187:9080/backoffice
+用户名：reportuser
+密码：P@ssword04
+
+20.120
+http://22.188.20.120:9080/backoffice/login.jsp;
+用户名：tmprt
+密码：1qaz@WSX
+
+
+select * from PM_CONDITION t;
+
+select * from PM_rule t  where t.id='963c043b40ed3dcf0140f2a4a09f008c';
+select *  from pm_condition t where t.rule_id='963c043b40ed3dcf0140f2a4a09f008c';
+select *  from pm_expression t where t.condition_id='963c043b40ed3dcf01410ba06fcf00d4';
+
+select distinct(t.operand)  from pm_expression t;
+--------------------------------
+select * from PM_CONDITION t;
+
+select * from PM_rule t  where t.id='963c043b40ed3dcf01410c00f1c90191';
+select *  from pm_condition t where t.rule_id='963c043b40ed3dcf01410c00f1c90191';
+select * from PM_CONDITION t;
+select *  from pm_expression t where t.condition_id='963c043b7fa3160c018359e504ce372c' or t.condition_id='963c043b7fa3160c018359e504ce372e';
+
+select * from PM_rule t  where t.id='963c043b40ed3dcf01410bce019b0140';
+select *  from pm_condition t where t.rule_id='963c043b40ed3dcf01410bce019b0140';
+select * from PM_CONDITION t;
+select *  from pm_expression t where t.condition_id='963c043b40ed3dcf01410bf4eeba017d' or t.condition_id='963c043b40ed3dcf01410bf4eeba017b';
+
+select * from pm_expression t ;
+select * from PM_rule t  where t.id='963c043b40ed3dcf0140f2a4a0a300ad';
+select *  from pm_condition t where t.rule_id='963c043b40ed3dcf0140f2a4a0a300ad';
+select * from PM_CONDITION t;
+select *  from pm_expression t where t.condition_id='963c043b40ed3dcf0140f2a4a0a400b8' ;
+select *  from pm_condition t where t.id='963c043b40ed3dcf0140f2a4a0a400b8';

@@ -1,0 +1,39 @@
+﻿-- Create table
+create global temporary table TEMP_GB_INS_BAL
+(
+  org_code        VARCHAR2(60),
+  subject_code    VARCHAR2(60),
+  currency_code   VARCHAR2(60),
+  data_source     VARCHAR2(60),
+  check_phase_flg VARCHAR2(60),
+  amt_bal         NUMBER(24,2),
+  check_code      VARCHAR2(60)
+  
+  
+)
+
+
+on commit delete rows; 事物级临时会话
+
+
+如果写成on commit preserve rows表示会话级临时表
+
+
+-- Add comments to the table 
+comment on table TEMP_GB_INS_BAL
+  is '用于总分余额检查临时存放分户余额统计信息';
+-- Add comments to the columns 
+comment on column TEMP_GB_INS_BAL.org_code
+  is '机构';
+comment on column TEMP_GB_INS_BAL.subject_code
+  is '科目';
+comment on column TEMP_GB_INS_BAL.currency_code
+  is '币种';
+comment on column TEMP_GB_INS_BAL.data_source
+  is '数据源';
+comment on column TEMP_GB_INS_BAL.check_phase_flg
+  is '检查阶段';
+comment on column TEMP_GB_INS_BAL.amt_bal
+  is '余额';
+comment on column TEMP_GB_INS_BAL.check_code
+  is '检查编号';

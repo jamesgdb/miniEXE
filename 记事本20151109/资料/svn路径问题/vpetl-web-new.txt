@@ -1,0 +1,1 @@
+﻿https://vprisk.8800.org:8443/svn/RDCODE/application/vpetl/branches/bugfix/2.2.x-meta-ui/vpetl-web

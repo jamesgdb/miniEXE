@@ -1,0 +1,38 @@
+﻿select count(1)    from (select distinct (n.rule_code)
+from (select t.check_code, t.filter_code as rule_code
+ from edm_dq_basic_check_rule t
+ union
+ select t.check_code, t.filter_code as rule_code  from edm_dq_logic_check_rule t
+  union
+ select t.check_code, t.rule_code as rule_code  from edm_dq_logic_check_rule t
+                union
+                
+                select t.check_code, t.Cktb_filter_code as rule_code
+                  from edm_dq_code_check_rule t
+                union
+                select t.check_code, t.Codetb_filter_code as rule_code
+                  from edm_dq_code_check_rule t
+                union
+                
+                select t.check_code, t.filter_code as rule_code
+                  from edm_dq_gs_bal_detail_rule t
+                union
+                
+                select t.check_code, t.filter_code as rule_code
+                  from edm_dq_gs_rate_detail_rule t
+                union
+                
+                select t.Dc_id, t.filter_code as rule_code
+                  from edm_dc_clear_rule t) n
+         where n.check_code not in
+               (select check_code
+                  from EDM_DQ_CHECK_BASE m
+                 where (m.status = '3')))
+ where rule_code  'RU-14040800001';
+ 
+ 
+ 
+ 
+ 
+
+select distinct (t.status) from EDM_DQ_CHECK_BASE t

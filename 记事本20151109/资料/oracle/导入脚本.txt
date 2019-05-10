@@ -1,0 +1,7 @@
+﻿su - oracle
+sqlplus tmrpt/tmrpt @init_tmrpt.sql
+sqlplus tmrpt/tmrpt @resource_tmrpt.sql 
+
+bash提示。
+
+

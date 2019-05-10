@@ -1,0 +1,364 @@
+﻿package com.vprisk.edm.dq.entity;
+
+import com.vprisk.rmplatform.common.entity.AbstractEntity;
+
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import java.io.Serializable;
+
+/**
+ *
+ */
+@Entity
+@Table(name="EDM_DQ_TOTAL_RATE_DETAIL")
+public class DqTotalRateDetail extends AbstractEntity implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private DqTotalRateDetailId id;
+    private String checkCode;
+    private String organ;
+    private String zfCd;
+    private String checkTable;
+    private String tableDesc;
+    private String orgCodeField;
+    private String currencyCodeField;
+    private String subjectCodeField;
+    private String amtRateField;
+    private String dataDtField;
+    private String checkPhaseFlg;
+    private String dataSource;
+    private String filterCode;
+    private String dbSchema; //schema
+    private String detailId;
+    
+    private String uuid; //临时属性 uuid 
+    
+    
+    /**
+   	 * @return the id;
+   	 */
+       @EmbeddedId
+   	@GenericGenerator(name = "idGenerator", strategy = "assigned")
+   	@GeneratedValue(generator = "idGenerator")
+   	 public DqTotalRateDetailId getId() {
+   		return this.id;
+   	}
+       
+       
+   	public void setId(DqTotalRateDetailId id) {
+   		this.id = id;
+   	}
+
+   	/**
+	 * @return the checkCode;
+	 */
+    @Column(name="detail_id",  length=32)
+	public String getDetailId() {
+		return detailId;
+	}
+
+
+	public void setDetailId(String detailId) {
+		this.detailId = detailId;
+	}
+
+
+	/**
+	 * @return the checkCode;
+	 */
+    @Column(name="CHECK_CODE", insertable=false, updatable=false, length=40)
+    public String getCheckCode() {
+        return this.checkCode;
+    }
+    
+    /**
+	 * @param checkCode
+	 */
+    public void setCheckCode(String checkCode) {
+        this.checkCode = checkCode;
+    }
+    
+		   
+	    @Column(name="DB_SCHEMA", length=50)
+		public String getDbSchema() {
+			return dbSchema;
+		}
+
+		public void setDbSchema(String dbSchema) {
+			this.dbSchema = dbSchema;
+		}
+
+   	
+	/**
+	 * @return the organ;
+	 */
+    @Column(name="ORGAN", nullable=false, length=40)
+    public String getOrgan() {
+        return this.organ;
+    }
+    
+    /**
+	 * @param organ
+	 */
+    public void setOrgan(String organ) {
+        this.organ = organ;
+    }
+
+    
+    
+    
+    
+    @Transient
+	public String getUuid() {
+		return checkCode + "," + orgCodeField +"," + currencyCodeField +"," + subjectCodeField + "," + amtRateField;
+	}
+
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+
+	/**
+	 * @return the zfCd;
+	 */
+    @Column(name="ZF_CD", length=1)
+    public String getZfCd() {
+        return this.zfCd;
+    }
+    
+    /**
+	 * @param zfCd
+	 */
+    public void setZfCd(String zfCd) {
+        this.zfCd = zfCd;
+    }
+
+	/**
+	 * @return the checkTable;
+	 */
+    @Column(name="CHECK_TABLE", nullable=false, length=40)
+    public String getCheckTable() {
+        return this.checkTable;
+    }
+    
+    /**
+	 * @param checkTable
+	 */
+    public void setCheckTable(String checkTable) {
+        this.checkTable = checkTable;
+    }
+
+	/**
+	 * @return the tableDesc;
+	 */
+    @Column(name="TABLE_DESC", length=100)
+    public String getTableDesc() {
+        return this.tableDesc;
+    }
+    
+    /**
+	 * @param tableDesc
+	 */
+    public void setTableDesc(String tableDesc) {
+        this.tableDesc = tableDesc;
+    }
+
+	/**
+	 * @return the orgCodeField;
+	 */
+    @Column(name="ORG_CODE_FIELD", insertable=false, updatable=false, length=50)
+    public String getOrgCodeField() {
+        return this.orgCodeField;
+    }
+    
+    /**
+	 * @param orgCodeField
+	 */
+    public void setOrgCodeField(String orgCodeField) {
+        this.orgCodeField = orgCodeField;
+    }
+
+	/**
+	 * @return the currencyCodeField;
+	 */
+    @Column(name="CURRENCY_CODE_FIELD", insertable=false, updatable=false, length=50)
+    public String getCurrencyCodeField() {
+        return this.currencyCodeField;
+    }
+    
+    /**
+	 * @param currencyCodeField
+	 */
+    public void setCurrencyCodeField(String currencyCodeField) {
+        this.currencyCodeField = currencyCodeField;
+    }
+
+	/**
+	 * @return the subjectCodeField;
+	 */
+    @Column(name="SUBJECT_CODE_FIELD", insertable=false, updatable=false, length=50)
+    public String getSubjectCodeField() {
+        return this.subjectCodeField;
+    }
+    
+    /**
+	 * @param subjectCodeField
+	 */
+    public void setSubjectCodeField(String subjectCodeField) {
+        this.subjectCodeField = subjectCodeField;
+    }
+
+	/**
+	 * @return the amtRateField;
+	 */
+    @Column(name="AMT_RATE_FIELD", insertable=false, updatable=false, length=50)
+    public String getAmtRateField() {
+        return this.amtRateField;
+    }
+    
+    /**
+	 * @param amtRateField
+	 */
+    public void setAmtRateField(String amtRateField) {
+        this.amtRateField = amtRateField;
+    }
+
+	/**
+	 * @return the dataDtField;
+	 */
+    @Column(name="DATA_DT_FIELD", nullable=false, length=30)
+    public String getDataDtField() {
+        return this.dataDtField;
+    }
+    
+    /**
+	 * @param dataDtField
+	 */
+    public void setDataDtField(String dataDtField) {
+        this.dataDtField = dataDtField;
+    }
+
+	/**
+	 * @return the checkPhaseFlg;
+	 */
+    @Column(name="CHECK_PHASE_FLG", length=1)
+    public String getCheckPhaseFlg() {
+        return this.checkPhaseFlg;
+    }
+    
+    /**
+	 * @param checkPhaseFlg
+	 */
+    public void setCheckPhaseFlg(String checkPhaseFlg) {
+        this.checkPhaseFlg = checkPhaseFlg;
+    }
+
+	/**
+	 * @return the dataSource;
+	 */
+    @Column(name="DATA_SOURCE", length=40)
+    public String getDataSource() {
+        return this.dataSource;
+    }
+    
+    /**
+	 * @param dataSource
+	 */
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
+    }
+
+	/**
+	 * @return the filterCode;
+	 */
+    @Column(name="FILTER_CODE", length=40)
+    public String getFilterCode() {
+        return this.filterCode;
+    }
+    
+    /**
+	 * @param filterCode
+	 */
+    public void setFilterCode(String filterCode) {
+        this.filterCode = filterCode;
+    }
+
+	@Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DqTotalRateDetail pojo = (DqTotalRateDetail) o;
+
+        if (organ != null ? !organ.equals(pojo.organ) : pojo.organ != null) return false;
+        if (zfCd != null ? !zfCd.equals(pojo.zfCd) : pojo.zfCd != null) return false;
+        if (checkTable != null ? !checkTable.equals(pojo.checkTable) : pojo.checkTable != null) return false;
+        if (tableDesc != null ? !tableDesc.equals(pojo.tableDesc) : pojo.tableDesc != null) return false;
+        if (orgCodeField != null ? !orgCodeField.equals(pojo.orgCodeField) : pojo.orgCodeField != null) return false;
+        if (currencyCodeField != null ? !currencyCodeField.equals(pojo.currencyCodeField) : pojo.currencyCodeField != null) return false;
+        if (subjectCodeField != null ? !subjectCodeField.equals(pojo.subjectCodeField) : pojo.subjectCodeField != null) return false;
+        if (amtRateField != null ? !amtRateField.equals(pojo.amtRateField) : pojo.amtRateField != null) return false;
+        if (dataDtField != null ? !dataDtField.equals(pojo.dataDtField) : pojo.dataDtField != null) return false;
+        if (checkPhaseFlg != null ? !checkPhaseFlg.equals(pojo.checkPhaseFlg) : pojo.checkPhaseFlg != null) return false;
+        if (dataSource != null ? !dataSource.equals(pojo.dataSource) : pojo.dataSource != null) return false;
+        if (filterCode != null ? !filterCode.equals(pojo.filterCode) : pojo.filterCode != null) return false;
+
+        return true;
+    }
+
+	@Override
+    public int hashCode() {
+        int result = 0;
+        result = (organ != null ? organ.hashCode() : 0);
+        result = 31 * result + (zfCd != null ? zfCd.hashCode() : 0);
+        result = 31 * result + (checkTable != null ? checkTable.hashCode() : 0);
+        result = 31 * result + (tableDesc != null ? tableDesc.hashCode() : 0);
+        result = 31 * result + (orgCodeField != null ? orgCodeField.hashCode() : 0);
+        result = 31 * result + (currencyCodeField != null ? currencyCodeField.hashCode() : 0);
+        result = 31 * result + (subjectCodeField != null ? subjectCodeField.hashCode() : 0);
+        result = 31 * result + (amtRateField != null ? amtRateField.hashCode() : 0);
+        result = 31 * result + (dataDtField != null ? dataDtField.hashCode() : 0);
+        result = 31 * result + (checkPhaseFlg != null ? checkPhaseFlg.hashCode() : 0);
+        result = 31 * result + (dataSource != null ? dataSource.hashCode() : 0);
+        result = 31 * result + (filterCode != null ? filterCode.hashCode() : 0);
+
+        return result;
+    }
+	
+	@Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer(getClass().getSimpleName());
+
+        sb.append(" [");
+        sb.append("checkCode").append("='").append(getCheckCode()).append("', ");
+        sb.append("organ").append("='").append(getOrgan()).append("', ");
+        sb.append("zfCd").append("='").append(getZfCd()).append("', ");
+        sb.append("checkTable").append("='").append(getCheckTable()).append("', ");
+        sb.append("tableDesc").append("='").append(getTableDesc()).append("', ");
+        sb.append("orgCodeField").append("='").append(getOrgCodeField()).append("', ");
+        sb.append("currencyCodeField").append("='").append(getCurrencyCodeField()).append("', ");
+        sb.append("subjectCodeField").append("='").append(getSubjectCodeField()).append("', ");
+        sb.append("amtRateField").append("='").append(getAmtRateField()).append("', ");
+        sb.append("dataDtField").append("='").append(getDataDtField()).append("', ");
+        sb.append("checkPhaseFlg").append("='").append(getCheckPhaseFlg()).append("', ");
+        sb.append("dataSource").append("='").append(getDataSource()).append("', ");
+        sb.append("filterCode").append("='").append(getFilterCode()).append("'");
+        sb.append("]");
+      
+        return sb.toString();
+    }
+
+}

@@ -1,0 +1,322 @@
+﻿create table ETLADMIN.VPDM_DT_CASA
+(
+	ACCOUNT_ID VARCHAR2(50) null,
+	SUB_ACC_ID VARCHAR2(50) null,
+	AS_OF_DATE DATE null,
+	PRODUCT_ID VARCHAR2(20) null,
+	GL_ACCOUNT_ID VARCHAR2(30) null,
+	CURRENCY_ID VARCHAR2(15) null,
+	ORGANIZATION_ID VARCHAR2(10) null,
+	ORGANIZATION_A_ID VARCHAR2(10) null,
+	CURRENT_BALANCE NUMBER(20,2) null,
+	ACCRUAL_BASIS_CD NUMBER null,
+	CURRENT_RATE NUMBER(12,6) null,
+	SPREAD_RATE NUMBER(12,6) null,
+	SPREAD_PERCENT NUMBER(8,2) null,
+	SPREAD_TYPE NUMBER null,
+	LRD_BASE_RATE NUMBER(12,6) null,
+	ACCOUNT_OPEN_DATE DATE null,
+	ACCOUNT_CLOSE_DATE DATE null,
+	CUSTOM_ID VARCHAR2(20) null,
+	BUSI_TYPE_CODE VARCHAR2(10) null,
+	ACCRUED_INTEREST NUMBER(24,6) null,
+	PAYMENT_INTEREST NUMBER(24,6) null,
+	DATA_SOURCE VARCHAR2(20) null,
+	BUSINESS_ID VARCHAR2(10) null,
+	INT_FLAG CHAR(1) null,
+	DEPO_CONS_FLAG CHAR(1) null,
+	ACCT_TYPE CHAR(2) null,
+	ACCOUNT_ID_KJ VARCHAR2(50) null
+)
+tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+partition by range (AS_OF_DATE)(  
+  partition p20100101 
+   values less than (to_date('20100101', 'yyyyMMdd'))
+    nologging
+    nocompress
+    tablespace TBS_ETL_DATA
+    pctused    40
+    pctfree    0
+    initrans   1
+    maxtrans   255
+    storage    (
+                initial          512k
+                next             512k
+                minextents       1
+                maxextents       unlimited
+                pctincrease      0
+                freelists        1
+                freelist groups  1
+                buffer_pool      default
+               )
+   )	
+;
+  
+comment on column ETLADMIN.VPDM_DT_CASA.ACCOUNT_ID is '账号';
+comment on column ETLADMIN.VPDM_DT_CASA.SUB_ACC_ID is '款项号';
+comment on column ETLADMIN.VPDM_DT_CASA.AS_OF_DATE is '数据日期';
+comment on column ETLADMIN.VPDM_DT_CASA.PRODUCT_ID is '产品号';
+comment on column ETLADMIN.VPDM_DT_CASA.GL_ACCOUNT_ID is '科目号';
+comment on column ETLADMIN.VPDM_DT_CASA.CURRENCY_ID is '货币';
+comment on column ETLADMIN.VPDM_DT_CASA.ORGANIZATION_ID is '核算机构';
+comment on column ETLADMIN.VPDM_DT_CASA.ORGANIZATION_A_ID is '考核机构';
+comment on column ETLADMIN.VPDM_DT_CASA.CURRENT_BALANCE is '当前余额';
+comment on column ETLADMIN.VPDM_DT_CASA.ACCRUAL_BASIS_CD is '利息提存计算方式代码';
+comment on column ETLADMIN.VPDM_DT_CASA.CURRENT_RATE is '当前执行利率';
+comment on column ETLADMIN.VPDM_DT_CASA.SPREAD_RATE is '净利加減值';
+comment on column ETLADMIN.VPDM_DT_CASA.SPREAD_PERCENT is '浮动比';
+comment on column ETLADMIN.VPDM_DT_CASA.SPREAD_TYPE is '浮动方式';
+comment on column ETLADMIN.VPDM_DT_CASA.LRD_BASE_RATE is '基准利率';
+comment on column ETLADMIN.VPDM_DT_CASA.ACCOUNT_OPEN_DATE is '开户日期';
+comment on column ETLADMIN.VPDM_DT_CASA.ACCOUNT_CLOSE_DATE is '销户日期';
+comment on column ETLADMIN.VPDM_DT_CASA.CUSTOM_ID is '客户号';
+comment on column ETLADMIN.VPDM_DT_CASA.BUSI_TYPE_CODE is '客户所属行业';
+comment on column ETLADMIN.VPDM_DT_CASA.ACCRUED_INTEREST is '计提利息';
+comment on column ETLADMIN.VPDM_DT_CASA.PAYMENT_INTEREST is '实付利息';
+comment on column ETLADMIN.VPDM_DT_CASA.DATA_SOURCE is '资料来源';
+comment on column ETLADMIN.VPDM_DT_CASA.BUSINESS_ID is '业务条线';
+comment on column ETLADMIN.VPDM_DT_CASA.INT_FLAG is '是否计息标识';
+comment on column ETLADMIN.VPDM_DT_CASA.DEPO_CONS_FLAG is '是否协定存款';
+comment on column ETLADMIN.VPDM_DT_CASA.ACCT_TYPE is '业务类别';
+comment on column ETLADMIN.VPDM_DT_CASA.ACCOUNT_ID_KJ is '会计平台账号';
+COMMENT ON TABLE ETLADMIN.VPDM_DT_CASA is '活期';
+
+
+create table ETLADMIN.VPDM_LN_LOAN
+(
+	NON_ACCR_B_BALANCE NUMBER(20,2) null,
+	NON_ACCR_D_BALANCE NUMBER(20,2) null,
+	MATURITY_DATE DATE null,
+	ORG_TERM NUMBER null,
+	ORG_TERM_MULT VARCHAR2(1) null,
+	ORIGINATION_DATE DATE null,
+	OVERDUE_DATE DATE null,
+	ACCRUAL_BASIS_CD NUMBER null,
+	CURRENT_RATE NUMBER(12,6) null,
+	CUR_OVERDUE_RATE NUMBER(12,6) null,
+	SPREAD_RATE NUMBER(12,6) null,
+	SPREAD_PERCENT NUMBER(8,2) null,
+	SPREAD_TYPE NUMBER null,
+	LRD_BASE_RATE NUMBER(12,6) null,
+	AMRT_TYPE_CD VARCHAR2(4) null,
+	AMOUNT_PAYINTEREST_NUM NUMBER null,
+	CUR_PAYMENT_INT NUMBER(20,2) null,
+	CUR_PAYMENT_CAP NUMBER(20,2) null,
+	FIRST_PAYMENT_DATE DATE null,
+	LAST_PAYMENT_DATE DATE null,
+	NEXT_PAYMENT_DATE DATE null,
+	PMT_FREQ NUMBER null,
+	PMT_FREQ_MULT CHAR(1) null,
+	REMAIN_NO_PMTS_C NUMBER null,
+	ADJUSTABLE_TYPE_CD NUMBER null,
+	LAST_REPRICE_DATE DATE null,
+	NEXT_REPRICE_DATE DATE null,
+	REPRICE_FREQ NUMBER null,
+	REPRICE_FREQ_MULT CHAR(1) null,
+	CUSTOM_ID VARCHAR2(20) null,
+	DATA_SOURCE VARCHAR2(20) null,
+	BUSINESS_ID VARCHAR2(10) null,
+	CLASSIFY_ID VARCHAR2(4) null,
+	VOUCHTYPE_ID VARCHAR2(14) null,
+	VOUCHTYPE_NAME VARCHAR2(100) null,
+	INDUSTRY VARCHAR2(20) null,
+	CUST_TYPE CHAR(1) null,
+	PREPAY_FLAG CHAR(1) null,
+	PREPAY_AMT NUMBER(22,4) null,
+	INT_TYPE CHAR(1) null,
+	ACC_INT NUMBER(20,2) null,
+	INT_FLAG CHAR(1) null,
+	ACCT_TYPE CHAR(2) null,
+	ORGANIZATION_ID VARCHAR2(10) null,
+	ORGANIZATION_WD CHAR(8) null,
+	ORGANIZATION_A_ID VARCHAR2(10) null,
+	ACCOUNT_CLOSE_DATE DATE null,
+	ACCOUNT_OPEN_DATE DATE null,
+	ACCRUED_INTEREST NUMBER(24,6) null,
+	PAYMENT_INTEREST NUMBER(24,6) null,
+	KJ_ACCOUNT_ID VARCHAR2(14) null,
+	LAST_REPRICE_DATE_BAL NUMBER(20,2) null,
+	ACCOUNT_ID VARCHAR2(30) null,
+	ACCOUNT_STAT NUMBER(1) null,
+	AS_OF_DATE DATE null,
+	PRODUCT_ID VARCHAR2(14) null,
+	GL_ACCOUNT_ID VARCHAR2(14) null,
+	GL_ACCOUNT_O_ID VARCHAR2(14) null,
+	CURRENCY_ID VARCHAR2(15) null,
+	ORGANIZATION_FH CHAR(8) null,
+	CURRENT_BALANCE NUMBER(18,2) null,
+	ORG_BALANCE NUMBER(20,2) null,
+	OVERDUE_BALANCE NUMBER(18,2) null
+)
+tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+partition by range (AS_OF_DATE)(  
+  partition p20100101 
+   values less than (to_date('20100101', 'yyyyMMdd'))
+    nologging
+    nocompress
+    tablespace TBS_ETL_DATA
+    pctused    40
+    pctfree    0
+    initrans   1
+    maxtrans   255
+    storage    (
+                initial          512k
+                next             512k
+                minextents       1
+                maxextents       unlimited
+                pctincrease      0
+                freelists        1
+                freelist groups  1
+                buffer_pool      default
+               )
+   )	
+;
+  
+comment on column ETLADMIN.VPDM_LN_LOAN.NON_ACCR_B_BALANCE is '呆滞金额';
+comment on column ETLADMIN.VPDM_LN_LOAN.NON_ACCR_D_BALANCE is '呆账金额';
+comment on column ETLADMIN.VPDM_LN_LOAN.MATURITY_DATE is '到期日';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORG_TERM is '货款期限';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORG_TERM_MULT is '货款期限单位';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORIGINATION_DATE is '起息日';
+comment on column ETLADMIN.VPDM_LN_LOAN.OVERDUE_DATE is '逾期日或减值日';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCRUAL_BASIS_CD is '利息提存计算方式代码';
+comment on column ETLADMIN.VPDM_LN_LOAN.CURRENT_RATE is '当前执行利率';
+comment on column ETLADMIN.VPDM_LN_LOAN.CUR_OVERDUE_RATE is '逾期或减值执行利率';
+comment on column ETLADMIN.VPDM_LN_LOAN.SPREAD_RATE is '净利加減值';
+comment on column ETLADMIN.VPDM_LN_LOAN.SPREAD_PERCENT is '浮动比';
+comment on column ETLADMIN.VPDM_LN_LOAN.SPREAD_TYPE is '浮动方式';
+comment on column ETLADMIN.VPDM_LN_LOAN.LRD_BASE_RATE is '基准利率';
+comment on column ETLADMIN.VPDM_LN_LOAN.AMRT_TYPE_CD is '分期偿还方式';
+comment on column ETLADMIN.VPDM_LN_LOAN.AMOUNT_PAYINTEREST_NUM is '只还利息次数';
+comment on column ETLADMIN.VPDM_LN_LOAN.CUR_PAYMENT_INT is '下次支付利息';
+comment on column ETLADMIN.VPDM_LN_LOAN.CUR_PAYMENT_CAP is '下次支付本金';
+comment on column ETLADMIN.VPDM_LN_LOAN.FIRST_PAYMENT_DATE is '首次还款日';
+comment on column ETLADMIN.VPDM_LN_LOAN.LAST_PAYMENT_DATE is '上次还款日';
+comment on column ETLADMIN.VPDM_LN_LOAN.NEXT_PAYMENT_DATE is '下次还款日';
+comment on column ETLADMIN.VPDM_LN_LOAN.PMT_FREQ is '支付频率';
+comment on column ETLADMIN.VPDM_LN_LOAN.PMT_FREQ_MULT is '支付频率单位';
+comment on column ETLADMIN.VPDM_LN_LOAN.REMAIN_NO_PMTS_C is '剩余还款次数';
+comment on column ETLADMIN.VPDM_LN_LOAN.ADJUSTABLE_TYPE_CD is '利率调整方式代码';
+comment on column ETLADMIN.VPDM_LN_LOAN.LAST_REPRICE_DATE is '上次重定价日';
+comment on column ETLADMIN.VPDM_LN_LOAN.NEXT_REPRICE_DATE is '下次重定价日';
+comment on column ETLADMIN.VPDM_LN_LOAN.REPRICE_FREQ is '重定价频率';
+comment on column ETLADMIN.VPDM_LN_LOAN.REPRICE_FREQ_MULT is '重定价频率单位';
+comment on column ETLADMIN.VPDM_LN_LOAN.CUSTOM_ID is '客户号';
+comment on column ETLADMIN.VPDM_LN_LOAN.DATA_SOURCE is '资料来源';
+comment on column ETLADMIN.VPDM_LN_LOAN.BUSINESS_ID is '业务条线';
+comment on column ETLADMIN.VPDM_LN_LOAN.CLASSIFY_ID is '五级分类';
+comment on column ETLADMIN.VPDM_LN_LOAN.VOUCHTYPE_ID is '主要担保方式';
+comment on column ETLADMIN.VPDM_LN_LOAN.VOUCHTYPE_NAME is '主要担保方式名称';
+comment on column ETLADMIN.VPDM_LN_LOAN.INDUSTRY is '行业';
+comment on column ETLADMIN.VPDM_LN_LOAN.CUST_TYPE is '客户类型';
+comment on column ETLADMIN.VPDM_LN_LOAN.PREPAY_FLAG is '提前还款标识';
+comment on column ETLADMIN.VPDM_LN_LOAN.PREPAY_AMT is '当日提前还款金额';
+comment on column ETLADMIN.VPDM_LN_LOAN.INT_TYPE is '记息方式';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACC_INT is '利息收支';
+comment on column ETLADMIN.VPDM_LN_LOAN.INT_FLAG is '是否计息标识';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCT_TYPE is '业务类别';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORGANIZATION_ID is '核算机构';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORGANIZATION_WD is '开户机构';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORGANIZATION_A_ID is '考核机构';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCOUNT_CLOSE_DATE is '结清日期';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCOUNT_OPEN_DATE is '开户日期';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCRUED_INTEREST is '计提利息';
+comment on column ETLADMIN.VPDM_LN_LOAN.PAYMENT_INTEREST is '实收利息';
+comment on column ETLADMIN.VPDM_LN_LOAN.KJ_ACCOUNT_ID is '会计平台科目号';
+comment on column ETLADMIN.VPDM_LN_LOAN.LAST_REPRICE_DATE_BAL is '上次重定价日余额';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCOUNT_ID is '货款账号';
+comment on column ETLADMIN.VPDM_LN_LOAN.ACCOUNT_STAT is '账户形态';
+comment on column ETLADMIN.VPDM_LN_LOAN.AS_OF_DATE is '数据日期';
+comment on column ETLADMIN.VPDM_LN_LOAN.PRODUCT_ID is '产品代码';
+comment on column ETLADMIN.VPDM_LN_LOAN.GL_ACCOUNT_ID is '正常科目号';
+comment on column ETLADMIN.VPDM_LN_LOAN.GL_ACCOUNT_O_ID is '逾期科目号或减值科目号';
+comment on column ETLADMIN.VPDM_LN_LOAN.CURRENCY_ID is '货币';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORGANIZATION_FH is '营业机构';
+comment on column ETLADMIN.VPDM_LN_LOAN.CURRENT_BALANCE is '当前正常本金';
+comment on column ETLADMIN.VPDM_LN_LOAN.ORG_BALANCE is '合同金额';
+comment on column ETLADMIN.VPDM_LN_LOAN.OVERDUE_BALANCE is '当前逾期本金或减值本金';
+COMMENT ON TABLE ETLADMIN.VPDM_LN_LOAN is '贷款';
+
+
+create table ETLADMIN.VPDM_FA_GL
+(
+	AS_OF_DATE DATE null,
+	GL_ACCOUNT_ID VARCHAR2(30) null,
+	CURRENCY_ID VARCHAR2(15) null,
+	ORGANIZATION_ID VARCHAR2(10) null,
+	D_AMT NUMBER(20,2) null,
+	C_AMT NUMBER(20,2) null,
+	D_BALANCE NUMBER(20,2) null,
+	C_BALANCE NUMBER(20,2) null,
+	CURRENT_BALANCE NUMBER(20,2) null,
+	BALANCE_DIRE CHAR(1) null,
+	DATA_SOURCE VARCHAR2(20) null,
+	ACCT_TYPE CHAR(2) null
+)
+tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+partition by range (AS_OF_DATE)(  
+  partition p20100101 
+   values less than (to_date('20100101', 'yyyyMMdd'))
+    nologging
+    nocompress
+    tablespace TBS_ETL_DATA
+    pctused    40
+    pctfree    0
+    initrans   1
+    maxtrans   255
+    storage    (
+                initial          512k
+                next             512k
+                minextents       1
+                maxextents       unlimited
+                pctincrease      0
+                freelists        1
+                freelist groups  1
+                buffer_pool      default
+               )
+   )	
+;
+  
+comment on column ETLADMIN.VPDM_FA_GL.AS_OF_DATE is '数据日期';
+comment on column ETLADMIN.VPDM_FA_GL.GL_ACCOUNT_ID is '科目号';
+comment on column ETLADMIN.VPDM_FA_GL.CURRENCY_ID is '币种';
+comment on column ETLADMIN.VPDM_FA_GL.ORGANIZATION_ID is '核算机构';
+comment on column ETLADMIN.VPDM_FA_GL.D_AMT is '当日借方发生额';
+comment on column ETLADMIN.VPDM_FA_GL.C_AMT is '当日贷方发生额';
+comment on column ETLADMIN.VPDM_FA_GL.D_BALANCE is '借方余额';
+comment on column ETLADMIN.VPDM_FA_GL.C_BALANCE is '贷方余额';
+comment on column ETLADMIN.VPDM_FA_GL.CURRENT_BALANCE is '当前余额';
+comment on column ETLADMIN.VPDM_FA_GL.BALANCE_DIRE is '当前余额方向';
+comment on column ETLADMIN.VPDM_FA_GL.DATA_SOURCE is '资料来源';
+comment on column ETLADMIN.VPDM_FA_GL.ACCT_TYPE is '业务类别';
+COMMENT ON TABLE ETLADMIN.VPDM_FA_GL is '总账';

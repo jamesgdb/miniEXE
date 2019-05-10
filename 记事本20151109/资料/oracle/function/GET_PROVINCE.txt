@@ -1,0 +1,32 @@
+﻿通过IP_COUNTRY、IP_CITY获取到省份所属
+create or replace function GET_PROVINCE(--根据城市名称获取省份
+        IP_COUNTRY VARCHAR2 ,--国家
+        IP_CITY VARCHAR2 ,--城市
+        IP_region
+        ) return VARCHAR2
+         is
+     TRANS_PROVINCE VARCHAR(100);
+--AUTHOR:毛小明
+--根据数据字典里的值获得名称 如省份02返回河北
+begin
+  IF IP_COUNTRY = 'cn' THEN
+    select O.AM_NAME
+    into TRANS_PROVINCE
+    from AM_OPTION O,AM_DICTIONARY D
+    where  O.AM_DICTIONARY_ID = D.AM_ID
+    and  D.AM_CODE = 'province_change'
+    and O.AM_VALUE = IP_CITY
+    and ROWNUM < 2;
+    if TRANS_PROVINCE is null then
+       TRANS_PROVINCE := IP_CITY;
+    end if;
+    return TRANS_PROVINCE;
+  else
+     TRANS_PROVINCE := IP_CITY;
+     return TRANS_PROVINCE;
+  end if;
+  exception
+    when NO_DATA_FOUND then
+     TRANS_PROVINCE := IP_CITY;
+     return TRANS_PROVINCE;
+end;

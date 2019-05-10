@@ -1,0 +1,16 @@
+﻿其中《head》中dwr路径报错；在其src前面加上“../”
+<SCRIPT type="text/javascript" src="../dwr/interface/DomainService"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/LogonService"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/UserRepository"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/RiskService"></SCRIPT>
+		
+		
+		注销登录：不在需要框架下带的，直接让其注销登录
+		function exit(){
+				if(confirm("您确认要退出系统吗？")){
+					LogonService.logout(function(result){
+						top.window.location.href = "${ctx}";
+				    });
+// 					top.window.location.href = "${ctx}";
+				}
+			}

@@ -1,0 +1,37 @@
+﻿sysoper  sysoper  22.188.132.158
+tmrpt  tmrpt
+wasadm  wasadm
+18612535972 朱婷
+AAOP_V03.00_01.01_TMRPT_BG_001
+AAOP_V03.00_TMRPT_BG_001
+
+createOption
+
+feb8b62b119636638182925768c7
+王黎
+
+
+22.188.134.123 rsatm tratm
+22.188.134.175 rsatm tsatm
+
+
+0xLJC7F1CCEFzzhxxzxdsywqt@mail.notes.bank-of-china.com
+邱田邮箱
+
+1
+2
+3
+com.ibm.ws.webcontainer.mapFiltersToAsterisk=true
+com.ibm.ws.webcontainer.removetrailingservletpathslash=true
+com.ibm.ws.webcontainer.invokeFiltersCompatibility=true
+- See more at: http://frightanic.com/software-development/solution-to-error-404-srve0190e-on-websphere-6-1/#comment-318
+
+18701374987
+
+MSArea1
+
+　解决方法：
+　　现在发现通过设置was jvm的参数可以解决这个问题，设置方法为： 
+进入was控制台，点击：应用程序服务器 > server1 > 进程定义 > Java 虚拟机 > 定制属性，新建一个定制属性： 
+名称：com.ibm.websphere.webservices.DisableIBMJAXWSEngine 
+值：true 

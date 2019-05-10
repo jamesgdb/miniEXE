@@ -1,0 +1,17 @@
+﻿ $.validator.addMethod("cartLength" ,function(value,name,params){
+    var len=value.length;
+	if(len!=15&&len!=18){
+		return false;
+	}
+	return true;
+});
+
+
+value:要验证的输入框的输入值
+name:这个输入框的对象
+params：为要传递的参数
+cartLength:自定义的对象，可以直接引入到
+cart:{
+         			required:"身份证输入框不能为空",
+         			cartLength:"身份证必须为15或者18位"
+        		}

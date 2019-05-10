@@ -1,0 +1,5 @@
+﻿
+关于j2ee工程发布到was上后，部分更新，例修改web.xml配置文件不起作用的原因解析
+在was中，应用的配置从config/cells/..目录下读取，而资源从/installedApps目录下读取，
+因此单web.xml发生改变时候，只更新应用程序资源文件/installedApps目录是不起作用的，必须到
+/WebSphere/AppServer/profiles/AppSrv01/config/cells/SHPAM028Cell01/applications下修改相应web.xml文件才能生效或者重新部署应用程序

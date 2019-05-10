@@ -1,0 +1,104 @@
+﻿获取焦点，触发函数：
+$("#tid").foucs(function(){
+alert("qqq");;//失去焦点
+});
+
+按钮的单击事件：
+ //id选择器
+  $("#tijiao").click( function () { $("#name").val("buhao");}); 
+  //class选择器
+  $("#change").click( function () { $("#.name").css("background","red");}); 
+  //改变所有元素
+  $("#all").click( function () { $("*").css("background","red");}); 
+  //改变部分元素
+  $("#some").click( function () { $("#name,#.name").css("background","red");});
+  
+  
+  <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>My JSP 'test.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  <script type="text/javascript">
+  
+    function test(){
+      var c=  $('#name').val();
+         alert(c);
+  }
+  
+  
+  
+  
+  </script>
+  <body>
+ <from>
+    <table>
+     <tr>
+      <td>
+	    <input type='text' id ="name" name="name" value="haode"></inpt>
+	    <input type="button"  value="tijiao1" id="tijiao" ></input><br>
+	    <input type="button"  value="改变所有div的属性" id="change" ></input><br>
+	    <input type="button"  value="改变所有元素的属性" id="all" ></input><br>
+	    <input type="button"  value="改变特定元素的属性" id="some" ></input><br>
+	    <input type="button"  value="层次选择器所有都变" id="fower" ></input><br>
+	    <input type="button"  value="层次选择器子元素" id="fower2" ></input><br>
+	   </td>
+	 </tr>
+   </table>
+ </from>
+ 
+    <div id="dd" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">nihao
+      <div id="dddd" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">123132
+        <div id="dddd" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">343333333333 </div>
+       </div>
+     </div>
+    <div id="dddd" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">meiwangfa</div>
+    
+  </body>
+  <div id="dddd" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">1212434 </div>
+    
+  <script type="text/javascript">
+  //id选择器
+  $("#tijiao").click( function () { $("#name").val("buhao");}); 
+  //class选择器
+  $("#change").click( function () { $("#.name").css("background","red");}); 
+  //改变所有元素
+  $("#all").click( function () { $("*").css("background","red");}); 
+  //改变部分元素
+  $("#some").click( function () { $("#name,#.name").css("background","red");}); 
+  //层次选择器. 改变所有的div背景色
+  $("#fower").click( function () { $("body div").css("background","red");}); 
+  //层次选择器. 改变子的div背景色
+  $("#fower2").click( function () { $("body >  div").css("background","red");}); 
+  
+  
+  </script>
+</html>
+
+  
+  
+  
+  
+  
+  
+  
+  

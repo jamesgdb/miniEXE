@@ -1,0 +1,21 @@
+﻿如果分钟位数为0-5的话，就直接变分钟位为0，去除秒数；如果分钟位数为大于5（6-9）的话，就直接变分钟位为5，去除秒数
+传入的DATA_TIME为分钟表里面的最大的汇总时间
+
+create or replace function GET_REAL_TIME_FOR_MINUTE(
+        DATA_TIME VARCHAR2 --时间
+        ) return VARCHAR2
+         is
+     VAR_DATA_TIME VARCHAR(100);
+--AUTHOR:王几
+--根据传入时间的分钟的尾数获取本次汇总开始的时间（只针对每五分汇总）
+begin
+   VAR_DATA_TIME := DATA_TIME;
+   IF TO_NUMBER(SUBSTR(VAR_DATA_TIME,16,1)) > 0
+   AND TO_NUMBER(SUBSTR(VAR_DATA_TIME,16,1)) <5 THEN
+    VAR_DATA_TIME := SUBSTR(VAR_DATA_TIME,0,15) || '0';
+    ELSE IF TO_NUMBER(SUBSTR(VAR_DATA_TIME,16,1)) > 5 THEN
+    VAR_DATA_TIME := SUBSTR(VAR_DATA_TIME,0,15) || '5';
+    END IF;
+   END IF;
+   return VAR_DATA_TIME;
+end;

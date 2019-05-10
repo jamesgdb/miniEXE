@@ -1,0 +1,49 @@
+﻿ ORACLE分析函数---RANK()
+分类： 个人常用 数据仓库 2011-07-12 23:22 297人阅读 评论(0) 收藏 举报
+oracleinsertdatetablec
+ create table B
+(
+  店铺     VARCHAR2(100),
+  销售数量 VARCHAR2(100),
+  价格     VARCHAR2(100),
+  日期     DATE
+)
+tablespace USERS
+
+/
+
+insert into B (店铺, 销售数量, 价格, 日期)
+values ('a', '3', '100', to_date('01-01-2011', 'dd-mm-yyyy'));
+insert into B (店铺, 销售数量, 价格, 日期)
+values ('a', '4', '200', to_date('02-02-2011', 'dd-mm-yyyy'));
+insert into B (店铺, 销售数量, 价格, 日期)
+values ('a', '4', '250', to_date('03-03-2011', 'dd-mm-yyyy'));
+insert into B (店铺, 销售数量, 价格, 日期)
+values ('b', '10', '120', to_date('05-05-2011', 'dd-mm-yyyy'));
+insert into B (店铺, 销售数量, 价格, 日期)
+values ('c', '5', '130', to_date('06-06-2011', 'dd-mm-yyyy'));
+commit;
+
+ 
+
+现在我们需要根据店铺进行分组，按照销售数量进行排名：
+
+
+
+1.select b.*,row_number() over(partition by 店铺 order by to_number(销售数量) desc ) rn from b
+
+ROW_NUMBER():为每一条分组纪录返回一个数字
+
+
+2.select b.*,rank() over(partition by 店铺 order by to_number(销售数量) desc ) rn from b
+
+RANK（）：返回数据项在分组中的排名。特点：在排名相等的情况下会在名次中留下空位
+
+
+3.select b.*,dense_rank() over(partition by 店铺 order by to_number(销售数量) desc ) rn from b
+
+DENSE_RANK():与RANK不同的是它在排名相等的情况下不会在名次中留下空位
+
+
+
+http://blog.csdn.net/zftang/article/details/6601500；

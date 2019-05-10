@@ -1,0 +1,3 @@
+﻿按天分组：
+
+select count(1),trunc(t.sys_creation_date, 'dd') from event_log t where t.sys_creation_date>add_months(sysdate,-4)  group by trunc(t.sys_creation_date, 'dd')

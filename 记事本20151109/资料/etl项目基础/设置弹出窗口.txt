@@ -1,0 +1,18 @@
+﻿
+	 function viewTheme(value){
+		var url="${pageContext.request.contextPath}/dmModelInstall_toTheme.action?modelInstallId="+value;
+		return  "<a href=\"javascript:void(0)\"   onclick=\"get('"+url+"','查看主题')\"><font color='blue'>查看主题</font></a>";
+	}
+/*	function viewTable(value){
+		var url="${pageContext.request.contextPath}/dmModelInstall_toEntity.action?modelInstallId="+value;
+		return  "<a href=\"javascript:void(0)\"   onclick=\"get('"+url+"','安装表信息')\"><font color='blue'>查看</font></a>";
+	} */
+
+  function get(url,title){
+	var width =  750;
+	var height = 400;
+	
+	showModalCenter (url, function(data){
+// 			grid.unselectAll();
+	}, width, height, title);	
+ }

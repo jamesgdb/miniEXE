@@ -1,0 +1,65 @@
+﻿1.新建类TeacherPK，在类上增加注解@Embeddable
+             public class TeacherPK  implements Serializable{}；
+-----------------------------------------------------------------------
+2.让其实现接口类，并重写equals和hashcode方法
+@Override
+	public boolean equals(Object object){
+		if(object instanceof StudentPK){
+			StudentPK spk = new StudentPK();
+			if(this.id==spk.getId()&&this.username.equals(spk.getUsername())){
+				return true;
+			}
+		}
+		return false;
+	}
+	@Override 
+	public int hashCode(){
+		return this.username.hashCode();
+	}
+	--------------------------------------------------------------
+3.在teacher类中增加private TeacherPK teacherpk;并在get方法上增加@Id
+----------------------------------------------------------------
+4.调用
+package com.gdb.action;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.Configuration;
+import com.gdb.entity.Position;
+import com.gdb.entity.Student;
+import com.gdb.entity.Teacher;
+import com.gdb.entity.TeacherPK;
+
+public class TeacherAction {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		 Date now = new Date(); 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");//可以方便地修改日期格式
+	 	String createTime = dateFormat.format( now ); 
+         Teacher s= new Teacher();
+         TeacherPK pk= new TeacherPK();
+         int id=(int) ((Math.random())*1000);
+          pk.setId(id+"");
+          s.setTitle("中级");s.setCreatetime(createTime);
+          pk.setUsername("zhangsan");
+          s.setPosition(Position.A);
+          s.setTeacherpk(pk);
+         Configuration  cfg = new AnnotationConfiguration();
+        SessionFactory sf=   cfg.configure().buildSessionFactory();
+        Session session =sf.openSession();
+        session.beginTransaction();
+         session.save(s);
+         session.getTransaction().commit();
+         session.close();
+         sf.close();
+         
+		  
+		
+	}
+
+}

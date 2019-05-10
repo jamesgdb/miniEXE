@@ -1,0 +1,29 @@
+﻿select  *  from event_log_realtime t where  t.user_id='96270986'  and t.sys_creation_date>to_date('2022-10-20','yyyy-mm-dd')  and  t.sys_creation_date>to_date('2022-10-20','yyyy-mm-dd');
+
+select  *  from event_log_realtime t where  t.user_id='96270986' and t.event_type='CHANGE_STATEMENT_SETTINGS' and (t.challenge_auth_method='SMS' or  t.challenge_auth_method='QUESTION') and t.sys_creation_date>to_date('2022-10-20 09','yyyy-mm-dd hh')  and  t.sys_creation_date<to_date('2022-10-20 12','yyyy-mm-dd hh');
+
+
+
+宝磊用的：
+ select  NUM_2_PER_UTIL( SUM( CASE WHEN POLICY_ACTION = 'ALLOW' THEN 0 ELSE T.TRANS_NUM END),(SELECT SUM(K.ANUM)
+                              FROM (SELECT SUM(CASE WHEN POLICY_ACTION = 'ALLOW' THEN 0 ELSE TRANS_NUM END) AS ANUM FROM RP_TRANS_LOG_MONTH E ) K))    FROM  RP_TRANS_LOG_MONTH T  group by  POLICY_ACTION ;
+                              
+                              
+                              
+                              
+                              
+ select count(1),t1.event_type,t1.user_defined_event_type,t1.ip_city,t1.ip_country  from  event_log_realtime t1 where ( T1.POLICY_ACTION = 'DENY' OR (T1.POLICY_ACTION = 'CHALLENGE' AND T1.CHALLENGE_SUCCESSFUL='N' AND T1.FLAGGED='Y') OR ( T1.FLAGGED IS NULL AND T1.RESOLUTION='F' ) ) and
+t1.sys_creation_date > to_date('2022-09-01', 'yyyy-mm-dd')
+   and t1.sys_creation_date < to_date('2022-10-01', 'yyyy-mm-dd') group by t1.event_type,t1.user_defined_event_type,t1.ip_city,t1.ip_country
+
+   select sum(t1.amount_original),t1.event_type,t1.user_defined_event_type,t1.ip_city,t1.ip_country  from  event_log_realtime t1 where ( T1.POLICY_ACTION = 'DENY' OR (T1.POLICY_ACTION = 'CHALLENGE' AND T1.CHALLENGE_SUCCESSFUL='N' AND T1.FLAGGED='Y') OR ( T1.FLAGGED IS NULL AND T1.RESOLUTION='F' ) ) and
+t1.sys_creation_date > to_date('2022-09-01', 'yyyy-mm-dd')
+   and t1.sys_creation_date < to_date('2022-10-01', 'yyyy-mm-dd') group by t1.event_type,t1.user_defined_event_type,t1.ip_city,t1.ip_country
+
+
+
+create user tmrpt401 identified by tmrpt401 default tablespace   zhangsan
+
+create tablespace "zhangsan" datafile '/zhangsan' size 100m;
+jdbc:oracle:thin:@(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 22.188.132.158)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = oraAARP)))
+${ORACLE_JDBC_DRIVER_PATH}/ojdbc6.jar

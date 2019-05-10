@@ -1,0 +1,22 @@
+﻿MQ服务：
+/home/vp/mq/apache-activemq-5.9.0/bin/linux-x86-64
+张巧军 15:13:02
+http://192.168.6.58:8161/admin/queues.jsp
+客户端
+/home/vp/etl/etlclient
+
+
+配置数据库连接：
+/home/vp/etl/etlclient/etl_client1/resources/sysconfig.properties
+
+cp -r 
+
+删除文件夹
+rm -rf 文件名
+
+启动和停止weblogic
+/opt/Oracle/Middleware/user_projects/domains/base_domain/bin
+张巧军 15:40:30
+启动的时候：nohup ./startWeblogic.sh &
+
+http://192.168.1.3:6080/svn/RDCODE/platform/branches/bugfix/vpetl/2.2

@@ -1,0 +1,17 @@
+﻿测试报告。
+出入库单。
+版本说明。
+
+
+AAOP_V03.00_B06
+
+
+一卡通发票：1840
+散票：2148
+办公：2400
+
+小米手机：订单号：1140217298018548
+
+	<script src="dwr/engine.js"></script>
+    <script src="dwr/util.js"></script>   
+   <script src="dwr/interface/exportType"></script>

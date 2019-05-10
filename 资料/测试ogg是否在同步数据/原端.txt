@@ -1,0 +1,504 @@
+﻿-------------------插入三天以内的，查看目标端event_log、event_log_realtime表
+insert into event_log
+  (EVENT_ID,
+   EVENT_TIME,
+   IP_ADDRESS,
+   EVENT_TYPE,
+   USER_DEFINED_EVENT_TYPE,
+   RISK_SCORE,
+   POLICY_ACTION,
+   CHALLENGE_AUTH_METHOD,
+   CHALLENGE_SUCCESSFUL,
+   POLICY_RULE_ID,
+   SHORT_DATE,
+   SYS_CREATION_DATE,
+   LASTMODIFIED,
+   USER_ID,
+   USER_HASH,
+   PRELIMINARY_SCORE,
+   IP_COUNTRY,
+   IP_CITY,
+   CHANNEL_INDICATOR,
+   OPERATING_SYSTEM,
+   BROWSER_TYPE,
+   AMOUNT_ORIGINAL,
+   AMOUNT_CURRENCY,
+   USER_ACCT_NUMBER,
+   EXT_ACCT_NUMBER,
+   EXT_ACCT_OWNER_NAME,
+   FLAGGED,
+   RESOLUTION,
+   CDF_S_1,
+   CDF_S_2,
+   CDF_S_3,
+   CDF_S_4,
+   CDF_S_5,
+   CDF_S_6,
+   CDF_S_7,
+   CDF_S_8,
+   CDF_S_9,
+   CDF_S_10,
+   CDF_S_11,
+   CDF_S_12,
+   CDF_S_13,
+   CDF_S_14,
+   CDF_S_15,
+   CDF_S_16,
+   CDF_S_17,
+   CDF_S_18,
+   CDF_S_19,
+   CDF_S_20,
+   ORG_ID,
+   IS_DEVICE_BOUND,
+   COOKIE)
+values
+  ('6a57:02a2cbd31:15ec2251_TRX1',
+   to_date('26-11-2013 07:30:34', 'dd-mm-yyyy hh24:mi:ss'),
+   '22.11.92.97',
+   'SESSION_SIGNIN',
+   'NA',
+   160,
+   'ALLOW',
+   null,
+   null,
+   'BOC-SIT-登录',
+   '20150530',
+   to_date('26-11-2013 15:29:27', 'dd-mm-yyyy hh24:mi:ss'),
+   to_date('26-11-2013 07:29:27', 'dd-mm-yyyy hh24:mi:ss'),
+   '100378611',
+   432,
+   1751,
+   'us',
+   'empty',
+   'WEB',
+   'Windows',
+   'Explorer',
+   null,
+   null,
+   null,
+   null,
+   null,
+   'Y',
+   null,
+   '813333333333',
+   '10-1',
+   '51530',
+   '2FINANCIAL',
+   '1li fh',
+   '7tt123455',
+   '4军人身份证',
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   'BOC',
+   'N',
+   '7654');
+commit;
+
+------------------------------------------------------------------
+-------------------插入三天以上的，查看目标端event_log、event_log_realtime表
+ insert into event_log
+  (EVENT_ID,
+   EVENT_TIME,
+   IP_ADDRESS,
+   EVENT_TYPE,
+   USER_DEFINED_EVENT_TYPE,
+   RISK_SCORE,
+   POLICY_ACTION,
+   CHALLENGE_AUTH_METHOD,
+   CHALLENGE_SUCCESSFUL,
+   POLICY_RULE_ID,
+   SHORT_DATE,
+   SYS_CREATION_DATE,
+   LASTMODIFIED,
+   USER_ID,
+   USER_HASH,
+   PRELIMINARY_SCORE,
+   IP_COUNTRY,
+   IP_CITY,
+   CHANNEL_INDICATOR,
+   OPERATING_SYSTEM,
+   BROWSER_TYPE,
+   AMOUNT_ORIGINAL,
+   AMOUNT_CURRENCY,
+   USER_ACCT_NUMBER,
+   EXT_ACCT_NUMBER,
+   EXT_ACCT_OWNER_NAME,
+   FLAGGED,
+   RESOLUTION,
+   CDF_S_1,
+   CDF_S_2,
+   CDF_S_3,
+   CDF_S_4,
+   CDF_S_5,
+   CDF_S_6,
+   CDF_S_7,
+   CDF_S_8,
+   CDF_S_9,
+   CDF_S_10,
+   CDF_S_11,
+   CDF_S_12,
+   CDF_S_13,
+   CDF_S_14,
+   CDF_S_15,
+   CDF_S_16,
+   CDF_S_17,
+   CDF_S_18,
+   CDF_S_19,
+   CDF_S_20,
+   ORG_ID,
+   IS_DEVICE_BOUND,
+   COOKIE)
+values
+  ('6a57:02a2cbd9e31:1c2251_TRX2',
+   to_date('11-11-2013 07:30:34', 'dd-mm-yyyy hh24:mi:ss'),
+   '22.11.92.97',
+   'SESSION_SIGNIN',
+   'NA',
+   160,
+   'ALLOW',
+   null,
+   null,
+   'BOC-SIT-登录',
+   '20150530',
+   sysdate-5,
+   sysdate-5,
+   '100378611',
+   432,
+   1751,
+   'us',
+   'empty',
+   'WEB',
+   'Windows',
+   'Explorer',
+   null,
+   null,
+   null,
+   null,
+   null,
+   'Y',
+   null,
+   '813333333333',
+   '10-1',
+   '51530',
+   '2FINANCIAL',
+   '1li fh',
+   '7tt123455',
+   '4军人身份证',
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   'BOC',
+   'N',
+   '7654');
+commit;
+
+-------------插入一百天以上的，查看目标端event_log、event_log_realtime表--
+  insert into event_log
+    (EVENT_ID,
+     EVENT_TIME,
+     IP_ADDRESS,
+     EVENT_TYPE,
+     USER_DEFINED_EVENT_TYPE,
+     RISK_SCORE,
+     POLICY_ACTION,
+     CHALLENGE_AUTH_METHOD,
+     CHALLENGE_SUCCESSFUL,
+     POLICY_RULE_ID,
+     SHORT_DATE,
+     SYS_CREATION_DATE,
+     LASTMODIFIED,
+     USER_ID,
+     USER_HASH,
+     PRELIMINARY_SCORE,
+     IP_COUNTRY,
+     IP_CITY,
+     CHANNEL_INDICATOR,
+     OPERATING_SYSTEM,
+     BROWSER_TYPE,
+     AMOUNT_ORIGINAL,
+     AMOUNT_CURRENCY,
+     USER_ACCT_NUMBER,
+     EXT_ACCT_NUMBER,
+     EXT_ACCT_OWNER_NAME,
+     FLAGGED,
+     RESOLUTION,
+     CDF_S_1,
+     CDF_S_2,
+     CDF_S_3,
+     CDF_S_4,
+     CDF_S_5,
+     CDF_S_6,
+     CDF_S_7,
+     CDF_S_8,
+     CDF_S_9,
+     CDF_S_10,
+     CDF_S_11,
+     CDF_S_12,
+     CDF_S_13,
+     CDF_S_14,
+     CDF_S_15,
+     CDF_S_16,
+     CDF_S_17,
+     CDF_S_18,
+     CDF_S_19,
+     CDF_S_20,
+     ORG_ID,
+     IS_DEVICE_BOUND,
+     COOKIE)
+  values
+    ('6a57:02a2cbd9e31:5ec2251_TRX3',
+     to_date('30-05-2015 07:30:34', 'dd-mm-yyyy hh24:mi:ss'),
+     '22.11.92.97',
+     'SESSION_SIGNIN',
+     'NA',
+     160,
+     'ALLOW',
+     null,
+     null,
+     'BOC-SIT-登录',
+     '20150530',
+     sysdate - 101,
+     sysdate - 101,
+     '100378611',
+     432,
+     1751,
+     'us',
+     'empty',
+     'WEB',
+     'Windows',
+     'Explorer',
+     null,
+     null,
+     null,
+     null,
+     null,
+     'Y',
+     null,
+     '813333333333',
+     '10-1',
+     '51530',
+     '2FINANCIAL',
+     '1li fh',
+     '7tt123455',
+     '4军人身份证',
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     'BOC',
+     'N',
+     '7654');
+  commit;
+------------------------------------------------------更新数据后
+
+update event_log
+   set 
+       event_time = SYSDATE,
+       
+      
+       
+       risk_score = 33,
+       policy_action = 'aa',
+       challenge_auth_method = 'aa',
+       challenge_successful = 'Y',
+       policy_rule_id = '11111111111---',
+    
+       
+      
+       user_id = 'U_ID',
+     
+     
+       ip_country = 'CN',
+       ip_city = 'BEIJING',
+      
+       resolution = 'G'
+       
+  where event_id = '6a57:02a2cbd31:15ec2251_TRX1'
+   and short_date = '20150530';
+commit;
+   -----------------------------------------------------
+
+delete event_log
+ where event_id = '6a57:02a2cbd31:15ec2251_TRX1'
+   and short_date = '20150530';
+commit;
+---------------------------------------------------
+
+---------------------------------------------------
+insert into acspuseraccount
+  (acspid,
+   acspname,
+   userid,
+   status,
+   LASTMODIFIED
+   )
+values
+  ('11213',
+   'aaaa',
+55,
+   'rrr',
+   SYSTIMESTAMP
+   
+  );
+commit;
+
+update acspuseraccount t set t.userid =66 where t.acspid='11213';
+commit;
+
+DELETE FROM acspuseraccount  WHERE acspid='11213'; 
+commit;
+----------------------------------------------------------
+insert into desktops
+  (pmid,
+   browser,
+   ip_address
+
+  )
+values
+  ('1134576',
+   'qqqqq',
+   'shanghai'
+
+  );
+commit;
+
+update desktops set browser ='ccc' where pmid='1134576';
+commit;
+
+DELETE FROM desktops WHERE pmid='1134576'; 
+commit;
+--------------------------------------------------------------
+insert into pm_policy
+  (id, context_name, modification_date, deletion_date)
+values
+  ('11', 'aaa', sysdate, sysdate);
+commit;
+
+update pm_policy t set t.context_name ='ccc' where t.id='11';
+commit;
+
+DELETE FROM pm_policy WHERE id='11'; 
+commit;
+----------------------------------------------------------
+insert into pm_rule
+  (id,
+  created_by,
+  name,
+   creation_date,
+   description,
+   modification_date,
+   rule_order,
+  RULE_STATUS,
+   POLICY_ID
+   )
+values
+  ('11',
+'22',
+'33',
+
+   sysdate,
+   'aaaaaa',
+   sysdate,
+   '33',
+   33,
+   '963c94f83b274dd8013b2778515c000e'
+  );
+commit;
+
+update pm_rule t set t.description ='ccc' where t.id='11';
+commit;
+
+DELETE FROM pm_rule WHERE id='11'; 
+commit;
+----------------------------------------------------------------
+
+insert into userchangehistory
+  (uhid, userid, LASTMODIFIED)
+values
+  ('112111',111,SYSTIMESTAMP);
+commit;
+
+update userchangehistory t set t.userid =222 where t.uhid='112111';
+commit;
+
+DELETE FROM userchangehistory t where t.uhid='112111';
+commit;
+------------------------------------------------------------
+insert into users
+  (username, password,id,LASTMODIFIED)
+values
+  ('11', '222',11232,SYSTIMESTAMP);
+commit;
+
+update users t set t.password ='ccc' where t.id='11';
+commit;
+
+DELETE FROM users t where t.username='11';
+commit;
+-------------------------------------------
+insert into RSA_CORE.FACT_META_DATA
+  (ID,
+   NAME,
+   TYPE,
+   CATEGORY,
+   STATUS,
+   CUSTOM_FACT_INDEX,
+   DESCRIPTION,
+   CREATION_DATE,
+   CREATED_BY,
+   MODIFICATION_DATE,
+   MODIFIED_BY,
+   DELETION_DATE
+   
+   )
+values
+  ('112222',
+   'TEST_DATA9',
+   'INT99',
+   'CUSTOM_FACTS99',
+   9,
+   209,
+   null,
+   to_timestamp('02-11-2012 14:33:01.286000', 'dd-mm-yyyy hh24:mi:ss.ff'),
+   'admin',
+   to_timestamp('02-11-2012 14:33:01.286000', 'dd-mm-yyyy hh24:mi:ss.ff'),
+   'admin',
+   null);
+commit;
+
+UPDATE RSA_CORE.FACT_META_DATA t SET NAME = 'TEST_DATA_UPDATE' where t.id='112222' ;
+COMMIT;
+
+DELETE FROM RSA_CORE.FACT_META_DATA WHERE ID='112222';
+COMMIT;
+

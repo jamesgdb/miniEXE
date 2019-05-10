@@ -1,0 +1,108 @@
+﻿SADDR RAW(4) 会话地址
+SID NUMBER 会话标识符
+SERIAL# NUMBER 会话序列号。用来唯一地标识绘画
+对象。如果该会话结束且其他会话
+以相同的会话ID 开始，则保证会
+话级的命令被应用到正确会话对象
+AUDSID NUMBER 审计会话ID
+PADDR RAW(4) 拥有这个会话的进程地址
+USER# NUMBER Oracle 用户标识符
+USERNAME VARCHAR(30) Oracle 用户名
+COMMAND NUMBER 正进行的命令（分析的最后一个语
+句），关于值的列表，请参阅表B-
+11
+OWNERID NUMBER 如果值为2147483644，则此列的
+内容无效。否则此列包含拥有可移
+植会话的用户标符。对于利用并行
+从服务器的操作，将这个值解释为
+一个48 字节的值。其低位两字节
+表示会话号，而高位字节表示查询
+协调程序的实例ID
+TADDR VARCHAR2(8) 事务处理状态对象的地址
+LOCKWAIT VARCHAR2(8) 等待锁的地址；如果没有，为NULL
+STATUS VARCHAR2(8) 会话的状态：ACTIVE (当前执行的
+SQL)、INACTIVE、KILLED(标记为
+终止)、CACHED（为Oracle*XA 使
+用而临时高速缓存）、SNIPED（会
+话不活动，在客户机上等待）
+SERVER VARCHAR2(9) 服务器类型：DEDICATED、SHARED、
+PSEUDO、NONE
+SCHEMA# NUMBER 模式用户标识符
+SCHEMANANME VARCHAR2(30) 模式用户名
+OSUSER VARCHAR(15) 操作系统客户机用户名
+PROCESS VARCHAR2(9) 操作系统客户机进程ID
+MACHINE VARCHAR2(64) 操作系统机器名
+TERMINAL VARCHAR2(10) 操作系统终端名
+PROGRAM VARCHAR(48) 操作系统程序名
+TYPE VARCHAR2(10) 会话类型
+SQL_ADDRESS RAW(4) 与SQL_HASH_VALUE 一道使用标识
+当前正在执行的SQL 语句
+SQL_HASH_VALUE NUMBER 与SQL_ADDRESS 一道使用标识当前
+正在执行的SQL 语句
+MODULE VARCHAR2(48) 包含当前正在执行的模块名，正如
+由调用
+DBMS_APPLICATION_INFO.SET_MODU
+LE 过程所设置
+MODULE_HASH NUMBER 上面MODULE 的散列值
+ACTION VARCHAR2(32) 包含当前执行活动的名称，正如由
+调用
+DBMS_APPLICATION_INFO.SET_ACTI
+ON 过程所设置
+ACTION_HASH NUMBER 上列活动名称的散列值
+CLIENT_INFO VARCHAR2(64) 由
+DBMS_APPLICATION_INFO.SET_CLIE
+NT_INFO 过程设置的信息
+FIXED_TABLE_
+SEQUENCE
+NUMBER 此列包含一个数，每当会话完成一
+个数据库调用并且存在来自动态性
+能表的介入选择，它个数就增加。
+这个列可被性能监控程序用来监控
+数据库中的统计数据。每当性能监
+控程序查看数据库时，只需要查看
+当前活动的会话或在这个列中具有
+比上次性能监控程序所看到的最大
+值更大的值的会话即可。所有其他
+会话自上次性能监控程序查看数据
+库以来都是空闲的
+ROW_WAIT_OBJ# NUMBER 包含ROW_WAIT_ROW#中指定的ROW#
+的表的对象ID
+ROW_WAIT_FILE# NUMBER 包含ROW_WAIT_ROW#中指定的
+ROWID 的数据文件的标识符。此列
+仅在会话当前正在等待其他事务处
+理提交并且ROW_ WAIT_OBJ#不为-
+1 时有效
+ROW_WAIT_BLOCK # NUMBER 包含ROW_WAIT_ROW#中指定的
+ROWID 的数据文件的标识符。此列
+仅在会话当前正在等待其他事务处
+理提交并且ROW_正在等待其他事
+务处理提交并且ROW_
+ROW_WAIT_ROW# NUMBER 被锁定的当前ROWID。此列仅在会
+话当前正在等待其他事务处理提交
+并且ROW_ WAIT_OBJ#不为-1 时有
+效
+LOGON_TIME DATE 登录时间
+LAST_CALL_ET NUMBER 最后一次调用
+PDML_STATUS VARCHAR2(8) 如果ENABLED，则会话正处于
+PARALLEL DML 启用方式。如果
+DISABLED，则此会话不支持
+PARALLEL DML 启用方式。如果
+FORCED，则会话已经更改为强制
+PARALLEL DLL
+PDML_ENABLED VARCHAR2(3) 此列已被PDML_ENABLED 和PDML_
+STATUS 所替代。请看上列内容
+FAILOVER_TYPE VARCHAR2(10) 如果这个会话禁止失败切换，则为
+NONE ，如果客户机能够在断开之
+后失败切换其会话，则为
+SESSION，如果客户机还能失败切
+换正在进行的选择，则为SELECT
+FAILOVER_METHOD VARXHAR2(3) 如果这个会话禁止失败切换，则为
+NONE，如果客户机能够在断开之后
+重新连接，为BASIC，如果备份实
+例能够支持它所支持的每个实例的
+所有连接，则为PRECONNECT
+FAILED_OVER VARCHAR2(13) 如果运行在失败切换方式并进行过
+失败切换，为TRUE，否则为FALSE
+RESOURCE_CON
+SU_MER_GROUP
+VARCHAR2(32) 会话的当前资源使用者组的名称

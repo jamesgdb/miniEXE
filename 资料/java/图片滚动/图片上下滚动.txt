@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>javascript图片上下无缝滚动</title>
+<style type="text/css">
+*{margin:0;padding:0;list-style-type:none;border:0;}
+
+.demo{width:270px;margin:20px auto;}
+#scrollbox{background:#FFF;overflow:hidden;width:192px;height:256px;margin:0 10px;display:inline;float:left;}
+#scrollbox img{border:3px solid #F2F2F2;}
+#leftDir{width:20px;height:40px;padding:8px 0px;text-align:center;float:left;cursor:pointer;margin:90px 0 0 0;}
+#rightDir{width:20px;height:40px;padding:8px 0px;text-align:center;float:left;cursor:pointer;margin:90px 0 0 0;}
+</style>
+</head>
+<body>
+innerHTML:设置或获取位于对象起始和结束标签内的 HTML
+scrollHeight: 获取对象的滚动高度。 
+scrollLeft:设置或获取位于对象左边界和窗口中目前可见内容的最左端之间的距离
+scrollTop:设置或获取位于对象最顶端和窗口中可见内容的最顶端之间的距离
+scrollWidth:获取对象的滚动宽度
+offsetHeight:获取对象相对于版面或由父坐标 offsetParent 属性指定的父坐标的高度
+offsetLeft:获取对象相对于版面或由 offsetParent 属性指定的父坐标的计算左侧位置
+offsetTop:获取对象相对于版面或由 offsetTop 属性指定的父坐标的计算顶端位置 
+offsetWidth:获取对象相对于版面或由父坐标 offsetParent 属性指定的父坐标的宽度
+<div class="demo">
+	<div id="leftDir"><<</div>
+	<div id="scrollbox">
+		<div id="scrollcon">
+			<div id="scrollpic">
+				<a href="http://www.17sucai.com/"><img src="image/IMG_0161.JPG" width="192" height="128" alt="" /></a>
+				<a href="http://www.17sucai.com/"><img src="image/IMG_0161.JPG" width="192" height="128" alt="" /></a>
+				<a href="http://www.17sucai.com/"><img src="image/IMG_0161.JPG" width="192" height="128" alt="" /></a>
+				<a href="http://www.17sucai.com/"><img src="image/IMG_0161.JPG" width="192" height="128" alt="" /></a>
+				<a href="http://www.17sucai.com/"><img src="image/IMG_0161.JPG" width="192" height="128" alt="" /></a>
+			</div>
+			<div id="scrollpic-copy"></div>
+		</div>
+	</div>
+	<div id="rightDir">>></div>
+</div>
+<script type="text/javascript">
+//上下无缝滚动
+var speed = 10;
+var direction="top";
+var tab = document.getElementById("scrollbox");
+var tab1 = document.getElementById("scrollpic");
+var tab2 = document.getElementById("scrollpic-copy");
+var leftDir = document.getElementById("leftDir");
+var rightDir = document.getElementById("rightDir");
+tab2.innerHTML = tab1.innerHTML;
+function marquee(){
+    switch(direction){
+        case "top":
+            if(tab2.offsetHeight - tab.scrollTop <= 0){
+                tab.scrollTop -= tab1.offsetHeight;
+            }
+            else{
+                tab.scrollTop++;
+            }
+        break;
+        case "bottom":
+            if(tab.scrollTop <= 0){
+                tab.scrollTop += tab2.offsetHeight;
+            }
+            else{
+                tab.scrollTop--;
+            }
+        break;
+    }
+}
+function changeDirection(dir){
+   direction = dir;
+}
+var timer = setInterval(marquee,speed);
+tab.onmouseover = function(){clearInterval(timer);};
+tab.onmouseout = function(){timer = setInterval(marquee,speed);};
+leftDir.onclick = function(){changeDirection("top");};
+rightDir.onclick = function(){changeDirection("bottom");};
+</script>
+</body>
+</html>

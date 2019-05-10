@@ -1,0 +1,518 @@
+﻿<%@ page language="java" contentType="text/html;charset=UTF-8"%>
+<%@ taglib uri="/WEB-INF/runqianReport4.tld" prefix="report" %>
+<%@ include file="/common/taglibs.jsp" %>
+<%@ page import="java.io.*"%>
+<%@ page import="java.util.*,com.boc.util.*"%>
+<%@ page import="com.runqian.report4.usermodel.Context"%>
+<%@ page import="com.runqian.report4.view.applet.HtmlPrintApplet"%>
+<%@ page import="com.boc.util.DBPool"%> 
+<%@ page import="java.util.List" %>
+<%@ page import="sun.jdbc.rowset.CachedRowSet" %>
+<%@ page import="com.boc.util.DataManage" %>
+<%@ page import="com.boc.report.*" %>
+<%@ page import="com.amsoft.amp.util.*" %>
+<%@ taglib uri="BOC" prefix="BOC" %>
+<%    
+	String reportName = JParamToolkit.getParameter(request,"reportName");  //报表名称 report name
+	String title = JParamToolkit.getParameter(request,"title");	 //报表标题 report title
+	String dataItem= JParamToolkit.getParameter(request,"dataItem");  //要显示的报表显示项编码，用于数据传输 report data item code for net transport
+	String dataItemSelect = JParamToolkit.getParameter(request,"dataItemSelect");  ///要显示的报表显示项名称，用于显示  report data item code for display
+	String selectItem =  JParamToolkit.getParameter(request,"selectItem");  //要显示的查询条件类别，用于数据传输 query condition type code for net transport
+	String selectItemSelect =  JParamToolkit.getParameter(request,"selectItemSelect");  //要显示的查询条件类别，用于显示  query condition type code for display
+	String width = JParamToolkit.getParameter(request,"width");
+	int  widthInt = Integer.valueOf(width)-60;
+	String  Scollwidth= ""+widthInt;
+	String ccc = JParamToolkit.getParameter(request,"ww");
+	int www;
+	if(ccc.equals("")||ccc==""||ccc ==null){
+		www = Integer.valueOf(width)-60;
+	}else{
+		www = Integer.valueOf(ccc)-45;
+	}
+	  ccc= ""+www;
+	String  ww=""+(www+45);
+	  
+	String report = JParamToolkit.getParameter(request,"raq");
+		
+	//是否已经为明细表 if is a detail report?
+	String detailTable = JParamToolkit.getParameter(request, "detailTable");
+	String dateType = JParamToolkit.getParameter(request, "dateType");//报表日期类型
+	String beginYear = JParamToolkit.getParameter(request, "beginYear");
+	String endYear = JParamToolkit.getParameter(request, "endYear");
+	String beginDay = JParamToolkit.getParameter(request, "beginDay");
+	String endDay = JParamToolkit.getParameter(request, "endDay");
+	String beginMonth = JParamToolkit.getParameter(request, "beginMonth");
+	String beginQuarter = JParamToolkit.getParameter(request, "beginQuarter");
+	String endMonth = JParamToolkit.getParameter(request, "endMonth");
+	String endQuarter = JParamToolkit.getParameter(request, "endQuarter");
+	String beginWeek = JParamToolkit.getParameter(request, "beginWeek");
+	String endWeek = JParamToolkit.getParameter(request, "endWeek");
+	String tableName = ChooseTable.getTableName(dateType, reportName,"");
+	String isSum = JParamToolkit.getParameter(request, "isSum");
+	String isFixed = JParamToolkit.getParameter(request, "isFixed");
+	String isList = JParamToolkit.getParameter(request, "isList");
+	//取得当前日 给予周默认值
+	String today = CalendarUtil.getCurrYearMonthDay();
+    if(beginDay == null || "".equals(beginDay)){
+    	beginDay = today;
+    }
+    if(endDay == null || "".equals(endDay)){
+    	endDay = today;
+    }
+    if(beginYear == null || "".equals(beginYear)){
+    	beginYear = CalendarUtil.getCurrYear()+"年";
+    }
+    if(beginMonth == null || "".equals(beginMonth)){
+    	beginMonth = CalendarUtil.getCurrMonth();
+    	if(Integer.parseInt(beginMonth) == 1){
+    		beginMonth = "12";
+    		beginYear=beginYear.substring(0, 4);
+    		beginYear = (Integer.parseInt(beginYear)-1)+"年";
+    	}else{
+    	beginMonth = (Integer.parseInt(beginMonth)-1)+"";
+    	}
+    }
+    if(endYear == null || "".equals(endYear) || endMonth == null || "".equals(endMonth)){
+    endYear = beginYear;
+    endMonth =beginMonth;
+    }
+	//点击查询时，请求自己时要带过来原来的raq
+	String initReport= report;
+	//保证报表名称的完整性 
+	
+		if( report.lastIndexOf(".raq") < 0 ){
+			 report += ".raq";
+		}
+	
+	String raqParam = "";
+	String  sql="";
+	String  bl ="";
+// 	String raqParam1 = "";
+	Enumeration paramNames = request.getParameterNames();
+	if(paramNames!=null ){
+	raqParam = ReportUtil.getReportParam4Flexible(request);
+	
+	 if(raqParam!="" &&!raqParam.equals("")){
+	 String[]  list = raqParam.split(";");
+	 for(int i = 0 ; i< list.length; i++){
+	  if("sql".endsWith(list[i].split("=")[0]) || "sql" == list[i].split("=")[0]){
+	        sql=  list[i].split("sql=")[1];	
+	        int count  = DBPool.countselect(sql);
+	     	 if(count>30000){
+	     		  bl ="true";
+	     	   }else{
+	     		  bl ="false"; 
+	     	   }
+		  	}	
+	}
+	} 
+// 	if(raqParam.equals("error")||raqParam=="error"){
+// 		out.print(	"<script type='text/javascript' >alert('您查询数据量过大，请缩短查询时间范围后再进行查询！');</script>");
+// 		 raqParam="";
+// 		}
+	}
+// 	out.println(raqParam);
+	List<DataItem> flexibleReportConditions = (List<DataItem>)SysConstants.getFlexibleReportConditions();
+%>
+<html>
+<head>
+	<title>Insert title here</title>
+	<meta name="Descrīption" Content="fixed report query page">
+	<meta name="Copyright" Content="Copyright © 2008 Yucheng Network Technologies Limited All Rights Reserved">
+	<meta name="Author" Content="Wang ji">
+	<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css"/>
+	<link href="${ctx}/css/centercontent.css" rel="stylesheet" id="centercontentcss" type="text/css"/>
+	<link href="${ctx}/css/page.css" rel="stylesheet" type="text/css">
+	<link href="${ctx}/css/report.css" rel="stylesheet" type="text/css"/>
+	<script type="text/javascript" src="${ctx}/js/jquery.js"></script>
+	<script type="text/javascript" src="${ctx}/js/calendar.js"></script>
+	<script type="text/javascript" src="${ctx}/js/progress.js"></script>
+	<script type="text/javascript" src="${ctx}/js/reportUtil.js"></script>
+	<script language="javascript" type="text/javascript" src="${ctx}/My97DatePicker/WdatePicker.js"></script>
+	<script type="text/javascript">	  
+		//获取body的宽度来决定报表显示项的宽度
+		function get_w(){
+			var ww;
+			ww=document.body.clientWidth;
+			$("#"+"ww").val(ww);
+			return ww;
+		}
+		//get the report data item
+		function selectDataItem(dataType){	
+			var url="${ctx}/report/selectDataItem.jsp";
+		 	url += "?dataType="+dataType;
+		 	var param = new Object();
+		 	param.value = document.getElementById(dataType).value;
+			//url += "&dataItem="+param;
+			var stat="dialogWidth:630px;dialogHeight:300px;status:0;help:0;scroll:0";
+		 	var returnStr=window.showModalDialog(url,param,stat);
+		 	if(returnStr != null&&returnStr !=""){
+		 	var retStrs = returnStr.split("$");
+		 	$("#"+dataType).val(retStrs[0]);
+		 	$("#"+dataType+"Select").val(retStrs[1]);
+		 	}
+		 	if(dataType == "selectItem"){
+			 	displayCondition();
+			}
+		}
+		
+		//控制隐藏
+		function displayCondition(){ //通过获得ischange来判断，用不同的值来做判断 缺十个选项
+			var selectItem = $("#selectItem").val();
+			var conditionList =$("#conditionList");
+			if(selectItem==""){
+				conditionList.hide("fast");
+				<%for(DataItem item:flexibleReportConditions){%>
+			    $("#"+"<%=item.getDataKey()%>").val("");
+				$("#"+"<%=item.getDataKey()%>"+"Select").val("");
+			<%}%>
+				return;
+			}
+			conditionList.show("fast");
+			var labelArea;
+			var dataArea;
+			<%for(DataItem item:flexibleReportConditions){%>
+				labelArea = $("#"+"<%=item.getDataKey()%>"+"Div");
+				dataArea =  $("#"+"<%=item.getDataKey()%>"+"SelectDiv");
+				if(selectItem.indexOf("<%=item.getDataValue()%>")>=0){
+					labelArea.show("fast");
+					dataArea.show("fast");
+				}else{
+					labelArea.hide("fast");
+					dataArea.hide("fast");
+					$("#"+"<%=item.getDataKey()%>").val("");
+					$("#"+"<%=item.getDataKey()%>"+"Select").val("");
+				}
+			<%}%>
+				
+		}
+		
+		function queryForm(){
+			var str = $("#dataItem").val();
+		    if(str == ""){
+		      	alert("请选择列");
+		      	return false;
+		    }
+		    //获得报表时间类型
+		    var dateType = $("#dateType").val();
+		    if(dateType == ""){
+		    	alert("请选择报表类型");
+		    	return false;
+		    }
+		    //检查时间条件(根据报表类型不同验证)
+		    if( checkDate(dateType) == false ){
+		    	return false;
+		    }
+		    var definedForm = $("#definedForm");
+		    get_w();
+		    definedForm.submit();
+		 } 
+		
+		function selectBehave(CUSTOMER_ACTION,suggest,trans_time){ 
+			var url="${ctx}/report/show_suggest_action_num.jsp";
+		 	url += "?CUSTOMER_ACTION="+CUSTOMER_ACTION+";"+trans_time;
+		 	//url += "?suggest="+suggest;
+		 	//url += "&trans_time="+trans_time;
+			var stat="dialogWidth:100px;dialogHeight:30px;status:0;help:0;scroll:0";
+		 	window.showModalDialog(url,stat);
+		 
+			}
+		
+		//日历页面的路径 calendar file path
+		var calendarUrl = "${ctx}/common/calendar.jsp";
+	</script>
+	</head>
+	<body style="overflow-x: auto;overflow-y: scroll">
+	
+	<div class="centercontent001">
+		<div class="info_box">
+		<div class="title_bg"><%=title %></div>
+			<div class="info_input_box">
+				<form name="definedForm" id="definedForm" action="${ctx}/report/fixedReport.jsp" method="post">
+					<input type="hidden" name="ww" id="ww" value="<%=ww%>">
+					<input type="hidden" name="reportName" id="reportName" value="<%=reportName%>">
+				 	<input type="hidden" id="dataItem" name="dataItem" value="<%=dataItem%>">
+				 	<input type="hidden" id="dataItemSelect" name="dataItemSelect" value="<%=dataItemSelect%>">
+				 	<input type="hidden" id="raq" name="raq" value="<%=initReport%>">
+				  	<input type="hidden" id="firstFlag" name="firstFlag" value="N">
+				  	<input type="hidden" id="firstFlag4Tool" name="firstFlag4Tool" value="${param.firstFlag}">
+				  	<input type="hidden" name="title" value="<%=title%>">
+				  	<input type="hidden" name="width" value="<%=width%>"/>
+				  	<input type="hidden" name="detailTable" value="<%=detailTable%>"/>
+				  	<input type="hidden" name="today" id="today" value="<%=today%>"/>
+				  	<input type="hidden" name="tableName" id="tableName" value="<%=tableName%>"/>
+				  	<input type="hidden" name="isSum" id="isSum" value="<%=isSum%>"/>
+				  	<input type="hidden" name="isFixed" id="isFixed" value="<%=isFixed%>"/>
+				  	<input type="hidden" name="isList" id="isList" value="<%=isList%>"/>
+				  	<input type="hidden" id="selectItem" name="selectItem" value="<%=selectItem %>">
+				  	<input type="hidden" id="bl" name="bl" value="<%=bl %>">
+				  	<%
+				//报表页数跳转有输入 
+				  	 if(reportName=="confirmedFraudList"||"confirmedFraudList".equals(reportName)||
+				  	     reportName=="transRiskDistributed"||"transRiskDistributed".equals(reportName)||
+				  	     reportName=="errLeakFraudCount"||"errLeakFraudCount".equals(reportName)||
+				  	     reportName=="errLeakFraudCountList"||"errLeakFraudCountList".equals(reportName)){%>   
+				      <%@include file="toolbar4Report_two.jsp"%> 
+				     <% }else if (reportName=="confirmedFraudTotal"||"confirmedFraudTotal".equals(reportName)||
+				    	 reportName=="authenMethodCountList"||"authenMethodCountList".equals(reportName)||
+				    	 reportName=="authenResultCountList"||"authenResultCountList".equals(reportName)||
+				    	 reportName=="ruleEffectCount"||"ruleEffectCount".equals(reportName)
+				    	){
+				    	
+				      %>  
+				       <%@include file="toolbar4Report_three.jsp"%> 
+				   
+				       
+				    <% }else {
+					%><%@include file="toolbar4Report_one.jsp"%>
+						    <% 	}%>
+					
+				  	
+				 	 <%if(!isFixed.equals("Y")){ %>
+<!-- 				 	 查询条件： -->
+				  		<div class="info_box_title"><BOC:I18N name="inputQueryCondition"/></div>
+				  	<% }else{ %>
+<!-- 				  	固定周期报表以月为周期且不提供查询条件 -->
+				  	<div class="info_box_title"><BOC:I18N name="note_for_fixed"/></div>
+				  	<% } %>
+					<table class="table_"  cellspacing="1" cellpadding="0" >
+						<tbody>	
+							<%if(!isFixed.equals("Y")){ %>
+					        <tr>
+								 <td  class="left_td" align="right"  nowrap width="3%"><BOC:I18N name="queryCondition"/></td>
+								 <td  class="td_data" width="22%" colspan="4">
+							  		<input id="selectItemSelect" name="selectItemSelect" type="text" value="<%=selectItemSelect%>" class="input" style="width:90%;" readOnly>
+							  		<img title="<BOC:I18N name="chooseListItem"/>" type="<BOC:I18N name="chooseListItem"/>" src="${ctx}/image/css/addressbook.gif" onclick="selectDataItem('selectItem');" style="cursor:pointer;">
+								 </td>
+					        	 <c:if test="${param.detailTable eq 'N'}">
+<!-- 					        	 汇总类型： -->
+					        	 <td  class="left_td" align="right"  nowrap width="3%"><BOC:I18N name="collectType"/></td>
+					        	 <td  width="6%" align="center" class="td_data" nowrap>
+					        	 	<input type="radio" name="reportType" id="reportType" value="totalReport" <c:if test="${param.reportType eq 'totalReport'}">checked="true"</c:if> /><BOC:I18N name="count"/>
+					        	 	<input type="radio" name="reportType" id="reportType" value="detailReport" <c:if test="${param.reportType eq 'detailReport'}">checked="true"</c:if>/><BOC:I18N name="list"/>
+					        	 </td>
+					        	 </c:if>
+					        	 <td class="button_td" width="3%"  align="center"><input type="button" class="List_Button2" value="<BOC:I18N name="query"/>" onClick="queryForm()"/></td>	
+					        </tr>
+					        <tr id="conditionList" style="display:none;">
+				            	<td  class="left_td" align="right"  nowrap width="3%"><BOC:I18N name="conditionValueAssignment"/></td>
+								<td class="td_data" colspan="7" align="left">
+									<div style="height:25px">
+										<% for(DataItem item:flexibleReportConditions){ %>
+											<div id="<%=item.getDataKey()%>Div" class="td_data" style="float:left;display:none;" >
+												<font size="50px"><%=item.getDataDesc()%>:</font>
+											</div>
+											<div id="<%=item.getDataKey()%>SelectDiv" class="td_data" style="float:left;display:none;"> 
+									    		<input id="<%=item.getDataKey()%>" name="<%=item.getDataKey()%>" type="hidden" value="<%=JParamToolkit.getParameter(request,item.getDataKey())%>">
+							          		  	<input id="<%=item.getDataKey()%>Select" name="<%=item.getDataKey()%>Select" type="text" value='<%=JParamToolkit.getParameter(request,item.getDataKey()+"Select")%>' class="input" style="width:50px;" readOnly>
+										  		<img title="<BOC:I18N name="chooseDateItem"/>" type="<BOC:I18N name="chooseDateItem"/>" src="${ctx}/image/css/addressbook.gif" onclick="selectDataItem('<%=item.getDataKey()%>');" style="cursor:pointer;">
+									    		&nbsp;&nbsp;&nbsp;&nbsp;
+											</div>
+										<% } %>
+									</div>
+								</td>
+							</tr>	
+							<% }%>
+					        <tr id= "timeTypeList" style="display:none;">
+					        	 <%if(isFixed.equals("Y")){ 
+					        	 %>
+					        	 <td>
+					        	  <input type="hidden" id="dateType" name="dateType" value="monthReport">
+					        	 </td>
+					        	<% }else{ %>
+					             <td  class="left_td" align="right"  nowrap width="3%"><BOC:I18N name="reportType"/></td>
+					        	 <td  width="5%" align="center" class="td_data" nowrap>
+					        	 <select name="dateType" id="dateType"   style="width:100px;height:20px;" onchange="showDateCondition('Y')" >
+					        	 	  <option value="dayReport" <c:if test="${param.dateType eq 'dayReport'}">selected</c:if> ><BOC:I18N name="dayReport"/></option>
+					        	      <option value="weekReport" <c:if test="${param.dateType eq 'weekReport'}">selected</c:if>><BOC:I18N name="weekReport"/></option>
+					        	      <option value="monthReport" <c:if test="${param.dateType eq 'monthReport'}">selected</c:if>><BOC:I18N name="monthReport"/></option>
+					        	      <option value="quarterReport" <c:if test="${param.dateType eq 'quarterReport'}">selected</c:if>><BOC:I18N name="quarterReport"/></option>
+					        	      <option value="halfYearReport" <c:if test="${param.dateType eq 'halfYearReport'}">selected</c:if>><BOC:I18N name="halfYearReport"/></option>
+					        	      <option value="yearReport" <c:if test="${param.dateType eq 'yearReport'}">selected</c:if>><BOC:I18N name="yearReport"/></option>
+					        	 </select>
+					        	 </td>
+					        	 <%} %>
+					        	 
+					        	  <%if(!isFixed.equals("Y")){
+					        		  %>
+					        	 <td  class="left_td" align="right"  nowrap width="3%"><BOC:I18N name="queryTime"/></td>
+					        	 <td   class="td_data" colspan="5" align="left" >
+					        	 <% }else{ %>
+					        	 <td  class="left_td" align="center"  nowrap width="5%"><BOC:I18N name="queryTime"/></td>
+					        	 <td   class="td_data" colspan="4" width="10%" align="center" >
+					        	 <%} %>
+							     <div id="beginDayReported" class="right_td" style="float:left;display:none;"  >
+							     <input class="Wdate" type="text" id="beginDay" name="beginDay" onClick="WdatePicker()" readonly value="<%=beginDay%> ">
+								 </div>
+								 <div id="beginYearReported" class="right_td" align="center" style="float:left;display:none;"  >
+		        					 <input type="text" maxLength="6" size="7" id="beginYear" name="beginYear" readonly value="<%=beginYear%> ">
+		        				 </div>
+		        				 <div id="beginYearChange" class="right_td" align="center" style="float:left;display:none;"  >
+									 <IMG height=22 src="${ctx}/image/css/button2.gif" width=19 useMap="#beginYear" border=0>
+			    					 <MAP name="beginYear">
+			    					 <AREA onclick="setNextYear('beginYear')" shape=RECT coords=1,0,18,10>
+			   						 <AREA onclick="setPreviousYear('beginYear')"  shape=RECT coords=1,12,18,21>
+			 						 </MAP> 
+			 					  </div>
+			 					  <div id="beginHalfYearReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="beginHalfYear" name="beginHalfYear">
+							       		<option value="1" <c:if test="${param.beginHalfYear eq '1'}">selected</c:if> ><BOC:I18N name="firstHalfOfYear"/></option>
+							     		<option value="2" <c:if test="${param.beginHalfYear eq '2'}">selected</c:if> ><BOC:I18N name="secondHalfOfYear"/></option>
+		   	                        </select> 
+		   	                      </div>
+		   	                      <div id="beginQuarterReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="beginQuarter" name="beginQuarter">
+							       		<%=DataManage.getDataSelect("quarter",beginQuarter ) %>
+		   	                        </select> 
+		   	                      </div>
+			 					  <div id="beginMonthReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="beginMonth" name="beginMonth" onchange="showWeekCondition('begin')">
+							       		<%=DataManage.getDataSelect("month",beginMonth ) %>
+		   	                        </select> 
+			 					  </div>
+			 					  <div id="beginWeekReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="beginWeek" name="beginWeek">
+		   	                        </select> 
+			 					  </div>
+			 					  <%if(!isFixed.equals("Y")){ %>
+			 					  <div  class="character1" align="center" style="float:left;display:;" ><BOC:I18N name="goTo"/></div>
+			 					  <% } %>
+			 					  <div id="endDayReported" class="right_td" style="float:left;display:none;">
+			 					  <input class="Wdate" type="text" id="endDay" name="endDay" onClick="WdatePicker()" readonly value="<%=endDay%> ">
+								  </div>
+			 					  <div id="endYearReported" class="right_td" align="center" style="float:left;display:none;"  >
+		        					 <input type="text" maxLength="6" size="7" id="endYear" name="endYear"  readonly value="<%=endYear%>">
+		        				  </div>
+		        				  <div id="endYearChange" class="right_td" align="center" style="float:left;display:none;"  >
+									 <IMG height=22 src="${ctx}/image/css/button2.gif" width=19 useMap="#endYear" border=0>
+			    					 <MAP name="endYear">
+			    					 <AREA onclick="setNextYear('endYear')" shape=RECT coords=1,0,18,10>
+			   						 <AREA onclick="setPreviousYear('endYear')"  shape=RECT coords=1,12,18,21>
+			 						 </MAP> 
+			 					  </div>
+			 					  <div id="endHalfYearReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="endHalfYear" name="endHalfYear">
+							       		<option value="1" <c:if test="${param.endHalfYear eq '1'}">selected</c:if> ><BOC:I18N name="firstHalfOfYear"/></option>
+							     		<option value="2" <c:if test="${param.endHalfYear eq '2'}">selected</c:if> ><BOC:I18N name="secondHalfOfYear"/></option>
+		   	                        </select> 
+		   	                      </div>
+		   	                      <div id="endQuarterReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="endQuarter" name="endQuarter">
+							       		<%=DataManage.getDataSelect("quarter",endQuarter ) %>
+		   	                        </select> 
+		   	                      </div>
+			 					  <div id="endMonthReported"  class="right_td" align="center" style="float:left;display:none;"  >
+			 						 <select class=wenbenkuang id="endMonth" name="endMonth" onchange="showWeekCondition('end')">
+							       		<%=DataManage.getDataSelect("month",endMonth ) %>
+		   	                        </select> 
+			 					  </div>
+			 					  <div id="endWeekReported"  class="right_td" align="center" style="float:left;display:none;" >
+			 						 <select class=wenbenkuang id="endWeek" name="endWeek">				     	
+		   	                        </select> 
+			 					  </div>  
+			 					  </td>  
+			 					   <%if(isFixed.equals("Y")){ %>
+			 					  <td class="button_td" width="8%"  align="center"><input type="button" class="List_Button2" value="<BOC:I18N name="query"/>" onClick="queryForm()"/>
+			 					  </td>	
+			 					  <%} %>     
+			 					</tr>	  					  					   				
+						</tbody>
+					</table>
+				 </form>		
+			</div>
+<%-- 			<div style=" overflow:scroll; width:400px; height:400px;”> --%>
+<!-- 		<div style="overflow:scroll; width:100%;"> -->
+<%if(raqParam==""){ %>
+    <%} else {%>
+    <c:if test="${param.firstFlag eq 'N'}">
+			<div class="help_box" >
+				<table class="table_" cellspacing="1" cellpadding="0" width="50%">
+					<tbody>
+						<tr class="td_nobg" valign="top">
+							<td valign="top">
+							<report:autoBig name="report1" reportFileName="<%=report%>"
+								    	dbType="oracle"  
+										dsName="ds1"    
+                                        totalCountExp=""     
+				                        cachePageNum="5"
+				                        funcBarLocation="bottom" 
+										needPageMark="yes"
+										generateParamForm="no"
+										needScroll="yes"
+									    scrollWidth="<%=ccc%>"
+										params="<%=raqParam%>"
+										exceptionPage="/reportJsp/errorPage.jsp"
+										appletJarName="runqianReport4Applet.jar,dmGraphApplet.jar"
+										pageMarkLabel=""
+										firstPageLabel=""
+							            prevPageLabel=""
+							            nextPageLabel=""
+							            lastPageLabel=""
+							            scale="1.5"
+							            needSaveAsPdf="yes"
+									/>
+							</td>
+						</tr>																																													
+					</tbody>
+				</table>
+		   </div>	
+		</c:if>	
+    <%} %>
+			
+<!-- 	  </div> -->
+		<div class="info_box_title"><font color="red"><BOC:I18N name="note"/></font></div>
+	</div>	
+	</body>
+</html>
+<script language="javascript">
+	//设置分页显示值 set paging value
+	document.getElementById( "t_page_span" ).innerHTML=report1_getTotalPage();
+	document.getElementById( "c_page_span" ).innerHTML=report1_getCurrPage();
+</script>
+<%
+if(!"".equals(session.getAttribute("raq"))){
+   session.removeAttribute("raq");
+}
+if(!"".equals(session.getAttribute("raqParam"))){
+	   session.removeAttribute("raqParam");
+	}
+session.setAttribute("raq", report);
+session.setAttribute("raqParam", raqParam);
+%>
+<script language=javascript>
+	function report1_saveAsXml() {
+		document.getElementById( "group_saveAs_frame").src = "${ctx}/ExportToXml";
+	}
+	
+	function report1_saveAsHtml() {
+
+		document.getElementById( "group_saveAs_frame" ).src = "${ctx}/ExportToHtml";
+	}	
+	
+	function report1_toChartPage() {
+		var stat='height=655, width=1050, toolbar=no, menubar=no,  top='+((window.screen.availHeight) / 10) + ', left=' + ((window.screen.availWidth) / 4)+',scrollbars=yes, resizable=yes, location=no, status=no';
+		window.open('','report2Dashboard',stat);
+		var definedForm = document.getElementById("definedForm");
+		definedForm.action = "${ctx}/manage/view/report2Dashboard";
+		definedForm.target="report2Dashboard";
+		definedForm.submit();  
+		definedForm.action = "${ctx}/report/fixedReport.jsp";
+		definedForm.target="_self";
+	}		
+	
+ 	displayCondition();
+ 	showDateCondition("N");
+ 	get_w();
+ 	// queryForm();
+ 	
+ 	chooseWeek();
+ 	function chooseWeek(){
+		var beginWeek ="<%=beginWeek%>";
+		var endWeek = "<%=endWeek%>";
+		$("#beginWeek").val(beginWeek);
+		$("#endWeek").val(endWeek);
+ 	}
+ 	/* $(document).ready(function (){
+ 		get_w();	
+ 	} */
+</script> 

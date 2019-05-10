@@ -1,0 +1,30 @@
+﻿1，查询锁的语句
+
+select sql_text
+  from v$sql
+ where hash_value in
+       (select sql_hash_value
+          from v$session
+         where sid in (select session_id from v$locked_object))
+         
+2，查看锁的类型
+
+  select   s.username,   
+  decode(l.type,'TM','TABLE   LOCK',   
+                              'TX','ROW   LOCK',   
+                              NULL)   LOCK_LEVEL,   
+  o.owner,o.object_name,o.object_type,   
+  s.sid,s.serial#,s.terminal,s.machine,s.program,s.osuser   
+  from   v$session   s,v$lock   l,dba_objects   o   
+  where   s.sid=l.sid   
+  and   o.object_id=l.id1   
+  and   s.username   is   not   null   
+  
+ 3，查看正在运行的job
+   
+    select * from dba_jobs_running;
+    
+ 4,杀死进程
+ 
+  alter system kill session '29,57107';-------------
+  EXEC sys.kill_session('11','1337');------------------

@@ -1,0 +1,2 @@
+﻿<file://E:\Java\Hibernate\hibernate.html>  hibernate文档
+<file://E:\Java\Hibernate\annotation.html>annotation文档

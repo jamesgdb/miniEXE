@@ -1,0 +1,37 @@
+﻿CREATE OR REPLACE PROCEDURE insert_data_4_pressure_3
+ is
+
+  --Result1  VARCHAR2(50);
+  VAR_num number;
+begin
+  VAR_num:=1;
+
+ while
+   VAR_num< 1000000
+   LOOP
+      insert into rp_trans_log_day
+        (trans_time,
+         trans_province,
+         trans_type,
+         score_range,
+         rule_name,
+         trans_num)
+
+        select to_date('2013/10/29', 'yyyy-mm-dd'),
+               round(dbms_random.value(1, 300)) || '省',
+               round(dbms_random.value(1, 800)) || '类型',
+               round(dbms_random.value(1, 100)) || '风险分值',
+               round(dbms_random.value(1, 300)) || '规则名称',
+               '1'
+          from dual;
+
+
+
+
+        commit;
+
+    VAR_num:=VAR_num+1;
+    end loop;
+
+
+end insert_data_4_pressure_3;

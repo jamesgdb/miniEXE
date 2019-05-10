@@ -1,0 +1,25 @@
+﻿1、通过本机从windows下可以操作AIX及oracle
+2、先CMD到命令窗口模式（即DOS模式）
+3、telnet 数据库服务器IP
+4、显示连接信息(login:)要求输入用户,一般AIX用户名为root相当于windows下的administrator一样。
+5、输入密码（问客户）
+6、连接进入后。常用操作命令为
+	ls	列目录。相当于dos下的dir命令
+	cd	进入目录。同于DOS
+	sh	执行批处理命令文件。以.sh结尾的文件。相当于windows下的.bat文件。
+7、（连接oracle）需要先切换到oracle用户。（必须的，root用户不能操作oracle数据库）
+	su  -  oracle
+8、lsnrctl start     （启动监听。一般是启动的，可以看到提示信息中有）
+9、sqlplus  / nolog	进入SQL模式。
+10、sqlplus 'sys' as sysdba;	以管理员身份登录oracle
+11、shutdown immediate;  快速关闭oracle
+12、如果因故不能正常关闭（超过30分钟还未关闭的）。先执行以下命令。
+	 startup force;
+	稍等后，可以看到相关提示信息。再次出现命令提示符，说明完成。
+13、再执行。shutdown immediate;   根据提示信息可以看到，已经正常关闭了。再次出现命令提示符，说明完成。
+14、正常关闭后，再执行startup;启动oracle.   看到mounted 表明已启动。
+15、如果正常启动就可以了。关闭退出。结束。退出一直用exit直到退回到你的windows命令窗口即结束
+
+
+cd ..
+quit

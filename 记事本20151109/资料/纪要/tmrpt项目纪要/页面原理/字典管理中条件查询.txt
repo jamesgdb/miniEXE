@@ -1,0 +1,1 @@
+﻿DomainServiceImpl.java中query（）方法中 Option[] conditions控制条件查询。

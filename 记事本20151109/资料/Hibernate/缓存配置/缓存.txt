@@ -1,0 +1,62 @@
+﻿4	一级缓存和二级缓存和査询缓存（面试题）(详见hibernate_3000_Hibernate_3KindsOf_Cache)
+a)	什么是缓存
+b)	什么是一级缓存，session级别的缓存
+c)	I什么是二级缓存，SessionFactory级别的缓存，可以跨越session存在
+i.	经常被访间
+ii.	改动不大不会经常改动
+iii.	数重有限
+d)	打开二级缓存
+i.	hibernate.cfg.xml 设定：
+<property
+name= "cache.use_second_level_cache">true</property>
+<property
+name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+ii.	@Cache注解(由hibernate扩展提供)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+
+注：使用EhCache二级缓存 需要导入ehcache-1.2.3.jar及commons-logging-1.0.4.jar包
+e)	load默认使用二级缓存，iterate默认使用二级缓存
+f)	list默认往二级缓存加数据，但是查询的时候不使用
+g)	如果要query用二级缓存，需打开查询缓存
+<property name="cache.use_query_cache">true</property>
+调用Query的setCachable (true)方法指明使用二级缓存
+例如：session.createQuery("from Category").setCacheable(true).list();
+h)	缓存算法：（纯为了面试）
+i.	LRU  LFU  FIFO
+1.	Least Recently Used –最近很少被使用
+2.	Least Frequently Used (命中率高低)
+3.	First In First Out 按顺序替换
+ii.	memoryStoreEvictionPolicy = "LRU" (ehcache.xml中配置) 
+
+
+
+---------------------------------------------------------------------------------------
+2.4.7. 缓存
+
+为了优化数据库访问,你可以激活所谓的Hibernate二级缓存.该缓存是可以按每个实体和集合进行配置的.
+
+@org.hibernate.annotations.Cache定义了缓存策略及给定的二级缓存的范围. 此注解适用于根实体(非子实体),还有集合.
+
+@Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+public class Forest { ... }
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+    @JoinColumn(name="CUST_ID")
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    public SortedSet<Ticket> getTickets() {
+        return tickets;
+    }
+@Cache(
+    CacheConcurrencyStrategy usage();                 (1)
+    String region() default "";                       (2)
+    String include() default "all";                   (3)
+)
+(1)	
+usage: 给定缓存的并发策略(NONE, READ_ONLY, NONSTRICT_READ_WRITE, READ_WRITE, TRANSACTIONAL)
+
+(2)	
+region (可选的)：缓存范围(默认为类的全限定类名或是集合的全限定角色名)
+
+(3)	
+include (可选的)：值为all时包括了所有的属性(proterty), 为non-lazy时仅含非延迟属性(默认值为all)
+

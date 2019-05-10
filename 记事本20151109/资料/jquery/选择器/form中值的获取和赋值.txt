@@ -1,0 +1,93 @@
+﻿<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+  <input type="button"  value="改变可用input的值" id="form" ></input><br>
+  <input type="button"  value="改变不可用的值" id="form1" ></input><br>
+  <input type="button"  value="获取复选框选中个数" id="form2" ></input><br>
+  <input type="button"  value="获取下拉选的值" id="form3" ></input><br>
+  
+<form>
+    <input type="button" value="Input Button" /><br>
+    <input type="checkbox"  name="hao" value="Input checkbox1"/>checkbox1
+    <input type="checkbox" name="hao" value="Input checkbox2"/>checkbox2
+    <input type="checkbox" name="hao" value="Input checkbox3"/>checkbox3
+    <input type="checkbox" name="hao" value="Input checkbox4"/>checkbox4
+
+    <input type="file"  value="Input file" /><br>
+    <input type="hidden" value="Input hidden" /><br>
+    <input type="image"  value="Input image"/><br>
+
+    <input type="password"  value="Input password"/><br>
+    <input type="radio" name="haoba" value="Input radio1" />男
+    <input type="radio"name="haoba" value="Input radio2" />女<br>
+    <input type="reset"  value="Input reset"/><br>
+
+    <input type="submit" value="Input submit" /><br>
+    <input type="text"  value="text " disabled="disabled"/><br>
+    <input type="text"  value="text "/><br>
+    <input type="text"  value="text " disabled="disabled" /><br>
+    <input type="text"  value="text "/><br>
+    <select multiple="multiple">
+    <option>Option1</option>
+    <option>Option2</option>
+    <option>Option3</option>
+    <option>Option4</option>
+    
+    </select>
+
+    <textarea>   </textarea>
+    <button>Button</button>
+
+</form>
+ 
+
+  <div id="dddd2" class ="name2" style="width:100px;height:100px;border:1px solid #ccc;">123</div>
+    
+ 
+  </body>
+  <script type="text/javascript"> 
+  //改变input中text的值：分别设置
+  $("#form").click( function () {
+    $("input[type='text']:enabled").each(function(index,domElm){
+        $(this).val("name"); }); }); 
+  //改变input中text的值：分别设置
+  $("#form1").click( function () {
+    $("input[type='text']:disabled").each(function(index,domElm){
+        $(this).val("not user"); }); }); 
+  //获取复选框的值
+  $("#form2").click( function () {
+    $("input[type=checkbox]:checked").each(function(index,domElm){
+      alert(  $(domElm).val()); }); }); 
+  
+  //获取下拉选的值select 是option的父亲
+  $("#form3").click( function () {
+  $.each($("select  option:selected"),function(index,domElm){
+   alert( $(domElm).val());
+  });});
+  
+  
+  </script>
+</html>

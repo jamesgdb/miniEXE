@@ -1,0 +1,30 @@
+﻿CREATE OR REPLACE PROCEDURE insert_data_4_pressure_6
+ is
+
+  --Result1  VARCHAR2(50);
+  VAR_SYSDATE varchar2(100);
+begin
+  VAR_SYSDATE:='2013/10/31 12:00:00';
+  
+ while 
+   to_date(VAR_SYSDATE,'yyyy-mm-dd hh24:mi:ss')<  to_date('2013/10/31 12:30:01','yyyy-mm-dd hh24:mi:ss')
+   LOOP
+       insert into event_log_realtime
+        (event_id, event_time, ip_address, event_type, user_defined_event_type, risk_score, policy_action, challenge_auth_method, challenge_successful, policy_rule_id, short_date, sys_creation_date, lastmodified, user_id, user_hash, preliminary_score, has_used, has_used_time, ip_country, ip_city, channel_indicator, operating_system, browser_type, amount_original, amount_currency, user_acct_number, ext_acct_number, ext_acct_owner_name, flagged, resolution, cdf_s_1, cdf_s_2, cdf_s_3, cdf_s_4, cdf_s_5, cdf_s_6, cdf_s_7, cdf_s_8, cdf_s_9, cdf_s_10, cdf_s_11, cdf_s_12, cdf_s_13, cdf_s_14, cdf_s_15, cdf_s_16, cdf_s_17, cdf_s_18, cdf_s_19, cdf_s_20, org_id, is_device_bound, cookie, ip_region)
+        select sys_guid(),  to_date(VAR_SYSDATE,'yyyy-mm-dd hh24:mi:ss'), ip_address, event_type, user_defined_event_type, risk_score, policy_action, challenge_auth_method, challenge_successful, policy_rule_id, to_char( to_date(VAR_SYSDATE,'yyyy-mm-dd hh24:mi:ss'),'yyyymmdd'),  to_date(VAR_SYSDATE,'yyyy-mm-dd hh24:mi:ss'),  to_date(VAR_SYSDATE,'yyyy-mm-dd hh24:mi:ss')+1/24/60, user_id, user_hash, preliminary_score,'N','', ip_country, ip_city, channel_indicator, operating_system, browser_type, amount_original, amount_currency, user_acct_number, ext_acct_number, ext_acct_owner_name, flagged, resolution, cdf_s_1, cdf_s_2, cdf_s_3, cdf_s_4, cdf_s_5, cdf_s_6, cdf_s_7, cdf_s_8, cdf_s_9, cdf_s_10, cdf_s_11, cdf_s_12, cdf_s_13, cdf_s_14, cdf_s_15, cdf_s_16, cdf_s_17, cdf_s_18, cdf_s_19, cdf_s_20, org_id, is_device_bound, cookie, ip_region from insert_data5 ;
+         
+        commit; 
+        
+        
+    insert into event_log_update
+     (event_id, event_time, ip_address, event_type, user_defined_event_type, risk_score, policy_action, challenge_auth_method, challenge_successful, policy_rule_id, short_date, sys_creation_date, lastmodified, user_id, user_hash, preliminary_score, ip_country, ip_city, channel_indicator, operating_system, browser_type, amount_original, amount_currency, user_acct_number, ext_acct_number, ext_acct_owner_name, flagged, resolution, cdf_s_1, cdf_s_2, cdf_s_3, cdf_s_4, cdf_s_5, cdf_s_6, cdf_s_7, cdf_s_8, cdf_s_9, cdf_s_10, cdf_s_11, cdf_s_12, cdf_s_13, cdf_s_14, cdf_s_15, cdf_s_16, cdf_s_17, cdf_s_18, cdf_s_19, cdf_s_20, org_id, is_device_bound, cookie, has_used, update_time, ip_region)
+   select event_id, event_time, ip_address, event_type, user_defined_event_type, risk_score, policy_action, challenge_auth_method, challenge_successful, policy_rule_id, short_date, sys_creation_date, lastmodified+1/24/60*6, user_id, user_hash, preliminary_score, ip_country, ip_city, channel_indicator, operating_system, browser_type, amount_original, amount_currency, user_acct_number, ext_acct_number, ext_acct_owner_name, flagged, 'F', cdf_s_1, cdf_s_2, cdf_s_3, cdf_s_4, cdf_s_5, cdf_s_6, cdf_s_7, cdf_s_8, cdf_s_9, cdf_s_10, cdf_s_11, cdf_s_12, cdf_s_13, cdf_s_14, cdf_s_15, cdf_s_16, cdf_s_17, cdf_s_18, cdf_s_19, cdf_s_20, org_id, is_device_bound, cookie,'N','', ip_region from event_log_realtime t where t.event_time=VAR_SYSDATE AND ROWNUM<21;
+          
+   commit;
+         
+        
+    VAR_SYSDATE:=to_char( to_date(VAR_SYSDATE,'yyyy-mm-dd hh24:mi:ss')+1/24/60/60,'yyyy-mm-dd hh24:mi:ss');
+    end loop;
+
+
+end insert_data_4_pressure_6;

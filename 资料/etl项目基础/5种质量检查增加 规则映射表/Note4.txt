@@ -1,0 +1,4 @@
+﻿<%-- 	queryUrl="${pageContext.request.contextPath}/dqRule_query.action&checksum=10&ruleFlg=2" --%>
+<%-- 	queryUrl="${pageContext.request.contextPath}/dqRule_query.action&checksum=10&ruleFlg=2&filterCode=${entity.filterCode}" --%>
+
+PROC_TEST(@P_AS_OF_DATE,@PROJECTID, @PARAM1,@RET_FLG,@RET_MSG）

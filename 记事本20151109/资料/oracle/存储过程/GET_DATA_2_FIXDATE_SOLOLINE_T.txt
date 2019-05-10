@@ -1,0 +1,588 @@
+﻿CREATE OR REPLACE PROCEDURE GET_DATA_2_FIXDATE_SOLOLINE_T
+AS
+  F_S_TRANS_TIME DATE;--交易时间
+  ARN_TRANS_ALL_NUM VARCHAR2(50);--总交易量
+  ARN_ALLO_NUM VARCHAR2(50);--ALLOW交易量
+  ARN_REVI_NUM VARCHAR2(50);--REVIEW交易量
+  ARN_CHAL_NUM VARCHAR2(50);--CHALLENGE交易量
+  ARN_DENY_NUM VARCHAR2(50);--DENY交易量
+  ARN_ENHAN_SUCC_NUM VARCHAR2(50); --认证成功数量
+  ARN_ENHAN_ALL_NUM VARCHAR2(50);--认证总数量
+  ARN_ENHAN_FAIL_NUM VARCHAR2(50);--认证失败数量
+  ARN_QA_NUM VARCHAR2(50);--QA交易量
+  ARN_QA_SUCC_NUM VARCHAR2(50);--QA成功交易量
+  ARN_QA_FAIL_NUM VARCHAR2(50);--QA失败交易量
+  ARN_CC_NUM VARCHAR2(50);--
+  ARN_CC_SUCC_NUM VARCHAR2(50);--
+  ARN_CC_FAIL_NUM VARCHAR2(50);--
+  ARN_SMS_NUM VARCHAR2(50);--
+  ARN_SMS_SUCC_NUM VARCHAR2(50);--
+  ARN_SMS_FAIL_NUM VARCHAR2(50);--
+  ARN_BIND_FAIL_TRANS VARCHAR2(50);--
+  ARN_FAIL_BIND_MAC VARCHAR2(50);--
+  ARN_AVG_VAL VARCHAR2(50);---
+  V_CMI_BIND_MAC_NUM number;--
+  CMI_PC_BIND_NUM VARCHAR2(50);--
+  CMI_MOBI_BIND_NUM VARCHAR2(50);--
+  CMI_BIND_CST_NUM VARCHAR2(50);--
+  CMI_UNBIND_CST_NUM VARCHAR2(50);--
+  CUT_WEB_USR_NUM VARCHAR2(50);--
+  CUT_MOBI_USR_NUM VARCHAR2(50);--
+  CUT_IPAD_USR_NUM VARCHAR2(50);--
+  CUT_WEB_TRANS_NUM VARCHAR2(50);--
+  CUT_MOBI_TRANS_NUM VARCHAR2(50);--
+  CUT_IPAD_TRANS_NUM VARCHAR2(50);--
+  CUT_ALL_TRANS_NUM VARCHAR2(50);--
+  NRU_QA_REG_NUM VARCHAR2(50);--
+  NRU_QA_REG_PER VARCHAR2(50);--
+  NRU_SMS_REG_NUM VARCHAR2(50);--
+  NRU_SMS_REG_PER VARCHAR2(50);--
+  NRU_CC_REG_NUM VARCHAR2(50);--
+  NRU_CC_REG_PER VARCHAR2(50);--
+  NRU_QA_RES_NUM VARCHAR2(50);--
+  NRU_QA_RES_PER VARCHAR2(50);--
+  NRU_CST_DOC_NUM VARCHAR2(50);--
+  ALL_USER_NUM NUMBER;--VARCHAR2(50);------------辅助(所有的去重用户)
+  ALL_IP_NUM NUMBER;--VARCHAR2(50);--
+  ALL_ADDR_NUM NUMBER;--VARCHAR2(50);--
+  ALL_DEVICE_NUM NUMBER;--VARCHAR2(50);--
+  TIME_SCY DATE;--用于循环的时间
+  MAX_TIME DATE;--表中最大时间
+  TIME_TODAY DATE;--当前时间
+  VAR_RP_FIXDATE_SOLOLINE RP_FIXDATE_SOLOLINE%ROWTYPE;
+   TRANS_TIME_MIN_MON date;--月表中的最小时间
+      VAR_RECORD_ID  VARCHAR2(30);--log日志主键
+      IS_NULL  NUMBER;
+      IS_NULL_2 NUMBER;
+
+
+ /*
+ 以上是固定周期单行表数据
+  MAX_TRANS_TIME DATE;
+ */
+
+BEGIN
+
+ --交易时间
+ SELECT MAX(T.TRANS_TIME) INTO F_S_TRANS_TIME FROM RP_TRANS_LOG_MONTH T;
+
+  SELECT min(T.TRANS_TIME) INTO TRANS_TIME_MIN_MON FROM RP_TRANS_LOG_MONTH T;
+
+
+ select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO TIME_SCY from dual;
+ select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO TIME_TODAY from dual;
+ SELECT MAX(TRANS_TIME) INTO MAX_TIME FROM RP_FIXDATE_SOLOLINE ;
+
+ IF F_S_TRANS_TIME IS NOT NULL AND MAX_TIME IS NULL THEN
+   WHILE TRANS_TIME_MIN_MON < TIME_TODAY
+     LOOP
+       ----------------------==============================------------------------
+
+        SELECT COUNT(1) INTO IS_NULL_2 FROM RP_TRANS_LOG_MONTH T WHERE  T.TRANS_TIME = TRANS_TIME_MIN_MON;
+                        IF IS_NULL_2 > 0 THEN
+                         INSERT INTO RP_FIXDATE_SOLOLINE(
+                            TRANS_TIME,--交易时间
+                            ARN_TRANS_ALL_NUM,--总交易量
+                            ARN_ALLO_NUM,--ALLOW交易量
+                            ARN_REVI_NUM,--REVIEW交易量
+                            ARN_CHAL_NUM,--CHALLENGE交易量
+                            ARN_DENY_NUM,--DENY交易量
+                            ARN_ENHAN_SUCC_NUM,--加强认证成功交易量
+                            ARN_ENHAN_ALL_NUM,--加强认证交易量
+                            ARN_ENHAN_FAIL_NUM,--加强认证失败交易量
+                            ARN_QA_NUM,--QA交易量
+                            ARN_QA_SUCC_NUM,--QA成功交易量
+                            ARN_QA_FAIL_NUM,--QA失败交易量
+                            ARN_CC_NUM,--CC交易量
+                            ARN_CC_SUCC_NUM,--CC成功交易量
+                            ARN_CC_FAIL_NUM,--CC失败交易量
+                            ARN_SMS_NUM,--SMS交易量
+                            ARN_SMS_SUCC_NUM,--SMS成功交易量
+                            ARN_SMS_FAIL_NUM,--SMS失败交易量
+                            ARN_BIND_FAIL_TRANS,--绑定设备认证失败交易笔数
+                            CUT_WEB_TRANS_NUM,--Web交易用户数
+                            CUT_MOBI_TRANS_NUM,--MOBILE交易用户数
+                            CUT_IPAD_TRANS_NUM,--IPAD交易用户数
+                            NRU_QA_RES_NUM,--重置 QA数量
+                            NRU_QA_RES_PER,--重置 QA百分比
+                            NRU_QA_REG_NUM,--QA注册数量
+                            NRU_QA_REG_PER,--QA注册百分比
+                            NRU_SMS_REG_NUM,--SMS注册数量
+                            NRU_SMS_REG_PER,--SMS注册百分比
+                            NRU_CC_REG_NUM,--CC注册数量
+                            NRU_CC_REG_PER,--CC注册百分比
+                            ARN_AVG_VAL,--平均风险分值
+                            NRU_CST_DOC_NUM,--建立客户档案数量
+                            CUT_ALL_TRANS_NUM--总交易量2
+
+                            )
+                      SELECT
+                       MAX(T.TRANS_TIME),
+                       nvl(SUM(T.TRANS_NUM),0) AS ARN_TRANS_ALL_NUM,
+                       nvl(SUM(T.ALLOW_TRANS_NUM),0) AS ARN_ALLO_NUM,
+                       nvl(SUM(T.REVIEW_TRANS_NUM),0) AS ARN_REVI_NUM,
+                       nvl(SUM(T.CHALLENGE_TRANS_NUM),0) AS ARN_CHAL_NUM,
+                       nvl(SUM(T.DENY_TRANS_NUM),0) AS ARN_DENY_NUM,
+                       SUM(case CHALLENGE_SUCCESSFUL when 'Y' then trans_num else 0 end) AS ARN_ENHAN_SUCC_NUM,
+                       SUM(T.TRANS_NUM) AS ARN_ENHAN_ALL_NUM,
+                       SUM(case CHALLENGE_SUCCESSFUL when 'N' then trans_num else 0 end) AS ARN_ENHAN_FAIL_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION' then trans_num else 0 end) AS ARN_QA_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_QA_SUCC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_QA_FAIL_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC' then trans_num else 0 end) AS ARN_CC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_CC_SUCC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_CC_FAIL_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS' then trans_num else 0 end) AS ARN_SMS_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_SMS_SUCC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_SMS_FAIL_NUM,
+                       SUM(case  when IS_USE_DEVICE = 'Y' then trans_num else 0 end) AS ARN_BIND_FAIL_TRANS,
+                       nvl(SUM(WEB_TRANS_NUM ),0) AS CUT_WEB_TRANS_NUM,
+                       nvl(SUM( MOBILE_TRANS_NUM )-SUM(IPAD_TRANS_NUM),0) AS CUT_MOBI_TRANS_NUM,
+                       nvl(SUM(IPAD_TRANS_NUM),0) AS CUT_IPAD_TRANS_NUM,
+                      '',-- nvl(SUM(REGISTRAR_QA_NUM),0) AS NRU_QA_RES_NUM,--
+                      '',-- num_2_per_util(SUM(REGISTRAR_QA_NUM ),SUM( QA_LOGIN_NUM)) AS NRU_QA_RES_PER,
+
+                       nvl(SUM(QA_LOGIN_NUM),0) AS NRU_QA_REG_NUM,
+                       num_2_per_util(SUM(QA_LOGIN_NUM),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS NRU_QA_REG_PER,
+
+                       nvl(SUM( SMS_LOGIN_NUM),0) AS NRU_SMS_REG_NUM,
+                       num_2_per_util(SUM( SMS_LOGIN_NUM),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS NRU_SMS_REG_PER,
+
+                       nvl(SUM( CC_LOGIN_NUM),0) AS NRU_CC_REG_NUM,
+                       num_2_per_util(SUM( CC_LOGIN_NUM ),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS NRU_CC_REG_PER,
+
+                       NUM_WORKED(SUM(TOTAL_SCORE_RANGE),SUM(TRANS_NUM)) AS ARN_AVG_VAL,
+                       nvl(SUM(CREATE_CUSTOMR_FILE_NUM),0) AS NRU_CST_DOC_NUM,
+                       nvl(SUM(TRANS_NUM),0) AS CUT_ALL_TRANS_NUM
+
+                       FROM  RP_TRANS_LOG_MONTH T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON ;
+
+                       COMMIT;
+
+
+
+                 --所有的去重用户数     
+                       
+                    SELECT COUNT(distinct T.CUSTOMER_ID)  INTO ALL_USER_NUM  FROM RP_BD_DEVICE_CUSTOMER_ID T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON ;    
+                  --所有的去重ip
+                  SELECT COUNT(distinct T.IP_ADDRESS)   INTO ALL_IP_NUM FROM RP_IP_UNIQUE T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON;
+
+                  --所有的去重交易省份
+                  SELECT COUNT(distinct t1.trans_province) INTO ALL_ADDR_NUM FROM  RP_PROVINCE_CUSTOMER_AMOUNT T1 WHERE T1.TRANS_TIME = TRANS_TIME_MIN_MON;
+
+
+              --所有的去重 DEVICE_id
+                SELECT COUNT (distinct K.DEVICE_ID) INTO ALL_DEVICE_NUM  FROM RP_ALL_OF_DEVICE_ID K WHERE K.TRANS_TIME =  TRANS_TIME_MIN_MON ;
+                
+           --绑定设备总数量
+                  SELECT COUNT(DISTINCT K.DEVICE_ID)  INTO V_CMI_BIND_MAC_NUM FROM RP_BD_DEVICE_ID K  WHERE K.TRANS_TIME = TRANS_TIME_MIN_MON;
+/*
+               --认证失败的绑定设备数量1
+                  SELECT COUNT(DISTINCT T.DEVICE_ID) INTO ARN_FAIL_BIND_MAC FROM RP_CHALLENGE_FAIL_BD_DEVICE_ID T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON;
+
+
+                 --Web交易用户数
+                  SELECT COUNT(DISTINCT K.CUSTOMER_ID ) INTO CUT_WEB_USR_NUM FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='WEB' AND K.TRANS_TIME = TRANS_TIME_MIN_MON ;
+                 --MOBILE交易用户数
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID ) INTO CUT_MOBI_USR_NUM FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='MOBILE' AND K.TRANS_TIME = TRANS_TIME_MIN_MON ;
+
+
+                  --IPAD交易用户数
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID ) INTO CUT_IPAD_USR_NUM FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='IPAD' AND K.TRANS_TIME = TRANS_TIME_MIN_MON ;
+
+
+                  
+
+                 --PC绑定数量
+                      SELECT COUNT(DISTINCT K.DEVICE_ID)  INTO CMI_PC_BIND_NUM FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='WEB' AND K.TRANS_TIME = TRANS_TIME_MIN_MON;
+
+                 --MOBILE绑定数量
+                      SELECT COUNT(DISTINCT K.DEVICE_ID)  INTO CMI_MOBI_BIND_NUM FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='MOBILE' AND K.TRANS_TIME = TRANS_TIME_MIN_MON;
+
+
+                   --绑定设备的客户数               
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID) INTO CMI_BIND_CST_NUM FROM  RP_BD_DEVICE_CUSTOMER_ID K WHERE  K.BOUND_DEVICE_OR_NOT='Y'AND K.TRANS_TIME =  TRANS_TIME_MIN_MON;
+
+                   --未绑定设备的客户数                        
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID) INTO CMI_UNBIND_CST_NUM FROM  RP_BD_DEVICE_CUSTOMER_ID K WHERE  K.BOUND_DEVICE_OR_NOT!='Y'AND K.TRANS_TIME =  TRANS_TIME_MIN_MON;
+    */
+
+
+                     UPDATE RP_FIXDATE_SOLOLINE R SET
+                            R.ARN_FAIL_BIND_MAC = (SELECT COUNT(DISTINCT T.DEVICE_ID)  FROM RP_CHALLENGE_FAIL_BD_DEVICE_ID T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON),--认证失败的绑定设备书
+                            R.CCM_CST_IP_NUM = NUM_WORKED(ALL_IP_NUM,ALL_USER_NUM),--每个用户使用的IP地址数量
+                            R.CCM_CST_ADDR_NUM = NUM_WORKED(ALL_ADDR_NUM,ALL_USER_NUM),--每个用户登录的地区数量
+                            R.CCM_CST_MAC_NUM = NUM_WORKED(ALL_DEVICE_NUM,ALL_USER_NUM),--每个用户拥有的设备数量
+                            R.CCM_MAC_IP_NUM = NUM_WORKED(ALL_IP_NUM,ALL_DEVICE_NUM),--每个设备使用的IP地址数量
+                            R.CCM_MAC_ADDR_NUM = NUM_WORKED(ALL_DEVICE_NUM,ALL_ADDR_NUM),--每个设备登录的地区数量
+                            R.CCM_MAC_CST_NUM = NUM_WORKED(ALL_USER_NUM,ALL_DEVICE_NUM),--每个设备使用的用户数量
+                            R.CCM_IP_CST_NUM =NUM_WORKED( ALL_USER_NUM,ALL_IP_NUM),--每个IP地址使用的用户数量
+                            R.CCM_ADDR_CST_NUM =NUM_WORKED(ALL_USER_NUM,ALL_ADDR_NUM),--每个地区使用的用户数量
+                            R.CCM_IP_MAC_NUM = NUM_WORKED(ALL_DEVICE_NUM,ALL_IP_NUM),--每个IP地址使用的设备数量
+                            R.CCM_ADDR_MAC_NUM =NUM_WORKED(ALL_DEVICE_NUM,ALL_ADDR_NUM),--每个地区使用的设备数量
+                            R.CUT_USR_NUM =NUM_WORKED( ( SELECT COUNT(distinct T.CUSTOMER_ID) FROM RP_BD_DEVICE_CUSTOMER_ID T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON  ),1),--总交易用户数
+                            R.CUT_WEB_USR_NUM =NUM_WORKED( (SELECT COUNT(DISTINCT K.CUSTOMER_ID )  FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='WEB' AND K.TRANS_TIME = TRANS_TIME_MIN_MON ),1),--Web交易用户数--
+                            R.CUT_MOBI_USR_NUM = NUM_WORKED(( SELECT COUNT(DISTINCT K.CUSTOMER_ID )  FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='MOBILE' AND K.TRANS_TIME = TRANS_TIME_MIN_MON),1),  --MOBILE交易用户数--
+                            R.CUT_IPAD_USR_NUM = NUM_WORKED(( SELECT COUNT(DISTINCT K.CUSTOMER_ID )  FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='IPAD' AND K.TRANS_TIME = TRANS_TIME_MIN_MON),1),--IPAD交易用户数--
+                            R.CMI_BIND_MAC_NUM =NUM_WORKED((SELECT COUNT(DISTINCT K.DEVICE_ID)   FROM RP_BD_DEVICE_ID K  WHERE K.TRANS_TIME = TRANS_TIME_MIN_MON),1),--绑定设备总数量--
+                            R.CMI_PC_BIND_NUM =NUM_WORKED((SELECT COUNT(DISTINCT K.DEVICE_ID)   FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='WEB' AND K.TRANS_TIME = TRANS_TIME_MIN_MON),1),--PC绑定数量--
+
+                             R.CMI_MOBI_BIND_NUM =NUM_WORKED((SELECT COUNT(DISTINCT K.DEVICE_ID)   FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='MOBILE' AND K.TRANS_TIME = TRANS_TIME_MIN_MON),1),--MOBILE绑定数量--
+                            R.CMI_BIND_CST_NUM =NUM_WORKED(( SELECT COUNT(distinct K.CUSTOMER_ID) FROM RP_BD_DEVICE_CUSTOMER_ID K  WHERE K.BOUND_DEVICE_OR_NOT='Y'AND K.TRANS_TIME =  TRANS_TIME_MIN_MON),1),--绑定设备的客户数--
+                            R.CMI_UNBIND_CST_NUM =NUM_WORKED(( SELECT COUNT(distinct K.CUSTOMER_ID) FROM RP_BD_DEVICE_CUSTOMER_ID K  WHERE K.BOUND_DEVICE_OR_NOT='N'AND K.TRANS_TIME =  TRANS_TIME_MIN_MON),1),--未绑定设备的客户数--
+                            R.CMI_AVG_CST_MAC = NUM_WORKED(V_CMI_BIND_MAC_NUM,ALL_USER_NUM)---平均每个客户绑定的设备数
+                            WHERE R.TRANS_TIME = TRANS_TIME_MIN_MON;
+                            commit;
+                         END IF;
+
+       ----------------------==================================------------------------
+       TRANS_TIME_MIN_MON:=ADD_MONTHS(TRANS_TIME_MIN_MON,1);
+     END LOOP;
+ ELSE
+
+             if F_S_TRANS_TIME IS NOT NULL THEN
+
+             while TIME_SCY >  ADD_MONTHS(TIME_TODAY,-3)
+             loop
+                 TIME_SCY := ADD_MONTHS(TIME_SCY,-1);
+
+                 IF TIME_SCY <= MAX_TIME
+                   THEN
+                     SELECT COUNT(1) INTO IS_NULL FROM RP_TRANS_LOG_MONTH T WHERE  T.TRANS_TIME = TIME_SCY;
+                   if IS_NULL > 0 then
+                   --------------------------------
+                   SELECT
+                                 P.ARN_TRANS_ALL_NUM,--总交易量
+                                P.ARN_ALLO_NUM,--ALLOW交易量
+                                P.ARN_REVI_NUM,--REVIEW交易量
+                                P.ARN_CHAL_NUM,--CHALLENGE交易量
+                                 P.ARN_DENY_NUM,--DENY交易量
+                                 P.ARN_ENHAN_SUCC_NUM,--加强认证成功交易量
+                                 P.ARN_ENHAN_ALL_NUM,--加强认证交易量
+                                 P.ARN_ENHAN_FAIL_NUM,--加强认证失败交易量
+                                 P.ARN_QA_NUM,--QA交易量
+                                 P.ARN_QA_SUCC_NUM,--QA成功交易量
+                                 P.ARN_QA_FAIL_NUM,--QA失败交易量
+                                 P.ARN_CC_NUM,--CC交易量
+                                 P.ARN_CC_SUCC_NUM,--CC成功交易量
+                                P. ARN_CC_FAIL_NUM,--CC失败交易量
+                                 P.ARN_SMS_NUM,--SMS交易量
+                                P. ARN_SMS_SUCC_NUM,--SMS成功交易量
+                                 P.ARN_SMS_FAIL_NUM,--SMS失败交易量
+                                 P.ARN_BIND_FAIL_TRANS,--绑定设备认证失败交易笔数
+                                 'A',
+                                   P.ARN_AVG_VAL,--平均风险分值
+                                     'A',
+                                'A',
+                              'A',
+                              'A',
+                              'A',
+                              'A',
+                                 P.CUT_WEB_TRANS_NUM,--Web交易用户数
+                                 P.CUT_MOBI_TRANS_NUM,--MOBILE交易用户数
+                                 P.CUT_IPAD_TRANS_NUM,--IPAD交易用户数
+                                   P.CUT_ALL_TRANS_NUM,--总交易量2
+                                   'A',
+                              'A',
+                              'A',
+                              'A',
+
+                                 P.NRU_QA_REG_NUM,--QA注册数量
+                                P.NRU_QA_REG_PER,--QA注册百分比
+                                 P.NRU_SMS_REG_NUM,--SMS注册数量
+                                P.NRU_SMS_REG_PER,--SMS注册百分比
+                                 P.NRU_CC_REG_NUM,--CC注册数量
+                                 P.NRU_CC_REG_PER,--CC注册百分比
+                                   '',-- P.NRU_QA_RES_NUM,--重置 QA数量
+
+                                '',-- P.NRU_QA_RES_PER,--重置 QA百分比
+
+                                 P.NRU_CST_DOC_NUM,--建立客户档案数量
+                                 'A',
+                              'A',
+                              'A',
+                              'A',
+                              'A',
+                                'A',
+                              'A',
+                              'A',
+                              'A',
+                              'A',
+                              P.TRANS_TIME
+
+
+                             INTO VAR_RP_FIXDATE_SOLOLINE
+
+                    FROM (  SELECT
+                               SUM(T.TRANS_NUM) AS  ARN_TRANS_ALL_NUM,--总交易量
+                               SUM(T.ALLOW_TRANS_NUM) AS ARN_ALLO_NUM,--ALLOW交易量
+                               SUM(T.REVIEW_TRANS_NUM)AS   ARN_REVI_NUM,--REVIEW交易量
+                               SUM(T.CHALLENGE_TRANS_NUM) AS  ARN_CHAL_NUM,--CHALLENGE交易量
+                               SUM(T.DENY_TRANS_NUM) AS  ARN_DENY_NUM,--DENY交易量
+                               SUM(case CHALLENGE_SUCCESSFUL when 'Y' then trans_num else 0 end) AS  ARN_ENHAN_SUCC_NUM,--加强认证成功交易量
+                               SUM(T.TRANS_NUM) AS ARN_ENHAN_ALL_NUM,--加强认证交易量
+                               SUM(case CHALLENGE_SUCCESSFUL when 'N' then trans_num else 0 end) AS  ARN_ENHAN_FAIL_NUM,--加强认证失败交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION' then trans_num else 0 end) AS  ARN_QA_NUM,--QA交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_QA_SUCC_NUM,--QA成功交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS  ARN_QA_FAIL_NUM,--QA失败交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC' then trans_num else 0 end) AS  ARN_CC_NUM,--CC交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_CC_SUCC_NUM,--CC成功交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_CC_FAIL_NUM,--CC失败交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS' then trans_num else 0 end) AS ARN_SMS_NUM,--SMS交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS  ARN_SMS_SUCC_NUM,--SMS成功交易量
+                               SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS  ARN_SMS_FAIL_NUM,--SMS失败交易量
+                               SUM(case  when IS_USE_DEVICE = 'Y' then trans_num else 0 end) AS ARN_BIND_FAIL_TRANS,--绑定设备认证失败交易笔数
+                               SUM( WEB_TRANS_NUM) AS  CUT_WEB_TRANS_NUM,--Web交易用户数
+                               SUM( MOBILE_TRANS_NUM)-SUM( IPAD_TRANS_NUM) AS CUT_MOBI_TRANS_NUM,--MOBILE交易用户数
+                               SUM( IPAD_TRANS_NUM) AS CUT_IPAD_TRANS_NUM,--IPAD交易用户数
+                              '',-- SUM( REGISTRAR_QA_NUM ) AS NRU_QA_RES_NUM,--重置 QA数量
+                              '',-- num_2_per_util(SUM(REGISTRAR_QA_NUM), SUM( QA_LOGIN_NUM )) AS NRU_QA_RES_PER,--重置 QA百分比
+
+                               SUM( QA_LOGIN_NUM ) AS NRU_QA_REG_NUM,--QA注册数量
+                               num_2_per_util(SUM( QA_LOGIN_NUM),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS  NRU_QA_REG_PER,--QA注册百分比
+
+                               SUM(SMS_LOGIN_NUM) AS  NRU_SMS_REG_NUM,--SMS注册数量
+                               num_2_per_util(SUM( SMS_LOGIN_NUM ),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS   NRU_SMS_REG_PER,--SMS注册百分比
+
+                               SUM( CC_LOGIN_NUM) AS NRU_CC_REG_NUM,--CC注册数量
+                               num_2_per_util(SUM( CC_LOGIN_NUM ),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS  NRU_CC_REG_PER,--CC注册百分比
+
+                               NUM_WORKED(SUM(TOTAL_SCORE_RANGE),SUM(TRANS_NUM)) AS ARN_AVG_VAL,--平均风险分值
+                               SUM(CREATE_CUSTOMR_FILE_NUM) AS NRU_CST_DOC_NUM,--建立客户档案数量
+                               SUM(TRANS_NUM) CUT_ALL_TRANS_NUM,--总交易量2
+                               MAX(T.TRANS_TIME) AS TRANS_TIME
+
+                               FROM  RP_TRANS_LOG_MONTH T WHERE T.TRANS_TIME = TIME_SCY ) P    ;
+
+
+                   ---------------------------------
+
+
+                   --------------------------------
+
+                      UPDATE RP_FIXDATE_SOLOLINE R SET
+                                R.ARN_TRANS_ALL_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_TRANS_ALL_NUM,--总交易量
+                                R.ARN_ALLO_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_ALLO_NUM,--ALLOW交易量
+                                R.ARN_REVI_NUM =VAR_RP_FIXDATE_SOLOLINE.ARN_REVI_NUM ,--REVIEW交易量
+                                R.ARN_CHAL_NUM=VAR_RP_FIXDATE_SOLOLINE.ARN_CHAL_NUM,--CHALLENGE交易量
+                                R.ARN_DENY_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_DENY_NUM,--DENY交易量
+                                R.ARN_ENHAN_SUCC_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_ENHAN_SUCC_NUM,--加强认证成功交易量
+                                R.ARN_ENHAN_ALL_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_ENHAN_ALL_NUM,--加强认证交易量
+                                 R.ARN_ENHAN_FAIL_NUM= VAR_RP_FIXDATE_SOLOLINE.ARN_ENHAN_FAIL_NUM, --加强认证失败交易量
+                                 R.ARN_QA_NUM =VAR_RP_FIXDATE_SOLOLINE.ARN_QA_NUM,--QA交易量
+                                R.ARN_QA_SUCC_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_QA_SUCC_NUM ,--QA成功交易量
+                                R.ARN_QA_FAIL_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_QA_FAIL_NUM,--QA失败交易量
+                                R.ARN_CC_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_CC_NUM,--CC交易量
+                                R.ARN_CC_SUCC_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_CC_SUCC_NUM,--CC成功交易量
+                                R.ARN_CC_FAIL_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_CC_FAIL_NUM,--CC失败交易量
+                                R.ARN_SMS_NUM=VAR_RP_FIXDATE_SOLOLINE.ARN_SMS_NUM,--SMS交易量
+                                R.ARN_SMS_SUCC_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_SMS_SUCC_NUM,--SMS成功交易量
+                                R.ARN_SMS_FAIL_NUM = VAR_RP_FIXDATE_SOLOLINE.ARN_SMS_FAIL_NUM,--SMS失败交易量
+                                R.ARN_BIND_FAIL_TRANS = VAR_RP_FIXDATE_SOLOLINE.ARN_BIND_FAIL_TRANS,--绑定设备认证失败交易笔数
+                                 R.CUT_WEB_TRANS_NUM = VAR_RP_FIXDATE_SOLOLINE.CUT_WEB_TRANS_NUM,--Web交易用户数
+                                R.CUT_MOBI_TRANS_NUM = VAR_RP_FIXDATE_SOLOLINE.CUT_MOBI_TRANS_NUM,--MOBILE交易用户数
+                                R.CUT_IPAD_TRANS_NUM = VAR_RP_FIXDATE_SOLOLINE.CUT_IPAD_TRANS_NUM,--IPAD交易用户数
+                               -- R.NRU_QA_RES_NUM = VAR_RP_FIXDATE_SOLOLINE.NRU_QA_RES_NUM,--重置 QA数量
+                               -- R.NRU_QA_RES_PER = VAR_RP_FIXDATE_SOLOLINE.NRU_QA_RES_PER,--重置 QA百分比
+                                R.NRU_QA_REG_NUM = VAR_RP_FIXDATE_SOLOLINE.NRU_QA_REG_NUM,--QA注册数量
+                                R.NRU_QA_REG_PER=VAR_RP_FIXDATE_SOLOLINE.NRU_QA_REG_PER,--QA注册百分比
+                                R.NRU_SMS_REG_NUM = VAR_RP_FIXDATE_SOLOLINE.NRU_SMS_REG_NUM,--SMS注册数量
+                                R.NRU_SMS_REG_PER = VAR_RP_FIXDATE_SOLOLINE.NRU_SMS_REG_PER,--SMS注册百分比
+                                R.NRU_CC_REG_NUM = VAR_RP_FIXDATE_SOLOLINE.NRU_CC_REG_NUM,--CC注册数量
+                                 R.NRU_CC_REG_PER = VAR_RP_FIXDATE_SOLOLINE.NRU_CC_REG_PER,--CC注册百分比
+                                R.ARN_AVG_VAL = VAR_RP_FIXDATE_SOLOLINE.ARN_AVG_VAL,--平均风险分值
+                                R.NRU_CST_DOC_NUM = VAR_RP_FIXDATE_SOLOLINE.NRU_CST_DOC_NUM,--建立客户档案数量
+                                R.CUT_ALL_TRANS_NUM = VAR_RP_FIXDATE_SOLOLINE.CUT_ALL_TRANS_NUM--总交易量2
+
+                            WHERE R.TRANS_TIME = TIME_SCY;
+                            commit ;
+                            end if;
+
+                   ELSE
+
+                        SELECT COUNT(1) INTO IS_NULL_2 FROM RP_TRANS_LOG_MONTH T WHERE  T.TRANS_TIME = TIME_SCY;
+                        IF IS_NULL_2 > 0 THEN
+                         INSERT INTO RP_FIXDATE_SOLOLINE(
+                            TRANS_TIME,--交易时间
+                            ARN_TRANS_ALL_NUM,--总交易量
+                            ARN_ALLO_NUM,--ALLOW交易量
+                            ARN_REVI_NUM,--REVIEW交易量
+                            ARN_CHAL_NUM,--CHALLENGE交易量
+                            ARN_DENY_NUM,--DENY交易量
+                            ARN_ENHAN_SUCC_NUM,--加强认证成功交易量
+                            ARN_ENHAN_ALL_NUM,--加强认证交易量
+                            ARN_ENHAN_FAIL_NUM,--加强认证失败交易量
+                            ARN_QA_NUM,--QA交易量
+                            ARN_QA_SUCC_NUM,--QA成功交易量
+                            ARN_QA_FAIL_NUM,--QA失败交易量
+                            ARN_CC_NUM,--CC交易量
+                            ARN_CC_SUCC_NUM,--CC成功交易量
+                            ARN_CC_FAIL_NUM,--CC失败交易量
+                            ARN_SMS_NUM,--SMS交易量
+                            ARN_SMS_SUCC_NUM,--SMS成功交易量
+                            ARN_SMS_FAIL_NUM,--SMS失败交易量
+                            ARN_BIND_FAIL_TRANS,--绑定设备认证失败交易笔数
+                            CUT_WEB_TRANS_NUM,--Web交易用户数
+                            CUT_MOBI_TRANS_NUM,--MOBILE交易用户数
+                            CUT_IPAD_TRANS_NUM,--IPAD交易用户数
+                            NRU_QA_RES_NUM,--重置 QA数量
+                            NRU_QA_RES_PER,--重置 QA百分比
+                            NRU_QA_REG_NUM,--QA注册数量
+                            NRU_QA_REG_PER,--QA注册百分比
+                            NRU_SMS_REG_NUM,--SMS注册数量
+                            NRU_SMS_REG_PER,--SMS注册百分比
+                            NRU_CC_REG_NUM,--CC注册数量
+                            NRU_CC_REG_PER,--CC注册百分比
+                            ARN_AVG_VAL,--平均风险分值
+                            NRU_CST_DOC_NUM,--建立客户档案数量
+                            CUT_ALL_TRANS_NUM--总交易量2
+
+                            )
+                      SELECT
+                       MAX(T.TRANS_TIME),
+                       nvl(SUM(T.TRANS_NUM),0) AS ARN_TRANS_ALL_NUM,
+                       nvl(SUM(T.ALLOW_TRANS_NUM),0) AS ARN_ALLO_NUM,
+                       nvl(SUM(T.REVIEW_TRANS_NUM),0) AS ARN_REVI_NUM,
+                       nvl(SUM(T.CHALLENGE_TRANS_NUM),0) AS ARN_CHAL_NUM,
+                       nvl(SUM(T.DENY_TRANS_NUM),0) AS ARN_DENY_NUM,
+                       SUM(case CHALLENGE_SUCCESSFUL when 'Y' then trans_num else 0 end) AS ARN_ENHAN_SUCC_NUM,
+                       SUM(T.TRANS_NUM) AS ARN_ENHAN_ALL_NUM,
+                       SUM(case CHALLENGE_SUCCESSFUL when 'N' then trans_num else 0 end) AS ARN_ENHAN_FAIL_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION' then trans_num else 0 end) AS ARN_QA_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_QA_SUCC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'QUESTION'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_QA_FAIL_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC' then trans_num else 0 end) AS ARN_CC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_CC_SUCC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'CCC'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_CC_FAIL_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS' then trans_num else 0 end) AS ARN_SMS_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS'and CHALLENGE_SUCCESSFUL = 'Y' then trans_num else 0 end) AS ARN_SMS_SUCC_NUM,
+                       SUM(case  when CHALLENGE_AUTH_METHOD = 'SMS'and CHALLENGE_SUCCESSFUL = 'N' then trans_num else 0 end) AS ARN_SMS_FAIL_NUM,
+                       SUM(case  when IS_USE_DEVICE = 'Y' then trans_num else 0 end) AS ARN_BIND_FAIL_TRANS,
+                       nvl(SUM(WEB_TRANS_NUM ),0) AS CUT_WEB_TRANS_NUM,
+                       nvl(SUM( MOBILE_TRANS_NUM ),0) AS CUT_MOBI_TRANS_NUM,
+                       nvl(SUM(IPAD_TRANS_NUM),0) AS CUT_IPAD_TRANS_NUM,
+                      '',-- nvl(SUM(REGISTRAR_QA_NUM),0) AS NRU_QA_RES_NUM,--
+                      '',-- num_2_per_util(SUM(REGISTRAR_QA_NUM ),SUM( QA_LOGIN_NUM)) AS NRU_QA_RES_PER,
+
+                       nvl(SUM(QA_LOGIN_NUM),0) AS NRU_QA_REG_NUM,
+                       num_2_per_util(SUM(QA_LOGIN_NUM),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS NRU_QA_REG_PER,
+
+                       nvl(SUM( SMS_LOGIN_NUM),0) AS NRU_SMS_REG_NUM,
+                       num_2_per_util(SUM( SMS_LOGIN_NUM),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS NRU_SMS_REG_PER,
+
+                       nvl(SUM( CC_LOGIN_NUM),0) AS NRU_CC_REG_NUM,
+                       num_2_per_util(SUM( CC_LOGIN_NUM ),SUM( QA_LOGIN_NUM)+SUM( SMS_LOGIN_NUM )+SUM( CC_LOGIN_NUM )) AS NRU_CC_REG_PER,
+
+                       NUM_WORKED(SUM(TOTAL_SCORE_RANGE),SUM(TRANS_NUM)) AS ARN_AVG_VAL,
+                       nvl(SUM(CREATE_CUSTOMR_FILE_NUM),0) AS NRU_CST_DOC_NUM,
+                       nvl(SUM(TRANS_NUM),0) AS CUT_ALL_TRANS_NUM
+
+                       FROM  RP_TRANS_LOG_MONTH T WHERE T.TRANS_TIME = TIME_SCY ;
+
+                       COMMIT;
+
+
+
+                 --所有的去重用户数
+
+               SELECT COUNT(distinct T.CUSTOMER_ID) INTO ALL_USER_NUM FROM RP_BD_DEVICE_CUSTOMER_ID T WHERE T.TRANS_TIME = TIME_SCY ;
+                  --所有的去重ip
+                  SELECT COUNT(distinct T.IP_ADDRESS)   INTO ALL_IP_NUM FROM RP_IP_UNIQUE T WHERE T.TRANS_TIME = TIME_SCY;
+
+
+                  --所有的去重交易省份
+                  SELECT COUNT(distinct t1.trans_province) INTO ALL_ADDR_NUM FROM  RP_PROVINCE_CUSTOMER_AMOUNT T1 WHERE T1.TRANS_TIME = TIME_SCY;
+
+              --所有的去重 DEVICE_id
+              
+                SELECT COUNT (distinct K.DEVICE_ID) INTO ALL_DEVICE_NUM  FROM RP_ALL_OF_DEVICE_ID K WHERE K.TRANS_TIME =  TIME_SCY ;
+                
+                   --绑定设备总数量
+                     SELECT COUNT(DISTINCT K.DEVICE_ID)  INTO V_CMI_BIND_MAC_NUM FROM RP_BD_DEVICE_ID K  WHERE K.TRANS_TIME = TIME_SCY;
+
+--------------------------------------------------
+/*
+               --认证失败的绑定设备数量1
+                  SELECT COUNT(DISTINCT T.DEVICE_ID) INTO ARN_FAIL_BIND_MAC FROM RP_CHALLENGE_FAIL_BD_DEVICE_ID T WHERE T.TRANS_TIME = TIME_SCY;
+
+
+                 --Web交易用户数
+                  SELECT COUNT(DISTINCT K.CUSTOMER_ID ) INTO CUT_WEB_USR_NUM FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='WEB' AND K.TRANS_TIME = TIME_SCY ;
+                 --MOBILE交易用户数
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID ) INTO CUT_MOBI_USR_NUM FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='MOBILE' AND K.TRANS_TIME = TIME_SCY ;
+
+                  --IPAD交易用户数
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID ) INTO CUT_IPAD_USR_NUM FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='IPAD' AND K.TRANS_TIME = TIME_SCY ;
+
+
+                
+                 --PC绑定数量
+                      SELECT COUNT(DISTINCT K.DEVICE_ID)  INTO CMI_PC_BIND_NUM FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='WEB' AND K.TRANS_TIME = TIME_SCY;
+
+                 --MOBILE绑定数量
+                      SELECT COUNT(DISTINCT K.DEVICE_ID)  INTO CMI_MOBI_BIND_NUM FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='MOBILE' AND K.TRANS_TIME = TIME_SCY;
+
+                   --绑定设备的客户数
+                   
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID) INTO CMI_BIND_CST_NUM FROM  RP_BD_DEVICE_CUSTOMER_ID K WHERE  K.BOUND_DEVICE_OR_NOT='Y'AND K.TRANS_TIME =  TIME_SCY;
+
+                 
+
+                   --未绑定设备的客户数
+                   SELECT COUNT(DISTINCT K.CUSTOMER_ID) INTO CMI_UNBIND_CST_NUM FROM  RP_BD_DEVICE_CUSTOMER_ID K WHERE  K.BOUND_DEVICE_OR_NOT!='Y'AND K.TRANS_TIME =  TIME_SCY;
+
+                 */
+                
+
+
+                       UPDATE RP_FIXDATE_SOLOLINE R SET
+                            R.ARN_FAIL_BIND_MAC = (SELECT COUNT(DISTINCT T.DEVICE_ID)  FROM RP_CHALLENGE_FAIL_BD_DEVICE_ID T WHERE T.TRANS_TIME = TIME_SCY),--认证失败的绑定设备书
+                            R.CCM_CST_IP_NUM = NUM_WORKED(ALL_IP_NUM,ALL_USER_NUM),--每个用户使用的IP地址数量
+                            R.CCM_CST_ADDR_NUM = NUM_WORKED(ALL_ADDR_NUM,ALL_USER_NUM),--每个用户登录的地区数量
+                            R.CCM_CST_MAC_NUM = NUM_WORKED(ALL_DEVICE_NUM,ALL_USER_NUM),--每个用户拥有的设备数量
+                            R.CCM_MAC_IP_NUM = NUM_WORKED(ALL_IP_NUM,ALL_DEVICE_NUM),--每个设备使用的IP地址数量
+                            R.CCM_MAC_ADDR_NUM = NUM_WORKED(ALL_DEVICE_NUM,ALL_ADDR_NUM),--每个设备登录的地区数量
+                            R.CCM_MAC_CST_NUM = NUM_WORKED(ALL_USER_NUM,ALL_DEVICE_NUM),--每个设备使用的用户数量
+                            R.CCM_IP_CST_NUM =NUM_WORKED( ALL_USER_NUM,ALL_IP_NUM),--每个IP地址使用的用户数量
+                            R.CCM_ADDR_CST_NUM =NUM_WORKED(ALL_USER_NUM,ALL_ADDR_NUM),--每个地区使用的用户数量
+                            R.CCM_IP_MAC_NUM = NUM_WORKED(ALL_DEVICE_NUM,ALL_IP_NUM),--每个IP地址使用的设备数量
+                            R.CCM_ADDR_MAC_NUM =NUM_WORKED(ALL_DEVICE_NUM,ALL_ADDR_NUM),--每个地区使用的设备数量
+                            R.CUT_USR_NUM =NUM_WORKED( ( SELECT COUNT(distinct T.CUSTOMER_ID) FROM RP_BD_DEVICE_CUSTOMER_ID T WHERE T.TRANS_TIME = TIME_SCY  ),1),--总交易用户数
+                            R.CUT_WEB_USR_NUM =NUM_WORKED( (SELECT COUNT(DISTINCT K.CUSTOMER_ID )  FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='WEB' AND K.TRANS_TIME = TIME_SCY ),1),--Web交易用户数--
+                            R.CUT_MOBI_USR_NUM = NUM_WORKED(( SELECT COUNT(DISTINCT K.CUSTOMER_ID )  FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='MOBILE' AND K.TRANS_TIME = TIME_SCY),1),  --MOBILE交易用户数--
+                            R.CUT_IPAD_USR_NUM = NUM_WORKED(( SELECT COUNT(DISTINCT K.CUSTOMER_ID )  FROM RP_TRANS_DITCH_CUSTOMER_ID K WHERE K.TRANS_DITCH='IPAD' AND K.TRANS_TIME = TIME_SCY),1),--IPAD交易用户数--
+                            R.CMI_BIND_MAC_NUM =NUM_WORKED((SELECT COUNT(DISTINCT K.DEVICE_ID)   FROM RP_BD_DEVICE_ID K  WHERE K.TRANS_TIME = TIME_SCY),1),--绑定设备总数量--
+                            R.CMI_PC_BIND_NUM =NUM_WORKED((SELECT COUNT(DISTINCT K.DEVICE_ID)   FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='WEB' AND K.TRANS_TIME = TIME_SCY),1),--PC绑定数量--
+
+                             R.CMI_MOBI_BIND_NUM =NUM_WORKED((SELECT COUNT(DISTINCT K.DEVICE_ID)   FROM RP_BD_DEVICE_ID K  WHERE K.DEVICE_TYPE='MOBILE' AND K.TRANS_TIME = TIME_SCY),1),--MOBILE绑定数量--
+                            R.CMI_BIND_CST_NUM =NUM_WORKED(( SELECT COUNT(distinct K.CUSTOMER_ID) FROM RP_BD_DEVICE_CUSTOMER_ID K  WHERE K.BOUND_DEVICE_OR_NOT='Y'AND K.TRANS_TIME =  TIME_SCY),1),--绑定设备的客户数--
+                            R.CMI_UNBIND_CST_NUM =NUM_WORKED(( SELECT COUNT(distinct K.CUSTOMER_ID) FROM RP_BD_DEVICE_CUSTOMER_ID K  WHERE K.BOUND_DEVICE_OR_NOT='N'AND K.TRANS_TIME =  TIME_SCY),1),--未绑定设备的客户数--
+                            R.CMI_AVG_CST_MAC = NUM_WORKED(V_CMI_BIND_MAC_NUM,ALL_USER_NUM)---平均每个客户绑定的设备数
+                            WHERE R.TRANS_TIME = TIME_SCY;
+                            commit;
+                         END IF;
+                    END IF;
+                    commit;
+
+             end loop;
+            END IF;
+   END IF;
+
+ EXCEPTION
+           WHEN OTHERS
+           THEN
+              ROLLBACK;
+               /*操作失败后插入日志记录*/
+               INSERT_COLLECT_DATA_LOG_4_FIX(
+                   VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+                  'GET_DATA_2_FIXDATE_SOLOLINE_T', --PROC_NAME 存储过程名称
+                  'rp_trans_log_month--',  --FROM_TABLE 来源表
+                  '',  --TO_TABLE 目标表
+                  SYSDATE,        --DATA_RANGE 数据范围
+                  TIME_SCY,        --DATA_BEGIN_TIME 数据开始时间
+                  TIME_SCY          --DATA_END_TIME 数据开始时间
+                   );
+
+             RETURN;
+
+END GET_DATA_2_FIXDATE_SOLOLINE_T;

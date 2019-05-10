@@ -1,0 +1,4 @@
+﻿注释掉“渐变”功能：295
+<!-- 						<input id="mycoloraaa" name="mycoloraaa" type="hidden"></br> -->
+<%-- 						<BOC:I18N name="gradient"/><input id="alpha" name="alpha" type="checkbox">  --%>
+	

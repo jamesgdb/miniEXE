@@ -1,0 +1,46 @@
+﻿truncate table  RP_CHALLENGE_FAIL_BD_DEVICE_ID;
+truncate table  RP_BD_DEVICE_ID;
+truncate table  RP_BD_DEVICE_CUSTOMER_ID;
+truncate table  RP_TRANS_DITCH_CUSTOMER_ID;
+truncate table  RP_USERAMOUNT_PROVINCE_DITCH_C;
+truncate table  RP_ALL_OF_DEVICE_ID;
+truncate table  RP_DEVICE_ID_IP_TRANS_PRO;
+truncate table  RP_IP_UNIQUE;
+truncate table  RP_COUNT_DIVICE_AMOUNT;
+truncate table  RP_COUNT_USER_AMOUNT;
+truncate table  RP_CUSTOMER_ID_IP_TRANS_PRO;
+truncate table  RP_PROVINCE_CUSTOMER_AMOUNT;
+truncate table  RP_PROVINCE_DITCH_DEVICEID;
+truncate table  RP_PROVINCE_DEVICEID;
+
+truncate table  RP_ERR_LOST_DETAIL;
+truncate table   RP_COMFIRMED_EVENT_DETAIL;
+
+truncate table   rp_trans_log_minute;
+truncate table   rp_trans_log_hour;
+truncate table   rp_trans_log_day;
+truncate table   rp_trans_log_week;
+truncate table   rp_trans_log_month;
+truncate table   rp_trans_log_quarter;
+truncate table   rp_trans_log_halfyear;
+truncate table   rp_trans_log_year;
+
+truncate table  rp_fixdate_sololine;
+truncate table  rp_auth_method_and_result;
+truncate table  device_risk_information;
+truncate table  rp_client_behave_als;
+truncate table  ever_province_information;
+
+
+truncate table RP_COLLECT_DATA_LOG;
+
+truncate table TEST;
+
+
+
+
+UPDATE EVENT_LOG_REALTIME T SET T.HAS_USED='N' ;
+
+
+
+

@@ -1,0 +1,8 @@
+﻿oslevel
+进入Websphere的bin目录：./versionInfo.sh查看版本
+df -m查看硬盘使用
+nmon查看进程、硬盘等
+
+
+查看cpu使用情况：vmstat
+查看当前路径：pwd

@@ -1,0 +1,21 @@
+﻿在wife类上面增加@entity
+之后在id上面增加 @Id
+				@GeneratedValue
+				public int getWife_id() {
+					return wife_id;
+				}
+----------------------------------------------
+在husband类上面增加@entity
+在husband的id上增加@Id
+				   @GeneratedValue
+				   public int getHus_id() {
+					return hus_id;
+				  }
+在private Wife wife;上面增加
+       @OneToOne
+	public Wife getWife() {
+		return wife;
+	}
+			  
+-------------------------------------------
+在save的时候要先save wife在save  husband

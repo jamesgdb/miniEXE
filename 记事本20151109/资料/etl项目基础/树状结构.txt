@@ -1,0 +1,78 @@
+﻿writeContent(convertToJson(list));
+---------------------------------------------------
+
+
+$(function(){
+	var setting = {
+		data: {
+			simpleData: {
+				enable: true,
+				idKey: "themeId",
+				pIdKey: "parentThemeId"
+			},
+			keep: {
+				parent: true,
+				leaf:true
+			},
+			key: {
+				name: "themeName"
+			}
+		}
+	};
+	
+	$.ajax({
+		 cache:false,
+		 type: 'post',
+		 dataType: 'text',
+		 url: "${pageContext.request.contextPath}/dmModelInstall_getThemeInfo.action?modelInstallId=${modelInstallId}",
+		 error: function () {
+				messager.alert( "主题信息请求失败，请联系管理员！","error");
+		 },
+		 success:function(data){
+			 var zNodes = eval(data);
+			 alert("data==="+data);
+			 $.fn.zTree.init($("#ThemeTree"),setting,zNodes);
+			//展开所有节点
+			 var treeObj = $.fn.zTree.getZTreeObj("ThemeTree");
+			 treeObj.expandAll(true);
+		 }
+	});
+	
+});
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ [DmTheme [organ='VP', themeName='整合层', ], DmTheme [organ='VP', themeName='表内业务', ], DmTheme [organ='VP', themeName='定期存款', ], DmTheme [organ='VP', themeName='活期存款', ], DmTheme [organ='VP', themeName='零售贷款', ], DmTheme [organ='VP', themeName='对公贷款', ], DmTheme [organ='VP', themeName='票据', ], DmTheme [organ='VP', themeName='同业1', ], DmTheme [organ='VP', themeName='同业2', ], DmTheme [organ='VP', themeName='同业3', ], DmTheme [organ='VP', themeName='同业4', ]]
+ 
+ 
+ 
+ 
+ [{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"e76a5576ee91431db2fa58f89753134a","isLeaf":"0","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"整合层","organ":"VP","parentThemeId":"-1","pid":"-1","themeDescn":"","themeEname":"","themeId":"e76a5576ee91431db2fa58f89753134a","themeLevel":0,"themeName":"整合层","themeSeq":0,"themeShort":"","themeType":"1"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"c7c56a6a9e83427eaff83ddb9d2d272b","isLeaf":"0","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"表内业务","organ":"VP","parentThemeId":"e76a5576ee91431db2fa58f89753134a","pid":"e76a5576ee91431db2fa58f89753134a","themeDescn":"","themeEname":"","themeId":"c7c56a6a9e83427eaff83ddb9d2d272b","themeLevel":1,"themeName":"表内业务","themeSeq":0,"themeShort":"","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"05690c149515495c8b89b713320cada8","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"定期存款","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"个人定期存款、单位定期存款","themeEname":"Time Deposit","themeId":"05690c149515495c8b89b713320cada8","themeLevel":2,"themeName":"定期存款","themeSeq":0,"themeShort":"TD","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"7406764be06d49f786bda4d8734995ed","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"活期存款","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"活期存款x","themeEname":"Demand Deposit","themeId":"7406764be06d49f786bda4d8734995ed","themeLevel":2,"themeName":"活期存款","themeSeq":1,"themeShort":"DD","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"308006d04b9d4b3299566b68e43592e2","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"零售贷款","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"零售贷款","themeEname":"Retail Loan","themeId":"308006d04b9d4b3299566b68e43592e2","themeLevel":2,"themeName":"零售贷款","themeSeq":2,"themeShort":"CL","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"f3c9d6b8de284078a976ab4790ec1f52","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"对公贷款","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"对公贷款x","themeEname":"Public Loans","themeId":"f3c9d6b8de284078a976ab4790ec1f52","themeLevel":2,"themeName":"对公贷款","themeSeq":3,"themeShort":"PL","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"19bdb4df349f4ecb979f7f8718979329","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"票据","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"票据","themeEname":"Bill","themeId":"19bdb4df349f4ecb979f7f8718979329","themeLevel":2,"themeName":"票据","themeSeq":4,"themeShort":"BI","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"52988ace2b4247918008193616b0a7dc","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"同业1","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"同业1x","themeEname":"Trade","themeId":"52988ace2b4247918008193616b0a7dc","themeLevel":2,"themeName":"同业1","themeSeq":5,"themeShort":"TR","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"7c18b510f2604bc08ff50b45d382080d","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"同业2","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"同业2x","themeEname":"Trade","themeId":"7c18b510f2604bc08ff50b45d382080d","themeLevel":2,"themeName":"同业2","themeSeq":6,"themeShort":"TR","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"79a4b8070e5a400fa04b330a8f8f2a68","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"同业3","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"同业3x","themeEname":"Trade","themeId":"79a4b8070e5a400fa04b330a8f8f2a68","themeLevel":2,"themeName":"同业3","themeSeq":7,"themeShort":"TR","themeType":"2"},{"createdTm":"2014-04-02 11:19:43","creater":"sysadmin","createrName":"超级管理员","customFlg":"0","id":"42f9d14ee76e4b6aa09b72a00d960ae2","isLeaf":"1","modelId":"d64f33e8520647749cdc15e8b2062c53","modifiedTm":"2014-04-02 11:19:43","modifier":"sysadmin","modifierName":"超级管理员","name":"同业4","organ":"VP","parentThemeId":"c7c56a6a9e83427eaff83ddb9d2d272b","pid":"c7c56a6a9e83427eaff83ddb9d2d272b","themeDescn":"同业4x","themeEname":"Trade","themeId":"42f9d14ee76e4b6aa09b72a00d960ae2","themeLevel":2,"themeName":"同业4","themeSeq":8,"themeShort":"TR","themeType":"2"}]
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

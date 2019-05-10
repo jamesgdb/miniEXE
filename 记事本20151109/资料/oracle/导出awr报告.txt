@@ -1,0 +1,5 @@
+﻿   @?/rdbms/admin/awrrpt          --导出awr报告 　
+       @?/rdbms/admin/awrrpt          --导出awr报告
+       
+       配置路径在.profle中  export ORACLE_BASE=/oracle/app/oracle
+       访问：cd $ORACLE_BASE

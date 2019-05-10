@@ -1,0 +1,270 @@
+﻿如果是此条数据第一次用（INPUT_REDO_TIMES = 0），那么就往日志表里面插数据，如果超过一次那么就去日志表里面更新这表数据
+同时还执行get_data_from_day_2_month, get_data_from_day_2_week, get_data_from_halfyear_2_year, get_data_from_hour_2_day, 
+CREATE OR REPLACE PROCEDURE BATCH_TRANSFOR_DATA(
+      INPUT_TODAY IN VARCHAR2,
+      INPUT_RECORD_ID IN VARCHAR2,
+      INPUT_REDO_TIMES IN INTEGER
+)
+AS
+ VAR_INT_FLAG INTEGER ;--标示
+ VAR_SYSTIME VARCHAR(30);--系统时间
+ VAR_TOTAL_RECORD_ID VARCHAR(30);--用作汇总时的日志参数
+ VAR_TOTAL_REDO_TIME INTEGER;--用作汇总时的日志参数
+ VAR_MAX_TIME VARCHAR(20);--当前汇总的表里的最大时间
+ OP_STATUS VARCHAR(5) ;--当前时间段的汇总的状态
+ STATUS_TIMES_ID VARCHAR(30);--返回的执行次数 ID已经当前状态
+ /*传入今天的日期,统计今天的数据*/
+ /*凌晨进行数据的转换与统计*/
+
+ --天--
+ VAR_TODAY VARCHAR2(20);
+ VAR_TODAY_DATE DATE;
+ --明天的日期
+ VAR_TOMORROW_DATE DATE;
+
+ --周
+ --今天是周几
+ VAR_TOMORROW_NUM_OF_WEEK VARCHAR2(20);
+ /*上周一的开始时间*/
+ VAR_BEGIN_OF_THIS_WEEK VARCHAR2(20);
+
+ --月
+ VAR_TOMORROW_DAY VARCHAR2(20);
+ VAR_TOMORROW_MONTH_DAY VARCHAR2(20);
+ VAR_BEGIN_OF_THIS_MONTH VARCHAR2(20);
+
+ --季度
+ VAR_TODAY_QUARTER VARCHAR2(20);
+ VAR_TOMORROW_QUARTER VARCHAR2(20);
+ /*上个季度的开始时间*/
+ VAR_BEGIN_OF_THIS_QUARTER VARCHAR2(20);
+
+ --半年
+ /*上个半年的开始时间*/
+ VAR_BEGIN_OF_THIS_HALF_YEAR VARCHAR2(20);
+
+ --年
+ /*今天的年份*/
+ VAR_TODAY_YEAR VARCHAR2(4);
+
+ --日志表的主键
+ VAR_RECORD_ID  VARCHAR2(30);
+ --受影响的记录数
+ VAR_RECORD_NUM NUMBER;
+--AUTHOR :毛小明
+BEGIN
+   /*获取系统最大时间*/
+  VAR_SYSTIME := SUBSTR(GET_MIN_EVENT_TIME,0,10);
+  VAR_RECORD_NUM := 0;
+
+  --处理参数过长
+  IF LENGTH(INPUT_TODAY) > 10
+      THEN
+       VAR_TODAY := SUBSTR(INPUT_TODAY,1,10);
+  ELSE
+       VAR_TODAY := INPUT_TODAY;
+  END IF;
+
+   /*插入日志*/
+
+   --判断是否为重做
+  IF INPUT_REDO_TIMES = 0
+  THEN
+  INSERT_COLLECT_DATA_LOG(
+    VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+    'BATCH_TRANSFOR_DATA', --PROC_NAME 存储过程名称
+    'BATCH_TRANSFOR_DATA',  --FROM_TABLE 来源表
+    'BATCH_TRANSFOR_DATA',  --TO_TABLE 目标表
+    VAR_TODAY,        --DATA_RANGE 数据范围
+    VAR_TODAY,        --DATA_BEGIN_TIME 数据开始时间
+    VAR_TODAY          --DATA_END_TIME 数据开始时间
+  );
+  ELSE
+  --重复执行的开始，修改数据
+    VAR_RECORD_ID := INPUT_RECORD_ID;
+    UPDATE_COLLECT_DATA_LOG(
+        VAR_RECORD_ID,
+        SYSDATE,
+        NULL,
+        'RUNNING',
+        VAR_RECORD_NUM,
+        INPUT_REDO_TIMES
+    );
+  END IF;
+
+  --今天的日期
+  VAR_TODAY_DATE := TO_DATE(VAR_TODAY,'YYYY-MM-DD');
+  VAR_TOMORROW_DATE := VAR_TODAY_DATE + 1;
+
+  /*=====================================每天晚上的数据汇总开始=====================================*/
+
+  --=============日报数据的汇总=============
+  --今天的日期(日报汇总)
+ SELECT CASE  WHEN MAX(t.trans_time) IS NULL
+  THEN VAR_SYSTIME ELSE
+  TO_CHAR(MAX(t.trans_time+(1)),'yyyy-mm-dd') END
+  INTO VAR_MAX_TIME
+  FROM rp_trans_log_day t WHERE T.TRANS_TIME > SYSDATE - 3;
+  --从上次成功汇总到本次汇总中间遗漏的操作循环执行
+  while
+  to_date(VAR_MAX_TIME,'YYYY-MM-DD') <  to_date(VAR_TODAY,'YYYY-MM-DD')
+  LOOP
+    STATUS_TIMES_ID := GET_RECORD_ID_AND_REDO_TIME(VAR_MAX_TIME,'GET_DATA_FROM_HOUR_2_DAY');
+    VAR_TOTAL_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));
+    VAR_TOTAL_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+
+    IF VAR_TOTAL_REDO_TIME < 3 AND OP_STATUS != 'R'   THEN
+       get_data_from_hour_2_day(VAR_MAX_TIME,VAR_TOTAL_RECORD_ID,VAR_TOTAL_REDO_TIME+1);
+    END IF;
+    VAR_MAX_TIME := TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM-DD')+(1),'YYYY-MM-DD');
+  END LOOP;
+
+
+
+
+   --=============周报数据的汇总=============
+  --获取周报表中最大周的周一的日期
+  VAR_MAX_TIME := GET_MAX_WEEK_BEGIN_TIME ;
+  while
+               to_date(VAR_MAX_TIME,'YYYY-MM-DD')+13 <  to_date(VAR_TODAY,'YYYY-MM-DD')
+
+  LOOP
+    STATUS_TIMES_ID := GET_RECORD_ID_AND_REDO_TIME(TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM-DD')+7,'YYYY-MM-DD'),'GET_DATA_FROM_DAY_2_WEEK');
+    VAR_TOTAL_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));
+    VAR_TOTAL_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+
+    IF VAR_TOTAL_REDO_TIME < 3 AND OP_STATUS != 'R'   THEN
+     get_data_from_day_2_week(
+     TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM-DD')+7,'YYYY-MM-DD'),
+     TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM-DD')+13,'YYYY-MM-DD'),
+     VAR_TOTAL_RECORD_ID,VAR_TOTAL_REDO_TIME+1
+     );
+  END IF;
+    VAR_MAX_TIME := TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM-DD')+(7),'YYYY-MM-DD');
+  END LOOP;
+
+  --月汇总表里的最大日期
+  SELECT CASE  WHEN MAX(t.trans_time) IS NULL
+  THEN SUBSTR(VAR_SYSTIME,0,7) ELSE
+  TO_CHAR(MAX(t.trans_time+40),'yyyy-mm') END
+  INTO VAR_MAX_TIME
+  FROM rp_trans_log_month t
+  WHERE T.TRANS_TIME > SYSDATE -100;
+  while
+  to_date(VAR_MAX_TIME,'YYYY-MM') <  to_date(to_char(to_date(VAR_TODAY,'YYYY-MM-DD'),'YYYY-MM'),'YYYY-MM')
+  LOOP
+    STATUS_TIMES_ID := GET_RECORD_ID_AND_REDO_TIME(VAR_MAX_TIME,'GET_DATA_FROM_DAY_2_MONTH');
+    VAR_TOTAL_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));
+    VAR_TOTAL_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+
+  IF VAR_TOTAL_REDO_TIME < 3 AND OP_STATUS != 'R'   THEN
+  get_data_from_day_2_month(
+    TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM'),'YYYY-MM-DD'),
+    TO_CHAR(TO_DATE(TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')+40,'YYYY-MM'),'YYYY-MM')-1,'YYYY-MM-DD'),
+    VAR_TOTAL_RECORD_ID,
+    VAR_TOTAL_REDO_TIME+1
+    );
+   END IF;
+  VAR_MAX_TIME := TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')+40,'YYYY-MM');
+  END LOOP;
+
+  --=============季度报数据的汇总=============
+  VAR_INT_FLAG := TO_NUMBER(SUBSTR(GET_MAX_QUARTER_NUMBER,5,6));
+  IF VAR_INT_FLAG <=3 THEN
+  VAR_MAX_TIME := SUBSTR(GET_MAX_QUARTER_NUMBER,0,4) || '-0' || TO_CHAR(VAR_INT_FLAG*3);
+  ELSE
+  VAR_MAX_TIME := SUBSTR(GET_MAX_QUARTER_NUMBER,0,4) || '-' || TO_CHAR(VAR_INT_FLAG*3);
+  END IF;
+  while
+  to_date(VAR_MAX_TIME,'YYYY-MM') <  to_date(to_char(to_date(VAR_TODAY,'YYYY-MM-DD'),'YYYY-MM'),'YYYY-MM')
+  LOOP
+  STATUS_TIMES_ID := GET_RECORD_ID_AND_REDO_TIME(TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')-40,'YYYY-MM'),'GET_DATA_FROM_MONTH_2_QUARTER');
+    VAR_TOTAL_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));
+    VAR_TOTAL_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+
+  IF VAR_TOTAL_REDO_TIME < 3 AND OP_STATUS != 'R'   THEN
+  get_data_from_month_2_quarter(
+    TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')-40,'YYYY-MM'),
+    VAR_MAX_TIME,
+    VAR_TOTAL_RECORD_ID,
+    VAR_TOTAL_REDO_TIME+1
+    );
+   END IF;
+  VAR_MAX_TIME := TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')+100,'YYYY-MM');
+  END LOOP;
+  --=============半年报数据的汇总=============
+  VAR_MAX_TIME := GET_MAX_HALFYEAR_NUMBER;
+  VAR_INT_FLAG := TO_NUMBER(SUBSTR(VAR_MAX_TIME,6,2));
+  IF VAR_INT_FLAG = 1 THEN
+  VAR_MAX_TIME := SUBSTR(VAR_MAX_TIME,0,4) || '-0' ||TO_CHAR(VAR_INT_FLAG*6);
+  else
+  VAR_MAX_TIME := SUBSTR(VAR_MAX_TIME,0,4) || '-' ||TO_CHAR(VAR_INT_FLAG*6);
+  END IF;
+   while
+       to_date(VAR_MAX_TIME,'YYYY-MM') <  to_date(to_char(to_date(VAR_TODAY,'YYYY-MM-DD'),'YYYY-MM'),'YYYY-MM')
+  LOOP
+    STATUS_TIMES_ID :=  GET_RECORD_ID_AND_REDO_TIME(TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')-150,'YYYY-MM'),'GET_DATA_FROM_MONTH_2_HALFYEAR');
+    VAR_TOTAL_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));
+    VAR_TOTAL_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+
+    IF VAR_TOTAL_REDO_TIME < 3 AND OP_STATUS != 'R'   THEN
+      get_data_from_month_2_halfyear(
+        TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')-150,'YYYY-MM'),
+        VAR_MAX_TIME,
+        VAR_TOTAL_RECORD_ID,
+        VAR_TOTAL_REDO_TIME+1
+        );
+     END IF;
+     VAR_MAX_TIME := TO_CHAR(TO_DATE(VAR_MAX_TIME,'YYYY-MM')+200,'YYYY-MM');
+  END LOOP;
+
+  --=============年报数据的汇总=============
+  SELECT CASE  WHEN MAX(t.trans_time) IS NULL THEN SUBSTR(VAR_SYSTIME,0,4) ELSE
+  TO_CHAR(MAX(t.trans_time+1)) END INTO VAR_MAX_TIME FROM rp_trans_log_year t;
+  while
+    TO_NUMBER(VAR_MAX_TIME) <  TO_NUMBER(SUBSTR(VAR_TODAY,0,4))
+  LOOP
+    STATUS_TIMES_ID :=  GET_RECORD_ID_AND_REDO_TIME(VAR_MAX_TIME,'GET_DATA_FROM_HALFYEAR_2_YEAR');
+    VAR_TOTAL_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));
+    VAR_TOTAL_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+
+    IF VAR_TOTAL_REDO_TIME < 3 AND OP_STATUS != 'R'   THEN
+    get_data_from_halfyear_2_year(VAR_MAX_TIME,VAR_TOTAL_RECORD_ID,VAR_TOTAL_REDO_TIME+1);
+   END IF;
+   VAR_MAX_TIME := TO_CHAR(TO_NUMBER(VAR_MAX_TIME)+1);
+  END LOOP;
+
+  /*==================================每天晚上的数据汇总结束========================================*/
+
+  /*操作成功后修改日志记录*/
+  UPDATE_COLLECT_DATA_LOG(
+    VAR_RECORD_ID,
+    NULL,
+    SYSDATE,
+    'SUCCESSFUL',
+    VAR_RECORD_NUM,
+    INPUT_REDO_TIMES
+  );
+
+  EXCEPTION
+     WHEN OTHERS
+     THEN
+         /*操作失败后修改日志记录*/
+         UPDATE_COLLECT_DATA_LOG(
+            VAR_RECORD_ID,
+            NULL,
+            SYSDATE,
+            'FAILED',
+            VAR_RECORD_NUM,
+            INPUT_REDO_TIMES
+         );
+
+       RETURN;
+
+END BATCH_TRANSFOR_DATA;

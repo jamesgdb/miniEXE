@@ -1,0 +1,30 @@
+﻿在代码中增加‘锁定/解锁用户数量’（代码同交易总数量）
+：
+// 锁定解锁用户数量
+				if ("lockOrNo".equals(name)) {
+					// 周期为1天 间隔时间为1小时
+					if ("day".equals(period)) {
+						sql = " select substr(TO_char(TRANS_TIME,'YYYY-MM-DD HH24:MI:SS'),0,13) every,sum(trans_num) total "
+								+ " from " + SysConstants.getCons("DayReport") + " T "
+								+ " where   TRANS_TIME >= to_date(to_char(sysdate,'YYYY-MM-DD HH24'),'YYYY-MM-DD HH24') - 1 "
+								+ " group by substr(TO_char(TRANS_TIME,'YYYY-MM-DD HH24:MI:SS'),0,13)"
+								+ " order by every ";
+					}
+					// 周期为1小时 间隔时间为5分钟
+					if ("hour".equals(period)) {
+						sql = " select get_real_time_for_minute(to_char(trans_time,'YYYY-MM-DD HH24:MI')) every,sum(trans_num) total "
+								+ " from " + SysConstants.getCons("HourReport") + " T "
+								+ " where t.trans_time >= to_date(get_real_time_for_minute(to_char(sysdate,'YYYY-MM-DD HH24:MI')),'YYYY-MM-DD HH24:MI') - 1/24 "
+								+ " group by get_real_time_for_minute(to_char(trans_time,'YYYY-MM-DD HH24:MI'))"
+								+ " order by every ";
+					}
+					// 周期为实时 间隔时间为1分钟（取前15分钟）
+					if ("rtime".equals(period)) {
+						sql = " select substr(TO_char(TRANS_TIME,'YYYY-MM-DD HH24:MI:SS'), 0, 16) every, sum(trans_num) total "
+								+ " from " + SysConstants.getCons("RealTimeReport") + " T "
+								+ " where TRANS_TIME >= to_date(to_char(sysdate,'YYYY-MM-DD HH24:MI'),'YYYY-MM-DD HH24:MI') - 1/24/60*20 "
+								+ " group by substr(TO_char(TRANS_TIME,'YYYY-MM-DD HH24:MI:SS'), 0, 16) "
+								+ " order by every ";
+					}
+				}
+

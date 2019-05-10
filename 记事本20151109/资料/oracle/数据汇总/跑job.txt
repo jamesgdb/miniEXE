@@ -1,0 +1,82 @@
+﻿--以下为相应job
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'CREATE_PARTITION_WHEN_SETUP();', 
+next_date => sysdate, ----当前时间执行 仅仅执行一次
+interval => 'sysdate+100000');
+commit; 
+end; 
+/ 
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_BATCH_TRANSFOR_DATA();', 
+next_date => TO_DATE(TO_CHAR(SYSDATE+1,'YYYY-MM-DD'),'YYYY-MM-DD')+1/24, ----明天01：00执行 间隔一天
+interval => 'sysdate+1');
+commit; 
+end; 
+/ 
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_MAKE_UP_BATCH_DATA();', 
+next_date => TO_DATE(TO_CHAR(SYSDATE+1,'YYYY-MM-DD'),'YYYY-MM-DD')+1/12, --明天02：00执行 间隔一天
+interval => 'sysdate+1');
+commit; 
+end; 
+/
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_MAKE_UP_MINUTE_2_HOUR();', 
+next_date => TO_DATE(TO_CHAR(SYSDATE+1/24,'YYYY-MM -DD hh24'),'YYYY-MM-DD hh24')+1/24/6, --下个小时过十分钟执行第一次 间隔一个小时
+interval => 'sysdate+1/24');
+commit; 
+end; 
+/
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_MAKE_UP_REALTIME_2_MINUTE();', 
+next_date => TO_DATE(TO_CHAR(SYSDATE+1/24,'YYYY-MM-DD hh24'),'YYYY-MM-DD hh24')+1/24/15, --下个小时过四分钟执行第一次 间隔五分钟 
+interval => 'sysdate+1/24/60*5');
+commit; 
+end; 
+/
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_MINUTE_2_HOUR();', 
+next_date => TO_DATE(TO_CHAR(SYSDATE+1/24,'YYYY-MM-DD hh24'),'YYYY-MM-DD hh24')+1/24/12, --下个小时过五分钟执行第一次 间隔一个小时
+interval => 'sysdate+1/24');
+commit; 
+end; 
+/
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_REALTIME_2_MINUTE();', 
+next_date =>  TO_DATE(TO_CHAR(SYSDATE+1/24,'YYYY-MM-DD hh24'),'YYYY-MM-DD hh24')+1/24/30, --下个小时过两分钟执行第一次 间隔五分钟
+interval => 'sysdate+1/24/60*5');
+commit; 
+end; 
+/
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'JOB_CREATE_PARTITION();', 
+next_date => TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')+1/24*23, --今天23：00执行 创建明天的分区 间隔一天, 
+interval => 'sysdate+1');
+commit; 
+end; 
+/
+variable job1 number; 
+begin 
+sys.dbms_job.submit(job => :job1, 
+what => 'APPEND_RESULT_WHEN_UPDATE();', 
+next_date =>  TO_DATE(TO_CHAR(SYSDATE+1/24,'YYYY-MM-DD hh24'),'YYYY-MM-DD hh24')+1/24/30, --下个小时过两分钟执行第一次 间隔五分钟
+interval => 'sysdate+1/24/60*5');
+commit; 
+end; 
+/

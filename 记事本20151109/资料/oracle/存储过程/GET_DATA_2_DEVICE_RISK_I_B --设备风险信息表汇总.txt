@@ -1,0 +1,154 @@
+﻿create or replace procedure GET_DATA_2_DEVICE_RISK_I_B --设备风险信息表汇总--每月job一次
+
+ is
+
+   TRANS_TIME_           DATE;--
+   IS_NULL        NUMBER;--用于判断月报里有没有数据
+   VAR_RECORD_ID  VARCHAR2(30);--log日志主键
+
+   TRANS_TIME_MIN_MON date;--月表中的最小时间
+   TRANS_TIME_MAX_MON date;--月表中的最小时间
+   MAX_TIME_IN_TARGET DATE;-- DEVICE_RISK_INFORMATION表中的最大时间
+
+  -- INTO_LOG_TIME    DATE;--将本月的一号插入到目标表中
+
+begin
+
+   SELECT MAX(T.TRANS_TIME) INTO TRANS_TIME_MAX_MON FROM RP_TRANS_LOG_MONTH T;
+   SELECT MIN(T.TRANS_TIME) INTO TRANS_TIME_MIN_MON FROM RP_TRANS_LOG_MONTH T;
+   SELECT MAX(T.TRANS_TIME) INTO MAX_TIME_IN_TARGET FROM DEVICE_RISK_INFORMATION T;
+
+   IF TRANS_TIME_MAX_MON IS NOT NULL AND MAX_TIME_IN_TARGET IS NULL THEN
+     WHILE TRANS_TIME_MIN_MON < to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd')
+       LOOP
+         SELECT COUNT(*) INTO IS_NULL FROM RP_TRANS_LOG_MONTH T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON;
+         IF IS_NULL > 0 THEN
+            INSERT INTO DEVICE_RISK_INFORMATION(
+                 trans_time   ,   --交易时间
+                 trans_ditch ,--交易渠道
+                 operating_system    ,--操作系统
+                 browser     ,--浏览器
+                 device_num   ,--设备类型总数
+                 device_percent   ,--设备类型占总数半分比
+                 total_device_num ,--设备数量
+                 total_device_percent ,--设备总数百分比
+                 user_num  ,--用户数量
+                 user_percent ,--用户数量百分比
+                 alarm_num    ,--报警数量
+                 alarm_percent  --报警数量百分比
+
+
+            )
+            SELECT
+             T.TRANS_TIME,
+              T.TRANS_DITCH,
+              T.TRANS_OPER_SYSTEM,
+              T.TRANS_BROWSER,
+              SUM(T.TRANS_NUM),
+              NUM_2_PER_UTIL( SUM(T.TRANS_NUM),(SELECT SUM(T2.TRANS_NUM) FROM RP_TRANS_LOG_MONTH T2 WHERE T2.TRANS_TIME = T.TRANS_TIME )), --
+             ( SELECT  COUNT(P.DEVICE_ID ) FROM RP_COUNT_DIVICE_AMOUNT P WHERE P.TRANS_DITCH = T.TRANS_DITCH
+              AND T.TRANS_OPER_SYSTEM = P.OPERATIING_SYSTEM AND T.TRANS_BROWSER = P.BROWSER AND P.TRANS_TIME = T.TRANS_TIME ) ,--
+              NUM_2_PER_UTIL( ( SELECT  COUNT(P.DEVICE_ID ) FROM RP_COUNT_DIVICE_AMOUNT P WHERE P.TRANS_DITCH = T.TRANS_DITCH
+              AND T.TRANS_OPER_SYSTEM = P.OPERATIING_SYSTEM AND T.TRANS_BROWSER = P.BROWSER AND P.TRANS_TIME = T.TRANS_TIME ),
+              (SELECT COUNT(P2.DEVICE_ID) FROM RP_COUNT_DIVICE_AMOUNT P2 WHERE P2.TRANS_TIME = T.TRANS_TIME  ))  ,--
+               ( select  COUNT(C2.CUSTOMER_ID) from RP_COUNT_USER_AMOUNT c2 where T.TRANS_DITCH = C2.TRANS_DITCH AND
+                   T.TRANS_OPER_SYSTEM = C2.OPERATIING_SYSTEM AND
+                   T.TRANS_BROWSER = C2.BROWSER AND C2.TRANS_TIME = T.TRANS_TIME) ,--
+              NUM_2_PER_UTIL( ( select  COUNT(C2.CUSTOMER_ID) from RP_COUNT_USER_AMOUNT c2 where T.TRANS_DITCH = C2.TRANS_DITCH AND
+                   T.TRANS_OPER_SYSTEM = C2.OPERATIING_SYSTEM AND
+                   T.TRANS_BROWSER = C2.BROWSER  AND C2.TRANS_TIME = T.TRANS_TIME) ,(SELECT COUNT(C2.CUSTOMER_ID) FROM RP_COUNT_USER_AMOUNT C2 WHERE C2.TRANS_TIME = T.TRANS_TIME)),--
+              SUM(CASE WHEN POLICY_ACTION = 'ALLOW' THEN 0 ELSE T.TRANS_NUM END) ,--
+              NUM_2_PER_UTIL( SUM(CASE WHEN POLICY_ACTION = 'ALLOW' THEN 0 ELSE T.TRANS_NUM END),(SELECT SUM(K.ANUM)
+                              FROM(SELECT SUM(E.TRANS_NUM) AS ANUM FROM RP_TRANS_LOG_MONTH E WHERE E.TRANS_TIME=TRANS_TIME_MIN_MON) K))--
+
+             FROM  RP_TRANS_LOG_MONTH T
+             WHERE
+
+                   T.TRANS_TIME = TRANS_TIME_MIN_MON
+               GROUP BY t.trans_time,T.TRANS_DITCH,T.TRANS_OPER_SYSTEM,T.TRANS_BROWSER
+              ;
+              COMMIT;
+         END IF;
+         TRANS_TIME_MIN_MON := ADD_MONTHS(TRANS_TIME_MIN_MON,1);
+       END LOOP;
+ELSE
+
+      SELECT COUNT(*) INTO IS_NULL FROM RP_TRANS_LOG_MONTH;
+     -- select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO INTO_LOG_TIME from dual;
+
+      IF IS_NULL > 0 THEN
+           SET TRANSACTION NAME 'GET_DATA_2_DEVICE_RISK_I_B';
+            SELECT MAX(T.TRANS_TIME) INTO TRANS_TIME_ FROM RP_TRANS_LOG_MONTH T;
+            IF TRANS_TIME_ IS NULL THEN
+             select add_months(to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd'),-1) INTO TRANS_TIME_ from dual;
+            END IF;
+
+            DELETE DEVICE_RISK_INFORMATION T WHERE T.TRANS_TIME =  TRANS_TIME_;
+
+            INSERT INTO DEVICE_RISK_INFORMATION(
+                 trans_time   ,   --交易时间
+                 trans_ditch ,--交易渠道
+                 operating_system    ,--操作系统
+                 browser     ,--浏览器
+                 device_num   ,--设备类型数
+                 device_percent   ,--设备类型占总数半分比
+                 total_device_num ,--设备数量
+                 total_device_percent ,--设备总数百分比
+                 user_num  ,--用户数量
+                 user_percent ,--用户数量百分比
+                 alarm_num    ,--报警数量
+                 alarm_percent  --报警数量百分比
+
+
+            )
+            SELECT
+             T.TRANS_TIME,
+              T.TRANS_DITCH,
+              T.TRANS_OPER_SYSTEM,
+              T.TRANS_BROWSER,
+              SUM(T.TRANS_NUM),
+              NUM_2_PER_UTIL( SUM(T.TRANS_NUM),(SELECT SUM(T2.TRANS_NUM) FROM RP_TRANS_LOG_MONTH T2 WHERE T2.TRANS_TIME = T.TRANS_TIME )), --
+             ( SELECT  COUNT(P.DEVICE_ID ) FROM RP_COUNT_DIVICE_AMOUNT P WHERE P.TRANS_DITCH = T.TRANS_DITCH
+              AND T.TRANS_OPER_SYSTEM = P.OPERATIING_SYSTEM AND T.TRANS_BROWSER = P.BROWSER AND P.TRANS_TIME = T.TRANS_TIME ) ,--
+              NUM_2_PER_UTIL( ( SELECT  COUNT(P.DEVICE_ID ) FROM RP_COUNT_DIVICE_AMOUNT P WHERE P.TRANS_DITCH = T.TRANS_DITCH
+              AND T.TRANS_OPER_SYSTEM = P.OPERATIING_SYSTEM AND T.TRANS_BROWSER = P.BROWSER AND P.TRANS_TIME = T.TRANS_TIME ),
+              (SELECT COUNT(P2.DEVICE_ID) FROM RP_COUNT_DIVICE_AMOUNT P2 WHERE P2.TRANS_TIME = T.TRANS_TIME  ))  ,--
+               ( select  COUNT(C2.CUSTOMER_ID) from RP_COUNT_USER_AMOUNT c2 where T.TRANS_DITCH = C2.TRANS_DITCH AND
+                   T.TRANS_OPER_SYSTEM = C2.OPERATIING_SYSTEM AND
+                   T.TRANS_BROWSER = C2.BROWSER AND C2.TRANS_TIME = T.TRANS_TIME) ,--
+              NUM_2_PER_UTIL( ( select  COUNT(C2.CUSTOMER_ID) from RP_COUNT_USER_AMOUNT c2 where T.TRANS_DITCH = C2.TRANS_DITCH AND
+                   T.TRANS_OPER_SYSTEM = C2.OPERATIING_SYSTEM AND
+                   T.TRANS_BROWSER = C2.BROWSER  AND C2.TRANS_TIME = T.TRANS_TIME) ,(SELECT COUNT(C2.CUSTOMER_ID) FROM RP_COUNT_USER_AMOUNT C2 WHERE C2.TRANS_TIME = T.TRANS_TIME)),--
+              SUM(CASE WHEN POLICY_ACTION = 'ALLOW' THEN 0 ELSE T.TRANS_NUM END) ,--
+              NUM_2_PER_UTIL( SUM(CASE WHEN POLICY_ACTION = 'ALLOW' THEN 0 ELSE T.TRANS_NUM END),
+              (SELECT SUM(K.ANUM)
+                              FROM(SELECT SUM(E.TRANS_NUM) AS ANUM FROM RP_TRANS_LOG_MONTH E WHERE E.TRANS_TIME=TRANS_TIME_) K))--
+
+             FROM  RP_TRANS_LOG_MONTH T
+             WHERE
+
+                   T.TRANS_TIME = TRANS_TIME_
+               GROUP BY t.trans_time,T.TRANS_DITCH,T.TRANS_OPER_SYSTEM,T.TRANS_BROWSER
+              ;
+              COMMIT;
+
+          END IF;
+     END IF;
+      EXCEPTION
+
+         WHEN OTHERS
+         THEN
+             ROLLBACK;
+              INSERT_COLLECT_DATA_LOG_4_FIX(
+              VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+              'GET_DATA_2_DEVICE_RISK_I_B', --PROC_NAME 存储过程名称
+              '',  --FROM_TABLE 来源表
+              'DEVICE_RISK_INFORMATION',  --TO_TABLE 目标表
+              TO_CHAR(sysdate,'YYYY-MM-DD HH24:MI:SS') ,  --DATA_RANGE 数据范围
+              TO_CHAR(TRANS_TIME_,'YYYY-MM-DD HH24:MI:SS'),        --DATA_BEGIN_TIME 数据开始时间
+              TO_CHAR(TRANS_TIME_,'YYYY-MM-DD HH24:MI:SS')          --DATA_END_TIME 数据结束时间
+            );
+
+       RETURN ;
+
+end GET_DATA_2_DEVICE_RISK_I_B;

@@ -1,0 +1,143 @@
+﻿两个Date类型字段：START_DATE，END_DATE，计算这两个日期的时间差（分别以天，小时，分钟，秒，毫秒）：
+天：
+ROUND(TO_NUMBER(END_DATE - START_DATE))
+小时：
+ROUND(TO_NUMBER(END_DATE - START_DATE) * 24)
+分钟：
+ROUND(TO_NUMBER(END_DATE - START_DATE) * 24 * 60)
+秒：
+ROUND(TO_NUMBER(END_DATE - START_DATE) * 24 * 60 * 60)
+毫秒：
+ROUND(TO_NUMBER(END_DATE - START_DATE) * 24 * 60 * 60 * 1000)
+ 
+Oracle计算时间差函数 2008-08-20 10:00 两个Date类型字段：START_DATE，END_DATE，计算这两个日期的时间差（分别以天，小时，分钟，秒，毫秒）： 天： ROUND(TO_NUMBER(END_DATE - START_DATE)) 小时： ROUND(TO_NUMBER(END_DATE - START_DATE) * 24) 分钟： ROUND(TO_NUMBER(END_DATE - START_DATE) * 24 * 60) 秒： ROUND(TO_NUMBER(END_DATE - START_DATE) * 24 * 60 * 60) 毫秒： ROUND(TO_NUMBER(END_DATE - START_DATE) * 24 * 60 * 60 * 1000)
+ 外加to_date与to_char函数：
+ORACLE中： 
+select to_date('2007-06-28 19:51:20','yyyy-MM-dd HH24:mi:ss') from dual; 
+一般SQL中： 
+select to_date('2007-06-28 19:51:20','yyyy-MM-dd HH:mm:ss') from dual; 
+区别： 
+1、HH修改为HH24。 
+2、分钟的mm修改为mi。
+24 小时的形式显示出来要用 HH24
+select to_char(sysdate,'yyyy-MM-dd HH24:mi:ss') from dual;
+select to_date('2005-01-01 13:14:20','yyyy-MM-dd HH24:mi:ss') from dual;
+ 
+to_date() function
+1. 日期格式参数 含义说明
+D 一周中的星期几
+DAY 天的名字，使用空格填充到 9 个字符
+DD 月中的第几天
+DDD 年中的第几天
+DY 天的简写名
+IW ISO 标准的年中的第几周
+IYYY ISO 标准的四位年份
+YYYY 四位年份
+YYY,YY,Y 年份的最后三位，两位，一位
+HH 小时，按 12 小时计
+HH24 小时，按 24 小时计
+MI 分
+SS 秒
+MM 月
+Mon 月份的简写
+Month 月份的全名
+W 该月的第几个星期
+WW 年中的第几个星期      1. 日期时间间隔操作
+当前时间减去 7 分钟的时间
+select sysdate,sysdate - interval '7' MINUTE from dual
+当前时间减去 7 小时的时间
+select sysdate - interval '7' hour from dual
+当前时间减去 7 天的时间
+select sysdate - interval '7' day from dual
+当前时间减去 7 月的时间
+select sysdate,sysdate - interval '7' month from dual
+当前时间减去 7 年的时间
+select sysdate,sysdate - interval '7' year from dual
+时间间隔乘以一个数字
+select sysdate,sysdate - 8 *interval '2' hour from dual
+ 
+2. 日期到字符操作
+select sysdate,to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') from dual
+select sysdate,to_char(sysdate,'yyyy-mm-dd hh:mi:ss') from dual
+select sysdate,to_char(sysdate,'yyyy-ddd hh:mi:ss') from dual
+select sysdate,to_char(sysdate,'yyyy-mm iw-d hh:mi:ss') from dual
+参考 oracle 的相关关文档 (ORACLE901DOC/SERVER.901/A90125/SQL_ELEMENTS4.HTM#48515)
+ 
+3. 字符到日期操作
+select to_date('2003-10-17 21:15:37','yyyy-mm-dd hh24:mi:ss') from dual
+具体用法和上面的 to_char 差不多。
+4.TO_NUMBER 
+使用TO_NUMBER函数将字符转换为数字 
+TO_NUMBER(char[, '格式'])
+数字格式格式 
+9 代表一个数字 
+0 强制显示0 
+$ 放置一个$符 
+L 放置一个浮动本地货币符 
+. 显示小数点 
+, 显示千位指示符
+oracle中的to_date参数含义 
+  
+  1.日期格式参数含义说明  
+D 一周中的星期几  
+DAY 天的名字，使用空格填充到9个字符  
+DD 月中的第几天  
+DDD 年中的第几天  
+DY 天的简写名  
+IW ISO标准的年中的第几周  
+IYYY ISO标准的四位年份  
+YYYY 四位年份  
+YYY,YY,Y 年份的最后三位，两位，一位  
+HH 小时，按12小时计  
+HH24 小时，按24小时计  
+MI 分  
+SS 秒  
+MM 月  
+Mon 月份的简写  
+Month 月份的全名  
+W 该月的第几个星期  
+WW 年中的第几个星期     1.日期时间间隔操作
+当前时间减去7分钟的时间
+select sysdate,sysdate - interval ’7’ MINUTE from dual
+当前时间减去7小时的时间
+select sysdate - interval ’7’ hour from dual
+当前时间减去7天的时间
+select sysdate - interval ’7’ day from dual
+当前时间减去7月的时间
+select sysdate,sysdate - interval ’7’ month from dual
+当前时间减去7年的时间
+select sysdate,sysdate - interval ’7’ year from dual
+时间间隔乘以一个数字
+select sysdate,sysdate - 8 *interval ’2’ hour from dual
+   2.日期到字符操作 
+select sysdate,to_char(sysdate,’yyyy-mm-dd hh24:mi:ss’) from dual
+select sysdate,to_char(sysdate,’yyyy-mm-dd hh:mi:ss’) from dual
+select sysdate,to_char(sysdate,’yyyy-ddd hh:mi:ss’) from dual
+select sysdate,to_char(sysdate,’yyyy-mm iw-d hh:mi:ss’) from dual
+参考oracle的相关关文档(ORACLE901DOC/SERVER.901/A90125/SQL_ELEMENTS4.HTM#48515)
+   3. 字符到日期操作 
+select to_date(’2003-10-17 21:15:37’,’yyyy-mm-dd hh24:mi:ss’) from dual
+具体用法和上面的to_char差不多。
+   4. trunk/ ROUND函数的使用 
+select trunc(sysdate ,’YEAR’) from dual
+select trunc(sysdate ) from dual
+select to_char(trunc(sysdate ,’YYYY’),’YYYY’) from dual
+    5.oracle有毫秒级的数据类型 
+--返回当前时间 年月日小时分秒毫秒
+select to_char(current_timestamp(5),’DD-MON-YYYY HH24:MI:SSxFF’) from dual;
+--返回当前时间的秒毫秒，可以指定秒后面的精度(最大=9)
+select to_char(current_timestamp(9),’MI:SSxFF’) from dual;
+   6.计算程序运行的时间(ms) 
+declare
+type rc is ref cursor;
+l_rc rc;
+l_dummy all_objects.object_name%type;
+l_start number default dbms_utility.get_time;
+begin
+  for I in 1 .. 1000 loop
+  open l_rc for 'select object_name from all_objects '|| 'where object_id = ' || i;
+  fetch l_rc into l_dummy;
+  close l_rc;
+  end loop;
+  dbms_output.put_line ( round( (dbms_utility.get_time-l_start)/100, 2 ) ||' seconds ...' );
+end;

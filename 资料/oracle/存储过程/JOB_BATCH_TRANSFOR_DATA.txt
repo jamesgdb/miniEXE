@@ -1,0 +1,65 @@
+﻿汇总从小时为粒度到年的所有汇总 ，然后再执行一些 汇总procedure 
+CREATE OR REPLACE PROCEDURE JOB_BATCH_TRANSFOR_DATA
+AS
+  /*今天的凌晨做操作，传入昨天的日期,统计昨天的数据*/
+
+ VAR_YESTERDAY VARCHAR2(20);
+ VAR_RECORD_ID  VARCHAR2(30);
+ VAR_RECORD_NUM NUMBER;
+
+--AUTHOR:毛小明
+--批处理 小时到天 天到周。。。批量处理
+BEGIN
+  VAR_RECORD_NUM := 0;
+
+   /*插入日志*/
+
+    --首次执行的开始，插入数据
+   INSERT_COLLECT_DATA_LOG(
+    VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+    'JOB_BATCH_TRANSFOR_DATA', --PROC_NAME 存储过程名称
+    'JOB_BATCH_TRANSFOR_DATA',  --FROM_TABLE 来源表
+    'JOB_BATCH_TRANSFOR_DATA',  --TO_TABLE 目标表
+    TO_CHAR(SYSDATE - 1 ,'YYYY-MM-DD'),        --DATA_RANGE 数据范围
+    TO_CHAR(SYSDATE - 1 ,'YYYY-MM-DD'),        --DATA_BEGIN_TIME 数据开始时间
+    TO_CHAR(SYSDATE - 1 ,'YYYY-MM-DD')          --DATA_END_TIME 数据开始时间
+  );
+
+  /*今天的凌晨做操作，传入今天的日期,统计昨天的数据*/
+  VAR_YESTERDAY := TO_CHAR(SYSDATE ,'YYYY-MM-DD');
+ --VAR_YESTERDAY := '2013-06-01';--CESHI
+  BATCH_TRANSFOR_DATA(VAR_YESTERDAY,0,0);
+
+
+  /*操作成功后修改日志记录*/
+  UPDATE_COLLECT_DATA_LOG(
+    VAR_RECORD_ID,
+    NULL,
+    SYSDATE,
+    'SUCCESSFUL',
+    VAR_RECORD_NUM,
+    0
+  );
+    GET_DATA_2_AUTH_M_AND_RE_CC;  ------------------各省用户数量及报警情况总览表
+     GET_DATA_2_CLI_BEHA_ALS_CC; -------------客户行为分析报表
+     GET_DATA_2_FIXDATE_SOLOLINE_T;
+     GET_DATA_2_DEVICE_RISK_I_B;
+     GET_DATA_2_PRO_INFORMAT_B;
+
+
+  EXCEPTION
+     WHEN OTHERS
+     THEN
+         /*操作失败后修改日志记录*/
+        UPDATE_COLLECT_DATA_LOG(
+           VAR_RECORD_ID,
+           NULL,
+           SYSDATE,
+           'FAILED',
+           VAR_RECORD_NUM,
+           0
+         );
+
+       RETURN;
+
+END JOB_BATCH_TRANSFOR_DATA;

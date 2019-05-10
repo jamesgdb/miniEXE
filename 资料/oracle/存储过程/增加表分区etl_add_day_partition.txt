@@ -1,0 +1,60 @@
+﻿CREATE OR REPLACE PROCEDURE etl_add_day_partition(
+                                              --p 向分区表添加按新的日期分区，如果分区已经存在不做任何操作
+                                              p_table_name varchar2, --s 分区表名称
+                                              p_as_of_date date) --s 添加分区的日期
+ as
+  v_count    integer;
+  csql       varchar2(4000);
+  v_max_date date;
+  v_user     varchar2(200);
+begin
+  --检查是否存在参数所指向的分区
+  select count(*)
+    into v_count
+    from all_tab_partitions
+   where table_name = upper(p_table_name)
+     and partition_name = 'P' || to_char(p_as_of_date, 'yyyymmdd');
+
+    select to_date(substr(max(partition_name), 2), 'yyyymmdd')
+      into v_max_date
+      from all_tab_partitions
+     where table_name = upper(p_table_name);
+
+    select table_owner
+      into v_user
+      from all_tab_partitions
+     where table_name = upper(p_table_name)
+       and rownum = 1;
+
+  if v_count = 0
+  then
+    --不存在此分区
+
+
+    loop
+      v_max_date := v_max_date + 1;
+      if v_max_date <= p_as_of_date
+      then
+        -- 使用 alter table add partition 语句添加分区
+        csql := '  alter table ' || v_user || '.' || p_table_name ||
+                ' add partition P' || to_char(v_max_date, 'yyyymmdd') ||
+                ' values LESS than ( to_date(''' ||
+                to_char(v_max_date + 1, 'yyyymmdd') || ''',''yyyymmdd'')) ';
+        execute immediate csql;
+      else
+        return;
+      end if;
+    end loop;
+
+     --如果存在该日期指向的分区则清空该分区
+    else
+     csql := '  alter table ' || v_user || '.' || p_table_name ||
+                ' truncate partition P' || to_char(p_as_of_date, 'yyyymmdd');
+     execute immediate csql;
+
+  end if;
+exception
+  when others then
+    dbms_output.put_line(p_table_name || ':' || SQLERRM);
+end;
+

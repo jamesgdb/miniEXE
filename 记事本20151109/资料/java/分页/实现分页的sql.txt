@@ -1,0 +1,2 @@
+﻿方法参数：userlist(int pageid, int pagesize)
+String sql =" SELECT * FROM  ( SELECT A.*, rownum r FROM  (SELECT * FROM userlist ) A  WHERE rownum <= "+pageid+"*"+pagesize+" ) B  WHERE r >  "+(pageid-1)+"*"+pagesize+" order by id"; 

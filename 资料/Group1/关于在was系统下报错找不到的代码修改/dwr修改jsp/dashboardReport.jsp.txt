@@ -1,0 +1,3 @@
+﻿<%-- <SCRIPT type="text/javascript" src="${ctx}/dwr/engine.js"></SCRIPT> --%>
+<%-- <SCRIPT type="text/javascript" src="${ctx}/dwr/util.js"></SCRIPT> --%>
+<%-- <SCRIPT type="text/javascript" src="${ctx}/dwr/interface/RiskService"></SCRIPT> --%>

@@ -1,0 +1,113 @@
+﻿ORACLE批量绑定FORALL与BULK COLLECT
+
+博客分类： 数据库相关
+OracleSQLSQL ServerperformanceUP 
+   FORALL与BULK COLLECT的使用方法: 
+1．使用FORALL比FOR效率高，因为前者只切换一次上下文，而后者将是在循环次数一样多个上下文间切换。 
+
+2．使用BLUK COLLECT一次取出一个数据集合，比用游标条取数据效率高，尤其是在网络不大好的情况下。但BLUK COLLECT需要大量内存。 
+
+例子: 
+Sql代码  收藏代码
+create table test_forall ( user_id number(10), user_name varchar2(20));  
+
+select into 中使用bulk collect 
+Sql代码  收藏代码
+DECLARE  
+  TYPE table_forall IS TABLE OF test_forall%ROWTYPE;  
+  v_table table_forall;  
+BEGIN  
+    SELECT mub.user_id,mub.user_name  
+         BULK COLLECT INTO v_table  
+    FROM mag_user_basic mub  
+         WHERE mub.user_id BETWEEN 10000 AND 10100;  
+    FORALL idx IN 1..v_table.COUNT  
+           INSERT INTO test_forall VALUES v_table(idx);  
+           --VALUES(v_table(idx).user_id,v_table(idx).user_name);Error  
+           --在PL/SQL中，BULK In-BIND与RECORD，%ROWTYPE是不能在一块使用的，  
+           --也就是说，BULK In-BIND只能与简单类型的数组一块使用  
+    COMMIT;  
+  
+EXCEPTION  
+    WHEN OTHERS THEN  
+        ROLLBACK;  
+    
+END;  
+
+fetch into 中使用bulk collect 
+Sql代码  收藏代码
+DECLARE  
+  TYPE table_forall IS TABLE OF test_forall%ROWTYPE;  
+  v_table table_forall;     
+    
+  CURSOR c1 IS  
+    SELECT mub.user_id,mub.user_name  
+         FROM mag_user_basic mub  
+           WHERE mub.user_id BETWEEN 10000 AND 10100;  
+BEGIN  
+   OPEN c1;  
+   --在fetch into中使用bulk collect  
+   FETCH c1 BULK COLLECT INTO v_table;  
+     
+   FORALL idx IN 1..v_table.COUNT  
+         INSERT INTO test_forall VALUES v_table(idx);  
+    COMMIT;  
+  
+EXCEPTION  
+    WHEN OTHERS THEN  
+        ROLLBACK;  
+END;  
+
+在returning into中使用bulk collect 
+Sql代码  收藏代码
+CREATE TABLE test_forall2 AS SELECT * FROM test_forall;  
+----在returning into中使用bulk collect  
+DECLARE  
+   TYPE IdList IS TABLE OF test_forall.User_Id%TYPE;  
+   enums IdList;  
+   TYPE NameList IS TABLE OF test_forall.user_name%TYPE;  
+   names NameList;  
+BEGIN  
+   DELETE FROM test_forall2 WHERE user_id = 10100  
+        RETURNING user_id, user_name BULK COLLECT INTO enums, names;  
+   dbms_output.put_line('Deleted ' || SQL%ROWCOUNT || ' rows:');  
+   FOR i IN enums.FIRST .. enums.LAST  
+   LOOP  
+     dbms_output.put_line('User #' || enums(i) || ': ' || names(i));  
+   END LOOP;  
+   COMMIT;  
+     
+EXCEPTION  
+    WHEN OTHERS THEN  
+        ROLLBACK;  
+         
+END;  
+
+批量更新中，将for改成forall 
+Sql代码  收藏代码
+DECLARE   
+    TYPE NumList IS VARRAY(20) OF NUMBER;                                                  
+    depts NumList := NumList(10, 30, 70, ...);  
+ -- department numbers                      
+     BEGIN          
+     ...             
+       FOR i IN depts.FIRST..depts.LAST  
+       LOOP  
+       ...  
+       --UPDATE statement is sent to the SQL engine   
+       -- with each iteration of the FOR loop!  
+         UPDATE emp SET sal = sal * 1.10 WHERE deptno = depts(i);  
+      END LOOP:   
+    END;            
+
+Sql代码  收藏代码
+--UPDATE statement is sent to the SQL engine just once, with the entire nested table  
+FORALL i IN depts.FIRST..depts.LAST   
+  UPDATE emp SET sal = sal * 1.10 WHERE deptno = depts(i);   
+
+To maximize performance, rewrite your programs as follows: 
+a. If an INSERT, UPDATE, or DELETE statement executes inside a loop and References collection elements, move it into a FORALL statement. 
+b. If a SELECT INTO, FETCH INTO, or RETURNING INTO clause references a 
+Collection, incorporate the BULK COLLECT clause. 
+c. If possible, use host arrays to pass collections back and forth between your Programs and the database server. 
+d. If the failure of a DML operation on a particular row is not a serious problem,Include the keywords SAVE EXCEPTIONS in the FORALL statement and report Or clean up the errors in a subsequent loop using the %BULK_EXCEPTIONS Attribute.

@@ -1,0 +1,1 @@
+﻿SELECT check_code, MAX(check_run_tm),t.check_name,t.check_type,t.check_desc  FROM EDM_DQ_CHECK_REPORT_BASE t GROUP BY SUBSTR(check_run_tm,1,10),check_code,check_name,t.check_type,t.check_desc;

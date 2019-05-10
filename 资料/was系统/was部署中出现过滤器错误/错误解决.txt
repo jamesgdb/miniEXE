@@ -1,0 +1,26 @@
+﻿王利军(412303627)  15:37:27
+http://frightanic.com/software-development/solution-to-error-404-srve0190e-on-websphere-6-1/#comment-318
+看看这个，应该是需要给websphere上进行一个参数配置 
+好的我先去配置一下试试，
+王利军(412303627)  15:40:40
+http://www.blogjava.net/yoda/archive/2010/07/01/324702.html
+这个说的比较详细 ，
+实施看看 。
+试试
+
+
+com.ibm.ws.webcontainer.invokeFiltersCompatibility=
+
+true
+or perhaps
+
+com.ibm.ws.webcontainer.modifiedFileNotFoundExceptionBehavior=true
+http://pic.dhe.ibm.com/infocenter/wasinfo/v8r0/index.jsp?topic=%2Fcom.ibm.websphere.base.iseries.doc%2Finfo%2Fiseries%2Fae%2Frweb_custom_props.html
+
+com.ibm.ws.webcontainer.mapFiltersToAsterisk=true
+com.ibm.ws.webcontainer.removetrailingservletpathslash=true
+com.ibm.ws.webcontainer.invokeFiltersCompatibility=true
+- See more at: http://frightanic.com/software-development/solution-to-error-404-srve0190e-on-websphere-6-1/#comment-318
+
+
+

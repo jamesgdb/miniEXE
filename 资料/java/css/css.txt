@@ -1,0 +1,210 @@
+﻿id选择器，id不能重复#one{
+}
+class选择器， .one{ 
+color:red;
+font-size:15px;
+font-weight:bold;
+text-decoration:underline下,overline顶,line-through删除,blink闪烁;
+font=style:normal,oblique,italic,18px;斜体
+text-transform:capitalize首字母,none,uppercase,lowercase;
+letter-spacing:-2px;字母间距
+vertical-align:top,bottom,middle;对齐方式
+background-color：black ;
+}
+.span{
+float:left;首字下沉
+padding-right:5px;与右边的间隔
+}
+ 类选择器h1,td{
+ font-family:黑体,幼体,楷体-GB2312;
+}
+css图片效果：
+<img src="1.jsp"  class="test1">
+<stype>
+img.test1{
+border-style:dotted点画线,dashed虚线;
+border-color:#FF9900;边框颜色
+border-width:5px;边框粗细
+}
+还可以写为img.test1{
+border:dashed 2px blue
+}
+还可以写为img.test1{
+border-left:dashed 2px blue;
+}
+图片缩放：
+img.test1{
+width：50%;相对宽度
+height：60%；相对高度
+width：50px；绝对宽度
+}
+</stype>
+图片对齐方式 ：
+<td style="text -align:left,center,right;vertical-align:baseline,bottom,middle,sub,super,text-bottom,text-top,top；竖直对齐方式"><img src="1.jsp"  class="test1"></td> 
+-----图文混排：
+1.文字环绕：
+<img src="1.jsp"  class="test1">
+<span>chun</span>
+img{
+float:left;文字环绕图片
+}
+span{
+float:left;
+}
+背景颜色：body{
+background-color:#99FF00;背景颜色
+color:red;字体颜色
+}
+body{
+background-image:url(03.jpg);图片重复
+}
+body{
+padding:0px;
+margin:0px
+background-image:url(03.jpg);背景图片
+background-repeat:repeat-y;垂直方向重复
+background-color:#0066FF;i背景颜色
+background-position:bottom right;位置为右下
+}
+body{
+padding:0px;
+margin:0px
+background-image:url(03.jpg);背景图片
+background-repeat:repeat-y;垂直方向重复
+background-color:#0066FF;i背景颜色
+background-attachment:fixed;固定背景图片
+}
+竖直排版
+div.conteng{
+height:260px;
+writing-mode:tb-tl;竖直版文字IE
+background:url(03.jpg) no-repeat;
+}
+设置输入框为下划线：
+.text{
+border-bottom:1px solid #005aa7;下划线效果
+color:red;
+border-top:0px;
+border-left:0px;
+border-right:0px;
+background-color:transparent;背景色透明
+}
+设置submit样式：
+.bottom1{
+border:0px;无边框
+background-color:transparent;背景色透明
+}
+设置inpuut边框为无
+input{
+border:none;
+}
+动态超链接效果
+a.link{正常状态下
+color:#005799;深蓝色
+text-decoration:none;无下划线
+}
+a.visited{访问过的超链接
+color:#000000;黑色
+text-decoration:none;无下划线
+}
+a.hover{鼠标经过的超链接
+color:#FFFF00;黄色
+text-decoration:underline;下划线
+}
+按钮式超链接
+a{										/* 统一设置所有样式 */
+	font-family: Arial;
+	font-size: .8em;
+	text-align:center;
+	margin:3px;
+}
+a:link, a:visited{	/* 超链接正常状态、被访问过的样式 */
+	color: #A62020;
+	padding:4px 10px 4px 10px;
+	background-color: #ecd8db;
+	text-decoration: none;
+	border-top: 1px solid #EEEEEE;	/* 边框实现阴影效果 */
+	border-left: 1px solid #EEEEEE;
+	border-bottom: 1px solid #717171;
+	border-right: 1px solid #717171;
+}
+a:hover{						/* 鼠标经过时的超链接 */
+	color:#821818;				/* 改变文字颜色 */
+	padding:5px 8px 3px 12px;	/* 改变文字位置 */
+	background-color:#e2c4c9;	/* 改变背景色 */
+	border-top: 1px solid #717171;/* 边框变换，实现“按下去”的效果 */
+	border-left: 1px solid #717171;
+	border-bottom: 1px solid #EEEEEE;
+	border-right: 1px solid #EEEEEE;
+}
+浮雕超链接
+a:visited{color:#654300}
+a.link{color:#654300}
+a:hover{color:#FFFFF
+             text-decortation:none;
+             background:url(button2.jpg) no-repeat;
+             	}
+鼠标变换超链接
+a.help.hover{
+ cursor:help;变换鼠标形状
+}
+<a href="#" class="help">帮助</a>
+设置滤镜
+1.Alpha通道
+<img src="building1.jpg" border="0" class="alpha">
+
+.alpha{
+	filter:alpha(opacity=50);透明度为50%
+}
+2.Blur模糊
+body{
+	background:url(bg1.jpg);
+	margin:20px;}
+img{
+	border:1px solid #d58000;}
+.alpha{
+filter:alpha(opacity=0,finishopacity=100,style=1,startx=0,starty=0,finishx=0,finishy=100);/* 从上到下渐变 */
+}
+<img src="building2.jpg" border="0" class="alpha">
+3.chroma透明度
+.chroma{
+filter:chroma(color=FF6800);去除金黄颜色
+}
+4.Flip翻转
+body{
+	margin:12px;
+	background:#000000;
+}
+.flip1{
+	filter:fliph;	/* 水平翻转 */
+}
+.flip2{
+	filter:flipv;	/* 竖直翻转 */
+}
+.flip3{
+	filter:flipv fliph;	/* 水平、竖直同时翻转 */
+}
+-->
+</style>
+   </head>
+<body>
+<img src="building4.jpg"><img src="building4.jpg" class="flip1"><br>
+<img src="building4.jpg" class="flip2"><img src="building4.jpg" class="flip3">
+</body>
+6.遮罩mask
+.flip3{
+	filter:mask(color=#FF0000);
+}
+7.波浪
+span.wave1{	
+	filter:wave(add=0,freq=2,lightstrength=70,phase=75,strength=4);
+}
+<span class="wave1">波浪Wave</span>
+8.多个滤镜使用
+.wave1{
+	filter:flipv alpha(opacity=80) wave(add=0, freq=15, lightstrength=30, phase=0, strength=4);
+	/* 同时使用三个滤镜 */
+	/* 竖直翻转、透明、波浪效果 */
+}
+
+

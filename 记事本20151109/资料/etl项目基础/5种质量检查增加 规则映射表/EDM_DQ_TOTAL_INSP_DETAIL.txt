@@ -1,0 +1,75 @@
+﻿-- Create table
+create table EDM_DQ_TOTAL_INSP_DETAIL
+(
+  check_code          VARCHAR2(40) not null,
+  organ               VARCHAR2(40) not null,
+  zf_cd               CHAR(1),
+  check_table         VARCHAR2(40) not null,
+  table_desc          VARCHAR2(100),
+  org_code_field      VARCHAR2(50) not null,
+  currency_code_field VARCHAR2(50) not null,
+  subject_code_field  VARCHAR2(50) not null,
+  amt_bal_field       VARCHAR2(50) not null,
+  data_dt_field       VARCHAR2(50) not null,
+  check_phase_flg     VARCHAR2(40),
+  data_source         VARCHAR2(40),
+  filter_code         VARCHAR2(200),
+  db_schema           VARCHAR2(50),
+  detail_id           VARCHAR2(32) not null
+)
+tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64
+    next 8
+    minextents 1
+    maxextents unlimited
+  );
+-- Add comments to the table 
+comment on table EDM_DQ_TOTAL_INSP_DETAIL
+  is '总分余额检查明细表';
+-- Add comments to the columns 
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.check_code
+  is '检查编号';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.organ
+  is '所属组织';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.zf_cd
+  is '总分标识';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.check_table
+  is '账户表名';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.table_desc
+  is '账户表描述';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.org_code_field
+  is '机构字段';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.currency_code_field
+  is '币种字段';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.subject_code_field
+  is '科目字段';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.amt_bal_field
+  is '余额字段';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.data_dt_field
+  is '数据日期';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.check_phase_flg
+  is '检查阶段标识';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.data_source
+  is '业务源系统代码';
+comment on column EDM_DQ_TOTAL_INSP_DETAIL.filter_code
+  is '过滤编号';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table EDM_DQ_TOTAL_INSP_DETAIL
+  add constraint PK_EDM_DQ_TOTAL_INSP_DETAIL primary key (DETAIL_ID)
+  using index 
+  tablespace TBS_ETL_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );

@@ -1,0 +1,3 @@
+﻿    <managementContext>
+            <managementContext createConnector="true" connectorPort="11099"/>
+        </managementContext>

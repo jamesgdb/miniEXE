@@ -1,0 +1,59 @@
+﻿<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+	<div id="mhmove" style="overflow:hidden;width:800px;margin:0 auto 0;">
+				<table width="800px" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+
+      <td width="800px" id="mhmove1"><table width="800px" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+
+
+        <td width="166" align="center"><a href = "index.jsp" title="woai"><img src="image/IMG_0139.JPG" width="166" height="117" border="0" usemap="#Map2" /></a></td>
+
+          <td width="166" align="center"> <img src="image/IMG_0140.JPG" width="166" height="117" border="0" usemap="#Map"/></td>
+
+          <td width="166" align="center"><img src="image/IMG_0142.JPG" width="166" height="117" border="0" usemap="#Map3" /></td>
+
+          <td width="166" align="center"><img src="image/IMG_0153.JPG" width="166" height="117" border="0" usemap="#Map4"  /></td>
+
+          <td width="172" align="center"><img src="image/IMG_0161.JPG" width="166" height="117" border="0" usemap="#Map5"  /></td>
+		  
+		  <td width="172" align="center"><img src="image/IMG_0162.JPG" width="166" height="117" border="0" usemap="#Map6" /></td>
+       </tr>
+        
+      </table></td>
+      <td width="50" id="mhmove2">&nbsp;</td>
+    </tr>
+  </table>
+			</div>
+</body>
+   <script> 
+				var speed=40 ;   //speed越大，滚动越慢
+				mhmove2.innerHTML=mhmove1.innerHTML; 
+				function Marquee3(){ 
+					if(mhmove2.offsetWidth-mhmove.scrollLeft<=0) 
+						mhmove.scrollLeft-=mhmove1.offsetWidth;
+					else{ 
+						mhmove.scrollLeft++; 
+					} 
+				} 
+				function Marquee4(){ 
+					if(mhmove2.offsetHeight-mhmove.scrollTop<=0)
+					 //scrollHeight: 获取对象的滚动高度。 offsetHeight:获取对象相对于版面或由父坐标 offsetParent 属性指定的父坐标的高度
+						mhmove.scrollTop-=mhmove1.offsetHeight; 
+					else{ 
+						mhmove.scrollTop++;
+					} 
+				}
+				var MyMar2=setInterval(Marquee3,speed); 
+				mhmove.onmouseover=function() {clearInterval(MyMar2)} 
+				mhmove.onmouseout=function() {MyMar2=setInterval(Marquee3,speed)}
+			</script>
+</html>

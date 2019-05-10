@@ -1,0 +1,51 @@
+﻿<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <base href="<%=basePath%>">
+    
+    <title>My JSP 'context.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+  <script type="text/javascript" src="jQuery/jquery-1.10.2.js"></script>
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+
+ <input type="button"  value="匹配包含给定属性的元素" id="attribute" ></input><br>
+ <input type="button"  value="匹配给定的属性是某个特定值的元素" id="attribute1" ></input><br>
+ <input type="button"  value="匹配所有不含有指定的属性，或者属性不等于特定值的元素" id="attribute2" ></input><br>
+ <input type="button"  value="匹配给定的属性是以某些值开始的元素" id="attribute3" ></input><br>
+ <input type="button"  value="匹配给定的属性是以某些值结尾的元素" id="attribute4" ></input><br>
+ <input type="button"  value="匹配给定的属性是以包含某些值的元素" id="attribute5" ></input><br>
+ <input type="button"  value="复合属性选择器，需要同时满足多个条件时使用" id="attribute6" ></input><br>
+  <div id="dddd" class ="name" style="width:100px;height:100px;border:1px solid #ccc;">123</div>
+  <div id="dddd1" class ="name1" style="width:100px;height:100px;border:1px solid #ccc;">123</div>
+  <div id="dddd2" class ="name2" style="width:100px;height:100px;border:1px solid #ccc;">123</div>
+    
+ 
+  </body>
+  <script type="text/javascript"> 
+  $("#attribute").click( function () {$("div[class]").css("background","yellow");}); 
+  $("#attribute1").click( function () {$("div[class='name2']").css("background","yellow");}); 
+  $("#attribute2").click( function () {$("div[class][class=!'name2']").css("background","bule");}); 
+  $("#attribute3").click( function () {$("div[class^='nam']").css("background","red");}); 
+  $("#attribute4").click( function () {$("div[class$='me2']").css("background","red");}); 
+  $("#attribute5").click( function () {$("div[class*='me2']").css("background","red");}); 
+  $("#attribute6").click( function () {$("div[class$='me2'][id*='ddd']").css("background","red");}); 
+  
+  </script>
+</html>

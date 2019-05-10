@@ -1,0 +1,20 @@
+﻿	public void getDataDtList(){
+		String checkCode = this.getHttpRequest().getParameter("checkCode");// checkCode
+		List<DqLogicCheckResult>  list = this.dqLogicCheckResultService.findDataDtListByCheckCode(checkCode);
+		
+		List<Map> ret = new ArrayList();
+		Map<String, Object> map;
+		for(DqLogicCheckResult  dqBasic : list){
+			map = new HashMap();
+			Date dataDt =  dqBasic.getDataDt();
+			SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+			String s=formater.format(dataDt);
+			map.put("dataDtId", s);
+			map.put("dataDtText", s);
+			ret.add(map);
+		}
+		String json = JSONArray.fromObject(ret).toString();
+		json = json.replace("[{", "[{\"dataDtId\":\"\",\"dataDtText\":\"\"},{");// 添加一个空选项
+		writeContent(json);
+		
+	}

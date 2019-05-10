@@ -1,0 +1,469 @@
+﻿create or replace procedure GET_DATA_2_CLI_BEHA_ALS_CC--逻辑有些需要进一步处理-----完活
+
+ is
+ CUSTOMER_ACTION_ VARCHAR2(50);--客户行为
+ TRANS_NUM_ NUMBER;--交易量
+ TRANS_PERCENT_ VARCHAR2(10);--交易量百分比
+ BROOM_ACTION_NUM_ NUMBER;--调查的行为数量
+ BROOM_ACTION_PERCENT_ VARCHAR2(10);--调查的行为百分比
+ SYS_FAKE_TRANS_NUM_ NUMBER;--系统标记欺诈交易量
+ HUM_FAKE_TRANS_NUM_ NUMBER;--人工标记欺诈交易量
+ FAKE_TRANS_NUM_ NUMBER;--欺诈交易量
+ FAKE_BROOM_PERCENT_ VARCHAR2(10);--欺诈交易占调查交易百分比
+ SYS_REAL_TRANS_NUM_ NUMBER;--系统标记真实交易量
+ HUM_REAL_TRANS_NUM_ NUMBER;--人工标记真实交易量
+ REAL_TRANS_NUM_ NUMBER;--真实交易量
+ SUGGEST_ACTION_NUM_ NUMBER;--建议此行为的规则数量
+ AVE_RISK_RANGE_ NUMBER;--平均风险分值
+ TRANS_TIME_ DATE;--时间
+ TRANS_TIME_MIN_MON date;--月表中的最小时间
+
+ TIME_SCY             DATE;--用于循环的时间(取当前时间)
+ MAX_TIME              DATE;--本表中的最大时间
+ TIME_TODAY            DATE;--当前时间
+ VAR_POLICY_ACTION    NUMBER;--用于循环记数，得到POLICY_ACTION
+ var_cyc  number;
+ line_val varchar2(50);
+  VAR_RP_CLIENT_BEHAVE_ALS RP_CLIENT_BEHAVE_ALS%ROWTYPE;
+   VAR_RECORD_ID  VARCHAR2(30);--log日志主键
+
+   VAR_TRANS_NUM  NUMBER;--当月的所有交易量
+   VAR_BROOM_ACTION_NUM NUMBER;--当月总体调查总数量
+   IS_NULL  NUMBER;--判断是否为空
+   VAR_COUNT_IN_ERR NUMBER;--在当月人为介入的数量(错漏报表中的条数)
+   VAR_COUNT_IN_ERR_A NUMBER;--在当月人为介入ALOOW的数量(错漏报表中的条数)
+   VAR_COUNT_IN_ERR_C NUMBER;--在当月人为介入CHANGELE的数量(错漏报表中的条数)
+   VAR_COUNT_IN_ERR_R NUMBER;--在当月人为介入REVIEW的数量(错漏报表中的条数)
+   VAR_COUNT_IN_ERR_D NUMBER;--在当月人为介入DENY的数量(错漏报表中的条数)
+   VAR_COUNT_IN_ERR_4_USE NUMBER;--在循环中使用到的人为介入的数量
+   
+
+
+
+
+begin
+  SELECT MAX(T.TRANS_TIME) INTO TRANS_TIME_ FROM RP_TRANS_LOG_MONTH T;
+  SELECT min(T.TRANS_TIME) INTO TRANS_TIME_MIN_MON FROM RP_TRANS_LOG_MONTH T;
+  
+   /*
+    IF TRANS_TIME_ IS NULL THEN
+       select add_months(to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd'),-1) INTO TRANS_TIME_ from dual;
+    END IF;
+   */
+    SELECT MAX(C.TRANS_TIME) INTO MAX_TIME FROM RP_CLIENT_BEHAVE_ALS C;
+
+    IF TRANS_TIME_ IS NOT NULL AND MAX_TIME IS NULL THEN
+      ------------------=========================------------------------------------
+
+       WHILE TRANS_TIME_MIN_MON < to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd')
+         LOOP
+           SELECT SUM(T.TRANS_NUM) INTO VAR_TRANS_NUM FROM RP_TRANS_LOG_MONTH T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON;
+           SELECT COUNT(*) INTO VAR_COUNT_IN_ERR FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON;
+           SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_A FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON AND T.ERD_BE_STT='ALLOW';
+           SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_C FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON AND T.ERD_BE_STT='CHALLENGE';
+           SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_R FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON AND T.ERD_BE_STT='REVIEW';
+           SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_D FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TRANS_TIME_MIN_MON AND T.ERD_BE_STT='DENY';
+           
+            SELECT (SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END))
+                  + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                  + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                  + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                  + VAR_COUNT_IN_ERR
+                          INTO    VAR_BROOM_ACTION_NUM
+                   FROM  RP_TRANS_LOG_MONTH T 
+                               WHERE  T.TRANS_TIME = TRANS_TIME_MIN_MON  GROUP BY T.TRANS_TIME,T.POLICY_ACTION;
+           
+            VAR_POLICY_ACTION :=4;
+
+                while  VAR_POLICY_ACTION <=7
+                 LOOP
+                    select VAR_POLICY_ACTION into var_cyc from dual;
+                   select  GET_LINE_BY_NUM(var_cyc) into line_val from dual;
+                  SELECT COUNT(1) INTO IS_NULL FROM RP_TRANS_LOG_MONTH T WHERE T.POLICY_ACTION =line_val AND T.TRANS_TIME=TRANS_TIME_MIN_MON;
+                  IF IS_NULL > 0 THEN
+                      select COUNT(DISTINCT(T.RULE_NAME)) into SUGGEST_ACTION_NUM_
+                             from RP_TRANS_LOG_MONTH t WHERE T.POLICY_ACTION=line_val AND T.TRIGGERED_NUM>0 AND T.TRANS_TIME =TRANS_TIME_MIN_MON;
+                      if line_val = 'ALLOW' then                         
+                        VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_A;                        
+                        end IF ;  
+                      if    line_val ='CHALLENGE' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_C;
+                       end if;  
+                      if    line_val ='REVIEW' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_R;
+                       end if;  
+                      if    line_val ='DENY' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_D;
+                       end if;    
+
+                    INSERT INTO RP_CLIENT_BEHAVE_ALS(
+
+                                CUSTOMER_ACTION ,--客户行为2
+                                TRANS_NUM ,--交易量3
+                                TRANS_PERCENT,--交易量百分比4
+                                BROOM_ACTION_NUM ,--调查的行为数量,--搁置5
+                                BROOM_ACTION_PERCENT ,--调查的行为百分比--搁置6
+                                SYS_FAKE_TRANS_NUM ,--系统标记欺诈交易量7
+                                HUM_FAKE_TRANS_NUM ,--人工标记欺诈交易量,搁置8
+                                FAKE_TRANS_NUM ,--欺诈交易量，搁置9
+                                FAKE_BROOM_PERCENT ,--欺诈交易占调查交易百分比，搁置10
+                                SYS_REAL_TRANS_NUM ,--系统标记真实交易量11
+                                HUM_REAL_TRANS_NUM ,--人工标记真实交易量12
+                                REAL_TRANS_NUM ,--真实交易量13
+                                SUGGEST_ACTION_NUM,--建议此行为的规则数量14
+                                AVE_RISK_RANGE, --平均风险分值15
+                                 TRANS_TIME,
+                                 REAL_TRANS_PER--真实交易占调查交易的百分比
+
+                          )
+                         SELECT
+
+                                    max(POLICY_ACTION) AS CUSTOMER_ACTION ,--2交易行为
+                                   MAX(SUM(T.TRANS_NUM)) AS TRANS_NUM,--3交易量
+                                   NUM_2_PER_UTIL(MAX(SUM(T.TRANS_NUM)),VAR_TRANS_NUM) AS TRANS_PERCENT ,--4交易量百分比
+                                   (SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) AS BROOM_ACTION_NUM  ,--5调查的行为数量搁置--CASEMANGER不知怎么生成案例
+                                   NUM_2_PER_UTIL((SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) ,VAR_BROOM_ACTION_NUM) as BROOM_ACTION_PERCENT,--搁置--6调查的行为百分比
+                                   (SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)) AS SYS_FAKE_TRANS_NUM,--7系统标记欺诈交易量
+                                   (SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)) AS HUM_FAKE_TRANS_NUM ,--8人工标记欺诈交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)+
+                                            SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            ) AS FAKE_TRANS_NUM ,--9欺诈交易量
+                                   NUM_2_PER_UTIL( SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)+
+                                            SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                             ,
+                                              SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE ) as FAKE_BROOM_PERCENT ,--10欺诈交易占调查交易百分比
+                                  ( SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)) AS SYS_REAL_TRANS_NUM,--11系统标记真实交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                              ) AS  HUM_REAL_TRANS_NUM,--12人工标记真实交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END) ) as REAL_TRANS_NUM ,--13真实交易量
+                                 
+                                   SUGGEST_ACTION_NUM_ as SUGGEST_ACTION_NUM,--14
+                                   num_worked(MAX(SUM(T.TOTAL_SCORE_RANGE)),MAX(SUM(T.TRANS_NUM)))  as AVE_RISK_RANGE,--15
+                                   max(t.trans_time) as TRANS_TIME,
+                                    NUM_2_PER_UTIL(SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END) ,
+                                              SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) as REAL_TRANS_PER
+
+                                   FROM  RP_TRANS_LOG_MONTH T
+                                   WHERE
+                                          T.TRANS_TIME = TRANS_TIME_MIN_MON AND                                       
+                                         T.POLICY_ACTION =   line_val                                       
+                                   GROUP BY T.TRANS_TIME,T.POLICY_ACTION,T.CHALLENGE_SUCCESSFUL,T.FLAGGED,T.RESOLUTION,T.RULE_NAME ;
+
+                                 END IF;
+                                  VAR_POLICY_ACTION := VAR_POLICY_ACTION + 1;
+                            END LOOP;
+                            TRANS_TIME_MIN_MON := ADD_MONTHS(TRANS_TIME_MIN_MON,1);
+         END LOOP;
+
+      -----------------------============================---------------------------------
+      ELSE
+
+          select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO TIME_SCY from dual;
+          select to_date(SUBSTR(to_char(sysdate,'yyyy/mm/dd'),1,8)||'01','yyyy/mm/dd') INTO TIME_TODAY from dual;
+
+          VAR_POLICY_ACTION :=4;
+
+          while TIME_SCY >  ADD_MONTHS(TIME_TODAY,-3)
+
+             LOOP
+                TIME_SCY := ADD_MONTHS(TIME_SCY,-1);
+
+
+               IF TIME_SCY <= MAX_TIME  THEN
+
+               -----------------------------------------------------------------------------------------------------
+                  SELECT SUM(T.TRANS_NUM) INTO VAR_TRANS_NUM FROM RP_TRANS_LOG_MONTH T WHERE T.TRANS_TIME = TIME_SCY;
+
+
+                 SELECT COUNT(*) INTO VAR_COUNT_IN_ERR FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TIME_SCY;
+                 SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_A FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TIME_SCY AND T.ERD_BE_STT='ALLOW';
+                 SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_C FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TIME_SCY AND T.ERD_BE_STT='CHALLENGE';
+                 SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_R FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TIME_SCY AND T.ERD_BE_STT='REVIEW';
+                 SELECT COUNT(*) INTO VAR_COUNT_IN_ERR_D FROM RP_ERR_LOST_DETAIL T WHERE T.TRANS_TIME = TIME_SCY AND T.ERD_BE_STT='DENY';
+                 
+                  SELECT (SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END))
+                        + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                        + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                        + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                        + VAR_COUNT_IN_ERR
+                                INTO    VAR_BROOM_ACTION_NUM
+                         FROM  RP_TRANS_LOG_MONTH T 
+                                     WHERE  T.TRANS_TIME = TIME_SCY  GROUP BY T.TRANS_TIME,T.POLICY_ACTION;
+                       --------------------------------------------------------------------------------------------------------
+
+
+                 while  VAR_POLICY_ACTION <=7
+                 LOOP
+
+                   select VAR_POLICY_ACTION into var_cyc from dual;
+                   select  GET_LINE_BY_NUM(var_cyc) into line_val from dual;
+                   SELECT COUNT(1) INTO IS_NULL FROM RP_TRANS_LOG_MONTH T WHERE T.POLICY_ACTION =line_val AND T.TRANS_TIME=TIME_SCY;
+                  IF IS_NULL > 0 THEN
+                    select COUNT(DISTINCT(T.RULE_NAME)) into SUGGEST_ACTION_NUM_
+                             from RP_TRANS_LOG_MONTH t WHERE T.POLICY_ACTION=line_val AND T.TRIGGERED_NUM>0 AND T.TRANS_TIME =TIME_SCY;
+                      if line_val = 'ALLOW' then                         
+                        VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_A;                        
+                        end IF ;  
+                      if    line_val ='CHALLENGE' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_C;
+                       end if;  
+                      if    line_val ='REVIEW' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_R;
+                       end if;  
+                      if    line_val ='DENY' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_D;
+                       end if;          
+
+                   SELECT
+
+                                    max(POLICY_ACTION) AS CUSTOMER_ACTION ,--2交易行为
+                                   MAX(SUM(T.TRANS_NUM)) AS TRANS_NUM,--3交易量
+                                   NUM_2_PER_UTIL(MAX(SUM(T.TRANS_NUM)),VAR_TRANS_NUM) AS TRANS_PERCENT ,--4交易量百分比
+                                   (SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) AS BROOM_ACTION_NUM  ,--5调查的行为数量搁置--CASEMANGER不知怎么生成案例
+                                   NUM_2_PER_UTIL((SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) ,VAR_BROOM_ACTION_NUM) as BROOM_ACTION_PERCENT,--搁置--6调查的行为百分比
+                                   (SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)) AS SYS_FAKE_TRANS_NUM,--7系统标记欺诈交易量
+                                   (SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)) AS HUM_FAKE_TRANS_NUM ,--8人工标记欺诈交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)+
+                                            SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            ) AS FAKE_TRANS_NUM ,--9欺诈交易量
+                                   NUM_2_PER_UTIL( SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)+
+                                            SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                             ,
+                                              SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE ) as FAKE_BROOM_PERCENT ,--10欺诈交易占调查交易百分比
+                                  ( SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)) AS SYS_REAL_TRANS_NUM,--11系统标记真实交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                              ) AS  HUM_REAL_TRANS_NUM,--12人工标记真实交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END) ) as REAL_TRANS_NUM ,--13真实交易量
+                                 
+                                   SUGGEST_ACTION_NUM_ as SUGGEST_ACTION_NUM,--14
+                                   num_worked(MAX(SUM(T.TOTAL_SCORE_RANGE)),MAX(SUM(T.TRANS_NUM)))  as AVE_RISK_RANGE,--15
+                                   max(t.trans_time) as TRANS_TIME,
+                                    NUM_2_PER_UTIL(SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END) ,
+                                              SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) as REAL_TRANS_PER
+
+                                 into VAR_RP_CLIENT_BEHAVE_ALS
+
+
+                               FROM  RP_TRANS_LOG_MONTH T 
+                               WHERE
+                                      T.TRANS_TIME = TIME_SCY AND
+                                     T.POLICY_ACTION =   line_val
+                               GROUP BY T.TRANS_TIME,T.POLICY_ACTION,T.CHALLENGE_SUCCESSFUL,T.FLAGGED,T.RESOLUTION,T.RULE_NAME;
+
+                         UPDATE  RP_CLIENT_BEHAVE_ALS T SET
+                               --  T.CUSTOMER_ACTION=CUSTOMER_ACTION_ ,--客户行为2
+                                 T.TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.Trans_Num ,--交易量3
+                                 T.TRANS_PERCENT=VAR_RP_CLIENT_BEHAVE_ALS.Trans_Percent,--交易量百分比4
+                                 T.BROOM_ACTION_NUM=VAR_RP_CLIENT_BEHAVE_ALS.Broom_Action_Num ,--调查的行为数量,--搁置5
+                                 T.BROOM_ACTION_PERCENT=VAR_RP_CLIENT_BEHAVE_ALS.Broom_Action_Percent ,--调查的行为百分比--搁置6
+                                 T.SYS_FAKE_TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.Sys_Fake_Trans_Num,--系统标记欺诈交易量7
+                                 T.HUM_FAKE_TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.Hum_Fake_Trans_Num,--人工标记欺诈交易量,搁置8
+                                 T.FAKE_TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.Fake_Trans_Num ,--欺诈交易量，搁置9
+                                 T.FAKE_BROOM_PERCENT=VAR_RP_CLIENT_BEHAVE_ALS.Fake_Broom_Percent ,--欺诈交易占调查交易百分比，搁置10
+                                 T.SYS_REAL_TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.Sys_Real_Trans_Num ,--系统标记真实交易量11
+                                 T.HUM_REAL_TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.HUM_REAL_TRANS_NUM,--人工标记真实交易量12
+                                 T.REAL_TRANS_NUM=VAR_RP_CLIENT_BEHAVE_ALS.REAL_TRANS_NUM ,--真实交易量13
+                                 T.SUGGEST_ACTION_NUM=VAR_RP_CLIENT_BEHAVE_ALS.SUGGEST_ACTION_NUM,--建议此行为的规则数量14
+                                 T.AVE_RISK_RANGE=VAR_RP_CLIENT_BEHAVE_ALS.AVE_RISK_RANGE ,--平均风险分值15
+                                 T.REAL_TRANS_PER = VAR_RP_CLIENT_BEHAVE_ALS.REAL_TRANS_PER
+                                 WHERE T.TRANS_TIME = TIME_SCY AND T.CUSTOMER_ACTION =line_val
+                                 ;
+                                 COMMIT;
+                                 END IF;
+                                 VAR_POLICY_ACTION := VAR_POLICY_ACTION + 1;
+
+                       END LOOP;
+
+
+               ELSE
+                      VAR_POLICY_ACTION :=4;
+
+                while  VAR_POLICY_ACTION <=7
+                 LOOP
+                    select VAR_POLICY_ACTION into var_cyc from dual;
+                   select  GET_LINE_BY_NUM(var_cyc) into line_val from dual;
+                  SELECT COUNT(1) INTO IS_NULL FROM RP_TRANS_LOG_MONTH T WHERE T.POLICY_ACTION =line_val AND T.TRANS_TIME=TIME_SCY;
+                  IF IS_NULL > 0 THEN
+                      select COUNT(DISTINCT(T.RULE_NAME)) into SUGGEST_ACTION_NUM_
+                             from RP_TRANS_LOG_MONTH t WHERE T.POLICY_ACTION=line_val AND T.TRIGGERED_NUM>0 AND T.TRANS_TIME =TIME_SCY;
+                       if line_val = 'ALLOW' then                         
+                                   VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_A;                        
+                      end IF ;  
+                      if    line_val ='CHALLENGE' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_C;
+                       end if;  
+                      if    line_val ='REVIEW' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_R;
+                       end if;  
+                      if    line_val ='DENY' then VAR_COUNT_IN_ERR_4_USE:=VAR_COUNT_IN_ERR_D;
+                       end if;         
+
+                      INSERT INTO RP_CLIENT_BEHAVE_ALS(
+
+                                CUSTOMER_ACTION ,--客户行为2
+                                TRANS_NUM ,--交易量3
+                                TRANS_PERCENT,--交易量百分比4
+                                BROOM_ACTION_NUM ,--调查的行为数量,--搁置5
+                                BROOM_ACTION_PERCENT ,--调查的行为百分比--搁置6
+                                SYS_FAKE_TRANS_NUM ,--系统标记欺诈交易量7
+                                HUM_FAKE_TRANS_NUM ,--人工标记欺诈交易量,搁置8
+                                FAKE_TRANS_NUM ,--欺诈交易量，搁置9
+                                FAKE_BROOM_PERCENT ,--欺诈交易占调查交易百分比，搁置10
+                                SYS_REAL_TRANS_NUM ,--系统标记真实交易量11
+                                HUM_REAL_TRANS_NUM ,--人工标记真实交易量12
+                                REAL_TRANS_NUM ,--真实交易量13
+                                SUGGEST_ACTION_NUM,--建议此行为的规则数量14
+                                AVE_RISK_RANGE, --平均风险分值15
+                                 TRANS_TIME,
+                                 REAL_TRANS_PER--真实交易占调查交易的百分比
+
+                          )
+                         SELECT
+
+                                    max(POLICY_ACTION) AS CUSTOMER_ACTION ,--2交易行为
+                                   MAX(SUM(T.TRANS_NUM)) AS TRANS_NUM,--3交易量
+                                   NUM_2_PER_UTIL(MAX(SUM(T.TRANS_NUM)),VAR_TRANS_NUM) AS TRANS_PERCENT ,--4交易量百分比
+                                   (SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) AS BROOM_ACTION_NUM  ,--5调查的行为数量搁置--CASEMANGER不知怎么生成案例
+                                   NUM_2_PER_UTIL((SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) ,VAR_BROOM_ACTION_NUM) as BROOM_ACTION_PERCENT,--搁置--6调查的行为百分比
+                                   (SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)) AS SYS_FAKE_TRANS_NUM,--7系统标记欺诈交易量
+                                   (SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)) AS HUM_FAKE_TRANS_NUM ,--8人工标记欺诈交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)+
+                                            SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            ) AS FAKE_TRANS_NUM ,--9欺诈交易量
+                                   NUM_2_PER_UTIL( SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='N'  THEN sum(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' THEN sum(T.TRANS_NUM) ELSE 0 END)+
+                                            SUM(CASE WHEN T.FLAGGED IS NULL AND T.RESOLUTION='F' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                             ,
+                                              SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE ) as FAKE_BROOM_PERCENT ,--10欺诈交易占调查交易百分比
+                                  ( SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)) AS SYS_REAL_TRANS_NUM,--11系统标记真实交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                              ) AS  HUM_REAL_TRANS_NUM,--12人工标记真实交易量
+                                  (SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END) ) as REAL_TRANS_NUM ,--13真实交易量
+                                 
+                                   SUGGEST_ACTION_NUM_ as SUGGEST_ACTION_NUM,--14
+                                   num_worked(MAX(SUM(T.TOTAL_SCORE_RANGE)),MAX(SUM(T.TRANS_NUM)))  as AVE_RISK_RANGE,--15
+                                   max(t.trans_time) as TRANS_TIME,
+                                    NUM_2_PER_UTIL(SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW' AND T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.CHALLENGE_SUCCESSFUL ='Y' AND  T.FLAGGED IS NULL THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            +SUM(CASE WHEN T.POLICY_ACTION = 'ALLOW'AND T.RESOLUTION = 'G' THEN SUM(T.TRANS_NUM) ELSE 0 END)                                           
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'CHALLENGE' AND T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'REVIEW' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END )
+                                            + SUM(CASE WHEN T.POLICY_ACTION = 'DENY' AND  T.RESOLUTION='G' THEN SUM(T.TRANS_NUM) ELSE 0 END) ,
+                                              SUM(CASE WHEN  T.POLICY_ACTION = 'ALLOW'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'CHALLENGE'  THEN SUM(T.TRANS_NUM) ELSE 0 END)                                          
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'REVIEW' THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + SUM(CASE WHEN  T.POLICY_ACTION = 'DENY'  THEN SUM(T.TRANS_NUM) ELSE 0 END)
+                                            + VAR_COUNT_IN_ERR_4_USE) as REAL_TRANS_PER
+
+                                   FROM  RP_TRANS_LOG_MONTH T
+                                   WHERE
+                                          T.TRANS_TIME = TIME_SCY AND                                       
+                                         T.POLICY_ACTION =   line_val                                       
+                                   GROUP BY T.TRANS_TIME,T.POLICY_ACTION,T.CHALLENGE_SUCCESSFUL,T.FLAGGED,T.RESOLUTION,T.RULE_NAME ;
+                                 END IF;
+                                  VAR_POLICY_ACTION := VAR_POLICY_ACTION + 1;
+                            END LOOP;
+
+               END IF;
+             END LOOP;
+          END IF;
+    EXCEPTION
+           WHEN OTHERS
+           THEN
+              ROLLBACK;
+               /*操作失败后插入日志记录*/
+               INSERT_COLLECT_DATA_LOG_4_FIX(
+                   VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+                  'GET_DATA_2_CLI_BEHA_ALS_CC', --PROC_NAME 存储过程名称
+                  'rp_trans_log_month--',  --FROM_TABLE 来源表
+                  '',  --TO_TABLE 目标表
+                  SYSDATE,        --DATA_RANGE 数据范围
+                  TIME_SCY,        --DATA_BEGIN_TIME 数据开始时间
+                  TIME_SCY          --DATA_END_TIME 数据开始时间
+                   );
+
+             RETURN;
+
+
+end GET_DATA_2_CLI_BEHA_ALS_CC;

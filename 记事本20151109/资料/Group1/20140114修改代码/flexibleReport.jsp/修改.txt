@@ -1,0 +1,5 @@
+﻿if(dataType == "dataItem" && isSettled != "Y"){
+				var stat="dialogWidth:900px;dialogHeight:600px;status:0;help:0;scroll:0";
+			}else{
+				var stat="dialogWidth:900px;dialogHeight:600px;status:0;help:0;scroll:0";
+			}	

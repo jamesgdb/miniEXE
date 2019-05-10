@@ -1,0 +1,2 @@
+﻿1.将所有的出现images。注掉
+/* 	background-image: url(../../images/2/xmsqb1.gif); */

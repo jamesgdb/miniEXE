@@ -1,0 +1,27 @@
+﻿3、	nmon数据采集
+3.1数据采集
+为了实时监控系统在一段时间内的使用情况并将结果记录下来，我们可以通过运行以下命令实现：
+#./ nmon -f -t -r test -s 30 -c 180
+ltest：这次监控记录的标题与生产的文件名称
+l-s 30：每30秒进行一次数据采集
+l-c 180：一共采集180次
+输入命令后，将自动在当前目录生成一个hostname_timeSeries.nmon的文件，如：
+lhosname为test1，生产的文件为：test1_090320_2213.nmon
+通过以下命令将nmon结果转换为csv文件：
+# sort -A test1_090320_2213.nmon > test1_090320_2213.csv
+即可在当前目录生产test1_090320_2213.csv文件。我们将test1_090320_2213.csv文件下载到本地转换为图形结果分析。
+3.2生成图形化结果 
+如何使用nmon analyser.xls工具生成excel文件呢？
+1、下载nmon analyser.xls工具
+2、打开nmon analyser.xls工具
+3、调整excel宏安全性：工具-宏-安全性
+（修改安全级别与可靠发行商）
+（选择）安全级别：低
+（勾上）信任所有安装的加载项和模板
+（勾上）信任对于“Visual Baisc项目”的访问
+4、 修改完后，确定-关闭nmon analyser.xls，重新打开 
+5、点击Analyse nmon data按钮，加载之前下载的test1_090320_2213.csv
+文件
+
+ 
+

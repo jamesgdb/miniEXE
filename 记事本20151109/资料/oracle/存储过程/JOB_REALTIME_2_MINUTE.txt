@@ -1,0 +1,92 @@
+﻿通过这个job调用real_to_min。每五分钟执行一次（在while---loop里面每次增加五分钟），在这个里面判断RP_COLLECT_DATA_LOG里面的REDO_TIME是否小于三次，小于三次的才执行get_data_from_realtim_2_minute，当操作成功后把此次操作的结果记录到UPDATE_COLLECT_DATA_LOG表里面
+CREATE OR REPLACE PROCEDURE JOB_REALTIME_2_MINUTE
+AS
+ VAR_RECORD_ID  VARCHAR2(30);
+ VAR_RECORD_NUM NUMBER;
+ VAR_MINUTE_RECORD_ID VARCHAR(30);
+ VAR_MINUTE_REDO_TIME INTEGER;
+  VAR_SYSTIME VARCHAR(30);--系统时间
+ /*minute表里的最大时间*/
+ VAR_MAX_MINUTE_TIME VARCHAR(30);
+ OP_STATUS VARCHAR(5) ;--当前时间段的汇总的状态
+ STATUS_TIMES_ID VARCHAR(30);--返回的执行次数 ID已经当前状态
+ --END_TIME DATE;
+BEGIN
+  /*得到过程最终时间*/
+  --SELECT to_date(to_char(sysdate-1,'yyyy-mm-dd')||' 23:59:59','yyyy-mm-dd hh24:mi:ss') INTO END_TIME FROM DUAL;
+
+  ----------------CESHI----------
+  --END_TIME := TO_DATE('2013-01-29 02:29:59','YYYY-MM-DD HH24:MI:SS');
+
+  VAR_RECORD_NUM := 0;
+ /*获取系统最大时间*/
+  VAR_SYSTIME := SUBSTR(GET_MIN_EVENT_TIME,0,16);
+ -- VAR_SYSTIME :=SUBSTR('2013-01-29 02:25:00',0,16);
+ /*获取分钟表的最大时间*/
+   SELECT CASE  WHEN MAX(t.trans_time) IS NULL
+   THEN VAR_SYSTIME ELSE
+   --分钟表里已经汇总过的最大时间，本次从它的下一时间开始，如果无则使用realtime里的
+   TO_CHAR(MAX(t.trans_time+(1/24/12)),'yyyy-mm-dd hh24:mi')
+   END INTO VAR_MAX_MINUTE_TIME FROM rp_trans_log_minute t
+   WHERE T.TRANS_TIME > SYSDATE - 1/8;
+  --保证汇总时间为整五分钟
+  VAR_MAX_MINUTE_TIME := GET_REAL_TIME_FOR_MINUTE(VAR_MAX_MINUTE_TIME);
+   /*插入日志*/
+   --判断是否为重做
+     INSERT_COLLECT_DATA_LOG(
+        VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+        'JOB_REALTIME_2_MINUTE', --PROC_NAME 存储过程名称
+        'JOB_REALTIME_2_MINUTE',  --FROM_TABLE 来源表
+        'JOB_REALTIME_2_MINUTE',  --TO_TABLE 目标表
+        TO_CHAR(SYSDATE-(1/24/60),'YYYY-MM-DD HH24:MI:SS'),        --DATA_RANGE 数据范围
+        TO_CHAR(SYSDATE-(1/24/60),'YYYY-MM-DD HH24:MI:SS'),        --DATA_BEGIN_TIME 数据开始时间
+        TO_CHAR(SYSDATE-(1/24/60),'YYYY-MM-DD HH24:MI:SS')         --DATA_END_TIME 数据开始时间
+      );
+--循环调用汇总存储过程
+while
+  to_date(VAR_MAX_MINUTE_TIME,'YYYY-MM-DD HH24:MI') + 1/24/12 <=  SYSDATE - 1/24/30 --当前时间的前两分钟
+  --to_date(VAR_MAX_MINUTE_TIME,'YYYY-MM-DD HH24:MI') < END_TIME
+
+  LOOP
+  STATUS_TIMES_ID := GET_RECORD_ID_AND_REDO_TIME(VAR_MAX_MINUTE_TIME||':00','GET_DATA_FROM_REALTIM_2_MINUTE');---例如‘R001711632’
+  VAR_MINUTE_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2));--‘0’
+  VAR_MINUTE_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));--‘1711632’
+  OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);‘R’
+  IF VAR_MINUTE_REDO_TIME < 3 AND  OP_STATUS != 'R' THEN  --如果次数小于三次，并且运行状态不是‘正在运行’
+  get_data_from_realtim_2_minute(
+     VAR_MAX_MINUTE_TIME,
+     TO_CHAR(TO_DATE(VAR_MAX_MINUTE_TIME,'YYYY-MM-DD HH24:MI')+(1/24/60*4),'YYYY-MM-DD HH24:MI'),
+     VAR_MINUTE_RECORD_ID,
+     VAR_MINUTE_REDO_TIME+1
+     );
+  END IF;
+  VAR_MAX_MINUTE_TIME := TO_CHAR(TO_DATE(VAR_MAX_MINUTE_TIME,'YYYY-MM-DD HH24:MI')+(1/24/60*5),'YYYY-MM-DD HH24:MI');
+
+  END LOOP;
+
+
+  /*操作成功后修改日志记录*/
+  UPDATE_COLLECT_DATA_LOG(
+    VAR_RECORD_ID,
+    NULL,
+    SYSDATE,
+    'SUCCESSFUL',
+    VAR_RECORD_NUM,
+    0
+  );
+  EXCEPTION
+     WHEN OTHERS
+     THEN
+         /*操作失败后修改日志记录*/
+       UPDATE_COLLECT_DATA_LOG(
+           VAR_RECORD_ID,
+           NULL,
+           SYSDATE,
+           'FAILED',
+           VAR_RECORD_NUM,
+           0
+         );
+
+       RETURN;
+
+END JOB_REALTIME_2_MINUTE;

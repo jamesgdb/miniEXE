@@ -1,0 +1,51 @@
+﻿<%@ page language="java" contentType="text/html;charset=UTF-8"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ include file="/common/taglibs.jsp" %>
+<html >
+	<head>
+		<meta name="Descrīption" Content="The common head page of the UI">
+		<meta name="Copyright" Content="Copyright © 2008 Yucheng Network Technologies Limited All Rights Reserved">
+		<meta name="Author" Content="Mao xiaoming">
+		<script type="text/javascript" src="${ctx}/resources/system/js/form.js"></script>
+		<script type="text/javascript" src="${ctx}/resources/system/js/checkData.js"></script>
+		<SCRIPT type="text/javascript" src="../dwr/engine.js"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/util.js"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/DomainService"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/LogonService"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/UserRepository"></SCRIPT>
+		<SCRIPT type="text/javascript" src="../dwr/interface/RiskService"></SCRIPT>
+		<SCRIPT type="text/javascript" src="${ctx}/resources/system/js/system.js"></SCRIPT>
+		<link href="${ctx}/css/page.css" rel="stylesheet" type="text/css">
+		<link href="${ctx}/css/centercontent.css" rel="stylesheet" type="text/css"> 
+		<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css"> 
+		<script>
+			function exit(){
+				if(confirm("您确认要退出系统吗？")){
+					LogonService.logout(function(result){
+						top.window.location.href = "${ctx}";
+				    });
+// 					top.window.location.href = "${ctx}";
+				}
+			}
+			function changePassword(){
+				window.top.createNewWindow("changePassword", "修改密码", "manage/view/changePassword", 400, 300);
+			}
+		</script>
+	</head>
+	<body style="margin:0px;overflow-x:hidden;overflow-y:hidden;"> 
+	<div class="title_bar">
+	<table class="table_" border="0" cellspacing="1" cellpadding="0">
+		<tbody>
+			<tr>
+				<td class="left_"><div class="logo"><input type="hidden"/></div></td>
+				<td class="center_"><img src="${ctx}/image/system/space.gif"/></td>
+				<td class="right_">
+					<span class="edit" onclick="changePassword();" style="cursor:hand"></span>&nbsp;
+					<span class="exit" onclick="exit();" style="cursor:hand"></span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+	</body>
+</html>

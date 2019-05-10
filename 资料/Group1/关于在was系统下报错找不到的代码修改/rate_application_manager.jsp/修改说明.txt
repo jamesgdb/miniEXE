@@ -1,0 +1,4 @@
+﻿错误的将globle写成了global.css：
+原始：	<link href="${ctx}/css/globle.css" rel="stylesheet" type="text/css">
+修改：<link href="${ctx}/css/global.css" rel="stylesheet" type="text/css">
+		

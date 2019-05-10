@@ -1,0 +1,63 @@
+﻿import java.io.FileInputStream;
+import java.io.InputStream;
+
+import com.runqian.report4.model.ReportDefine;
+import com.runqian.report4.model.engine.ExtCellSet;
+import com.runqian.report4.usermodel.Context;
+import com.runqian.report4.usermodel.Engine;
+import com.runqian.report4.usermodel.IReport;
+import com.runqian.report4.util.ReportUtils;
+
+
+
+public class exportreport {
+//	public static IReport Create() throws Exception{
+//		String reportFile1 = "C:/graphtest1.raq";
+//		InputStream is =new FileInputStream(reportFile1);
+//		ReportDefine rd = (ReportDefine)ReportUtils.read(is);
+//		//第二步，运算报表
+//		Context context = new Context();
+//		Engine enging = new Engine( rd, context);
+//		IReport iReport= enging.calc();
+//		
+//		
+//		return iReport;
+//		
+//	}
+	/**
+	 * @param args
+	 * @throws Exception 
+	 */
+	public static void main(String[] args) throws Exception {
+		// TODO Auto-generated method stub
+		String lisenseFile = "D:\\runqianServer.lic"; 
+		ExtCellSet.setLicenseFileName(lisenseFile);
+//		
+//		
+		String reportFile1 = "D:\\flexibleReport.raq";
+		InputStream is =new FileInputStream(reportFile1);
+		ReportDefine rd = (ReportDefine)ReportUtils.read(is);
+//		//第二步，运算报表
+		Context context = new Context();
+		Engine enging = new Engine( rd, context);
+		IReport iReport= enging.calc();
+		try {
+			//输出到本地
+			//rd = setInput(rd);
+			
+//			OutputStream out = new FileOutputStream( "C:/temp/result2.html" );
+//			ReportUtils.write(out,rd);
+//			out.close();
+			
+			ReportUtils.exportToHTML("d:\\rrresult2.html",  iReport);
+
+			System.out.println("导出成功");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}

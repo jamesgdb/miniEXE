@@ -1,0 +1,18 @@
+﻿dmEntityList.jsp  -----------------------------1
+
+-------------------------------------------------------------------------------
+dmFieldList.jsp -------------------------------1
+--------------------------------------------------------------------------------
+dqBasicCheckResultList.jsp ------------------1
+dqCodeCheckResultList.jsp ------------------1
+dqGsBalResultList.jsp -------------------------1
+dqGsRateResultList.jsp -----------------------1
+dqLogicCheckResultList.jsp--------------------1
+
+
+function goBack(){
+    var modelId = $("#modelId").val(); 
+    window.location.href = "${pageContext.request.contextPath}/dmTheme_toTheme.action?modelId="+modelId;
+	}
+	
+	dmModInsThemList.jsp

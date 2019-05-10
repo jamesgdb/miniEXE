@@ -1,0 +1,12 @@
+﻿通过设置session.setAttribute("title", title);
+在request中 String title = JParamToolkit.getSession(request.getSession(), "title");
+
+   public static String getSession(HttpSession session, String sessionName) {
+        String retStr = "";
+        try {
+            retStr = session.getAttribute(sessionName).toString();
+        } catch (Exception e) {
+            retStr = "";
+        }
+        return retStr;
+    }

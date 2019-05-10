@@ -1,0 +1,16 @@
+﻿在teacher中private Set<Student> student =new HashSet<Student>();
+
+       @OneToMany(mappedBy="teacher",    --------------mappedBy属性设置时只 考虑对面的关联，不用考虑本侧的关联，只需要指定一边的关联就ok
+			   cascade={CascadeType.ALL}，  -------------如果有关联的表，那么增加此属性后，直接就可以关联，不需要在save（Student）负责 -------------增删改
+			    fetch=FetchType.EAGER /LAZY  负责get和load  前者是直接去取，积极的。LAZY  是默认的
+			)    
+	@JoinColumn(name="teacher_student") ---------------必须指定，否则会生成一张中间表
+	public Set<Student> getStudent() {
+		return student;
+	}
+---------------------------------------------	
+         在action中直接配置set
+         Set<Student> s = new HashSet<Student>();
+		s.add(s1);
+		s.add(s2);
+		t.setStudent(s);

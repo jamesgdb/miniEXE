@@ -1,0 +1,24 @@
+﻿select userenv('language') from dual;---------查看数据库的编码格式
+create tablespace zhangsan datafile 'zhangsan.dbf' size 100m;---------创建表空间
+
+
+
+dbms_job.remove(365);
+
+select job,priv_user from user_jobs;
+select * from user_jobs
+
+execute dbms_job.remove(29);
+
+select * from user_procedures  t where t.object_type  like '%PRO%';
+select *  from user_tables;
+select *  from user_objects  t where t.object_type  like 'TABLE';
+
+select  distinct(t.OBJECT_TYPE) from user_objects  t;
+
+select 'drop table '|| t.OBJECT_NAME  from user_objects  t where t.object_type  like 'TABLE';
+ Select Tablespace_Name,Sum(bytes)/1024/1024 From Dba_Segments Group By Tablespace_Name
+
+
+select username,default_tablespace from user_users;------查看用户默认的表空间
+ Select Tablespace_Name,Sum(bytes)/1024/1024 From Dba_Segments Group By Tablespace_Name ;-------------查看用户的所有表空间

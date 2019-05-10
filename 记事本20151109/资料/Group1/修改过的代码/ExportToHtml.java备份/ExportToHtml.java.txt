@@ -1,0 +1,101 @@
+﻿package com.boc.report;
+
+import com.boc.util.JParamToolkit;
+import com.runqian.report4.model.ReportDefine;
+import com.runqian.report4.usermodel.Context;
+import com.runqian.report4.usermodel.Engine;
+import com.runqian.report4.usermodel.IReport;
+import com.runqian.report4.usermodel.MacroMetaData;
+import com.runqian.report4.usermodel.ParamMetaData;
+import com.runqian.report4.util.ReportUtils;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * <p> Title: ExportToHtml </p>
+ * <p>Description: 将报表数据导出为html文件 export the report to html file
+ * <p>Copyright: 北京宇信易诚科技有限公司 (Copyright © 2008 Yucheng Network Technologies Limited All Rights Reserved.)</p>
+ * <p>Company: 北京宇信易诚网络技术有限公司(Beijing Yucheng Network Technologies Co. Ltd)</p>
+ * <p>Date: 2012-7-15</p>
+ * @author 何忠朝(He zhongchao)
+ * @version 1.0
+ */
+public class ExportToHtml extends HttpServlet
+{
+	
+  /**
+   * deal whith the get method
+   */
+  public void doGet(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException
+   {
+	String raq = JParamToolkit.getSession(request.getSession(), "raq");
+	String raqParam = JParamToolkit.getSession(request.getSession(), "raqParam");
+	String[]  list = raqParam.split(";");
+	//用于存放参数和宏的map
+	Map<String, String> param = null;
+	param = new HashMap();
+	//给Map赋值
+	for(int i = 0 ; i< list.length; i++){
+	if("sql".endsWith(list[i].split("=")[0]) || "sql" == list[i].split("=")[0]){
+	  	param.put(list[i].split("=")[0], list[i].split("ql=")[1]); 			
+	  	}else{
+	  	   param.put(list[i].split("=")[0], list[i].split("=")[1]);
+	  	}	
+	 }
+    String path = getServletContext().getRealPath("report/" + raq);
+    try {
+      ReportDefine rd = (ReportDefine)ReportUtils.read(path);
+      Context ctx = new Context();
+      ParamMetaData pmd = rd.getParamMetaData(); //从报表定义中取得参数元对象ParamMetaData
+      String paramOrMocrName = "";
+      if(pmd != null){
+    	  for(int i = 0, count = pmd.getParamCount(); i < count; i ++ ) { //
+    		  paramOrMocrName = pmd.getParam(i).getParamName(); //获取参数名
+    		  if("width".equals(paramOrMocrName)){
+    			    ctx.setParamValue(paramOrMocrName, Float.parseFloat(param.get(paramOrMocrName)));
+	    		  }else if(paramOrMocrName.indexOf("isHidden") >= 0){
+	    			ctx.setParamValue(paramOrMocrName, Boolean.valueOf(paramOrMocrName));
+	    		  }else {
+	    		    ctx.setParamValue(paramOrMocrName, param.get(paramOrMocrName));
+	    		  }//设参数值
+    		  }
+      }
+      MacroMetaData mmd = rd.getMacroMetaData(); //从报表定义中取得宏的元对象MacroMetaData
+      if( mmd != null ){
+    	  for(int i = 0; i < mmd.getMacroCount(); i ++){
+    		  	paramOrMocrName = mmd.getMacro(i).getMacroName(); //获取宏名
+    		  		ctx.setMacroValue(paramOrMocrName,param.get(paramOrMocrName)); //设置宏值
+    	  	}
+      }
+      Engine en = new Engine(rd, ctx);
+      IReport ireport = en.calc();
+      response.setCharacterEncoding("utf-8");
+      response.setContentType("application/x-msdownload");
+      response.setHeader("Content-Disposition", "attachment; filename=" + raq + ".html");
+      PrintWriter out = response.getWriter();
+      String html = ReportUtils.toHTMLString(ireport, raq, request);
+      out.print("<head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head>");
+      out.println(html);
+    }
+    catch (Throwable e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * deal whith the post method
+   */
+  public void doPost(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    doGet(request, response);
+  }
+}

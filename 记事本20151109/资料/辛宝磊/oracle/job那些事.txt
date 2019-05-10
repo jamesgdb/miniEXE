@@ -1,0 +1,27 @@
+﻿1，查询当前用户下的job
+select * from user_jobs t 
+
+杀死正在运行的job
+1，select * from dbsm_jobs
+2,select * from dbs
+
+
+1、查看所有job;
+select * from dba_jobs;
+2、查看正在运行的job;
+select * from dba_jobs_running;
+3、根据sid查出对应的session;
+select SID,SERIAL# from V$Session where SID='&SID';
+4、kill对应的session;
+alter system kill session '&SID,&SERIAL';
+5、将job置为broken;
+exec dbms_job.broken('&JOB',true);
+6、sysdba用户权限删除job;
+delete from dba_jobs where JOB='&JOB';
+
+
+
+ 怎样把job分配到不同节点。
+
+设置ＪＯＢ使用函数dbms_job.submit　其中有一个参数instance_id的参数可以指定Job在哪个实例上运行
+

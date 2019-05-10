@@ -1,0 +1,15 @@
+﻿start d:\test.sql;
+edit .编辑脚本，路径
+spool：新建脚本:可以将屏幕的东西输出到sql文件；spool off；
+输入条件：select * from gaodebao where name='&name';
+设置linesize；设置显示行的宽度
+设置pagesize：设置一页显示的行数。
+如果删除已经创建表的用户，那么要用命令：drop user gaodebao dascade 级联删除。
+改用户密码：password；
+grant select on tablename to user;
+去其他用户下查表：select * from system.emp;
+如果全乡权限想继续传递的话，那么得：grant connect to gaodebao with grant option;
+
+
+查看执行时间：set timing on
+

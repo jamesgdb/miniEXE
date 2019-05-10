@@ -1,0 +1,588 @@
+﻿CREATE OR REPLACE PROCEDURE APPEND_RESULT_WHEN_UPDATE
+--AUTHOR:毛小明
+--当交易数据发生修改时 向汇总结果表追加统计结果
+AS
+  --v_ErrorCode NUMBER;           -- Variable to hold the error message code
+  --v_ErrorText VARCHAR2(200);
+  VAR_SYSDATE VARCHAR2(30);
+  VAR_ORDER_ID VARCHAR2(300);
+  VAR_EVENT_ID INTEGER;--存放EVENT_ID
+  STATUS_TIMES_ID VARCHAR(30);--返回的执行次数 ID以及当前状态
+  VAR_RECORD_ID VARCHAR(30);--日志的ID
+  VAR_REDO_TIME INTEGER;--日志的执行次数
+  OP_STATUS VARCHAR(5) ;--当前数据被更新的状态
+  CANNOT_UPDATE_ID VARCHAR(300);--当前不能被更新的数据的ID
+  --当前数据在REALTIME被汇总的时间
+  VAR_USED_TIME DATE;
+  --EVENT_LOG_UPDATE一行记录的数据类型
+  VAR_EVENT_LOG_UPDATE EVENT_LOG_UPDATE%ROWTYPE;
+
+
+  --VAR_EVENT_LOG一行记录的数据类型
+  VAR_EVENT_LOG_REAL_GATHER EVENT_LOG_REAL_GATHER%ROWTYPE;
+  --定义EVENT_LOG_UPDATE游标
+  CURSOR MY_CURSOR IS
+  --修改表中没有操作过的数据,要按发生顺序依次执行
+  SELECT * FROM EVENT_LOG_UPDATE T WHERE HAS_USED = 'N'
+ --AND T.SYS_CREATION_DATE<TO_DATE('2022-2-22 00:00:00','YYYY-MM-DD HH24:MI;SS')
+  AND T.SYS_CREATION_DATE>TO_DATE('2022-2-01 00:00:00','YYYY-MM-DD HH24:MI;SS')
+  and t.sys_creation_date<TO_DATE('2022-2-20 12:00:00','YYYY-MM-DD HH24:MI;SS')
+   ORDER BY LASTMODIFIED ASC;
+
+  VAR_APPEND_RESULT_SQL VARCHAR2(8000);
+  /*插入记录数量*/
+  VAR_RECORD_NUM NUMBER;
+
+  VAR_DATE_CHAR VARCHAR2(50);--用于游历游标时的时间获取成字符串形式
+ -- VAR_LOG_POLICY_ACTION VARCHAR2(50);--没有更新前POLICY_ACTION的状态
+
+
+
+  VAR_IS_IN_ERR NUMBER;--查一下是否错漏报表中已经存在此交易
+  VAR_POLICY_ACT_STA_LOG VARCHAR2(20);--判定log表中数据，确定交易状态，如果是真实ALLOW,如果是欺诈DENY
+  VAR_POLICY_ACT_STA_UPD VARCHAR2(20);--判定UPDATE表中数据，确定交易状态，如果是真实ALLOW,如果是欺诈DENY
+  VAR_COUNT_IN_LOG NUMBER;--由于测试源端可能删除数据，导致update时，源端已经把event_log中的交易记录给删除，导致报错
+  VAR_C4 VARCHAR2(200);--付款人证件
+  VAR_C7 VARCHAR2(200);--证件号
+  VAR_C6 VARCHAR2(200);--ipa
+  VAR_C1 VARCHAR2(200);--付款人行名
+  VAR_C11 VARCHAR2(200);--收款人开户行
+  VAR_C13 VARCHAR2(200);--开户省份
+   VAR_C4_2 VARCHAR2(200);--付款人证件
+  VAR_C7_2 VARCHAR2(200);--证件号
+  VAR_C6_2 VARCHAR2(200);--ipa
+  VAR_C1_2 VARCHAR2(200);--付款人行名
+  VAR_C11_2 VARCHAR2(200);--收款人开户行
+  VAR_C13_2 VARCHAR2(200);--开户省份
+
+  VAR_CDF_ALL VARCHAR2(2000);--所有的自定义因子拼接‘，all，’
+  VAR_CDF_ALL_used VARCHAR2(2000);--以前的自定义因子拼接‘，all，’
+
+
+BEGIN
+  VAR_RECORD_NUM := 0;
+  CANNOT_UPDATE_ID := '000000';
+  --打开游标
+  OPEN MY_CURSOR;
+
+  --遍历游标
+  LOOP
+    FETCH MY_CURSOR INTO VAR_EVENT_LOG_UPDATE;
+    --无数据时退出
+    EXIT WHEN MY_CURSOR%NOTFOUND;
+    ---------------------------------------
+      VAR_POLICY_ACT_STA_LOG:='000';
+      VAR_POLICY_ACT_STA_UPD:='0000';
+      VAR_CDF_ALL_used:='';
+      VAR_CDF_ALL:='';
+      VAR_C4:='';
+       VAR_C7:='';
+       VAR_C6:='';
+       VAR_C1:='';
+       VAR_C11:='';
+       VAR_C13:='';
+       VAR_C4_2:='';
+        VAR_C7_2:='';
+       VAR_C6_2:='';
+       VAR_C1_2:='';
+       VAR_C11_2:='';
+       VAR_C13_2:='';
+
+    VAR_CDF_ALL:=','||VAR_EVENT_LOG_UPDATE.CDF_S_1||','||VAR_EVENT_LOG_UPDATE.CDF_S_2||','||VAR_EVENT_LOG_UPDATE.CDF_S_3||','||VAR_EVENT_LOG_UPDATE.CDF_S_4||','||VAR_EVENT_LOG_UPDATE.CDF_S_5
+    ||','||VAR_EVENT_LOG_UPDATE.CDF_S_6||','||VAR_EVENT_LOG_UPDATE.CDF_S_7||','||VAR_EVENT_LOG_UPDATE.CDF_S_8||','||VAR_EVENT_LOG_UPDATE.CDF_S_9||','||VAR_EVENT_LOG_UPDATE.CDF_S_10
+    ||','||VAR_EVENT_LOG_UPDATE.CDF_S_11||','||VAR_EVENT_LOG_UPDATE.CDF_S_12||','||VAR_EVENT_LOG_UPDATE.CDF_S_13||','||VAR_EVENT_LOG_UPDATE.CDF_S_14||','||VAR_EVENT_LOG_UPDATE.CDF_S_15
+    ||','||VAR_EVENT_LOG_UPDATE.CDF_S_16||','||VAR_EVENT_LOG_UPDATE.CDF_S_17||','||VAR_EVENT_LOG_UPDATE.CDF_S_18||','||VAR_EVENT_LOG_UPDATE.CDF_S_19||','||VAR_EVENT_LOG_UPDATE.CDF_S_20||',';
+    VAR_C4:=get_vale_from_cd_gnpx(VAR_CDF_ALL,'4','4');
+    VAR_C7:=get_vale_from_cd_gnpx(VAR_CDF_ALL,'7','4');
+    VAR_C6:=get_vale_from_cd_gnpx(VAR_CDF_ALL,'6','4');
+    VAR_C1:=get_vale_from_cd_gnpx(VAR_CDF_ALL,'1','4');
+    VAR_C11:=get_vale_from_cd_gnpx(VAR_CDF_ALL,'11','5');
+    VAR_C13:=get_vale_from_cd_gnpx(VAR_CDF_ALL,'13','5');
+
+
+    VAR_DATE_CHAR :=TO_CHAR(VAR_EVENT_LOG_UPDATE.LASTMODIFIED,'YYYY-MM-DD HH24:MI:SS');--
+
+
+
+      --判定update状态
+
+       IF (VAR_EVENT_LOG_UPDATE.RESOLUTION='F' AND VAR_EVENT_LOG_UPDATE.FLAGGED IS NULL)
+         OR  VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'DENY'
+         OR  (VAR_EVENT_LOG_UPDATE.POLICY_ACTION  = 'CHALLENGE' AND VAR_EVENT_LOG_UPDATE.CHALLENGE_SUCCESSFUL='N')
+
+         THEN VAR_POLICY_ACT_STA_UPD:='DENY';
+         END IF;
+        IF VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'ALLOW'
+          OR  (VAR_EVENT_LOG_UPDATE.POLICY_ACTION  = 'CHALLENGE' AND VAR_EVENT_LOG_UPDATE.CHALLENGE_SUCCESSFUL='Y')
+          OR  (VAR_EVENT_LOG_UPDATE.FLAGGED='Y'   AND  VAR_EVENT_LOG_UPDATE.RESOLUTION = 'G')
+         THEN VAR_POLICY_ACT_STA_UPD:='ALLOW';
+         END IF;
+
+    -----------------------------------------
+
+    --查看此次修改的数据是否已经汇总过
+    --先去realtime判断是否汇总过
+ -- 只做realtime到minute的+1 -1
+    --如果数据还没有进行汇总，则不处理
+    --查询出UPDATE里的该条数据在REALTIME表里的被汇总的时间
+    VAR_USED_TIME := GET_USED_TIME(VAR_EVENT_LOG_UPDATE.EVENT_ID,VAR_EVENT_LOG_UPDATE.SHORT_DATE);
+
+
+
+
+    --如果更新发生在汇总后
+    SET TRANSACTION NAME 'APPEND_RESULT_WHEN_UPDATE';
+    STATUS_TIMES_ID := GET_RECORD_ID_AND_REDO_TIME(TO_CHAR(VAR_EVENT_LOG_UPDATE.LASTMODIFIED,'YYYY-MM-DD HH24:MI:SS'),'APPEND_RESULT_WHEN_UPDATE'||VAR_EVENT_LOG_UPDATE.EVENT_ID);
+    VAR_REDO_TIME := TO_NUMBER(SUBSTR(STATUS_TIMES_ID,2,2))+1;
+    OP_STATUS := SUBSTR(STATUS_TIMES_ID,1,1);
+    IF OP_STATUS = 'R' and  VAR_REDO_TIME>3 THEN --如果有当前的数据正在被更新或（防止延时后两次更新一条数据）
+     CANNOT_UPDATE_ID :=  VAR_EVENT_LOG_UPDATE.EVENT_ID;
+    END IF;
+    IF VAR_EVENT_LOG_UPDATE.EVENT_ID != CANNOT_UPDATE_ID THEN
+        IF VAR_REDO_TIME = 0
+        THEN
+        /*插入日志*/
+       /*插入日志*/
+        INSERT_COLLECT_DATA_LOG(
+        VAR_RECORD_ID,        --RECORD_ID 将来会返回主键，用于修改日志操作
+        'APPEND_RESULT_WHEN_UPDATE'||VAR_EVENT_LOG_UPDATE.EVENT_ID, --PROC_NAME 存储过程名称和存储过程名字
+        'EVENT_LOG_REALTIME',  --FROM_TABLE 来源表
+        'RP_TANS_LOG_MINUTE',  --TO_TABLE 目标表
+        VAR_EVENT_LOG_UPDATE.EVENT_ID,        --DATA_RANGE 数据范围
+        TO_CHAR(VAR_EVENT_LOG_UPDATE.LASTMODIFIED,'YYYY-MM-DD HH24:MI:SS'),        --DATA_BEGIN_TIME 数据开始时间
+        TO_CHAR(VAR_EVENT_LOG_UPDATE.LASTMODIFIED,'YYYY-MM-DD HH24:MI:SS')          --DATA_END_TIME 数据开始时间
+       );
+       ELSE
+        --重复执行的开始，修改数据
+        VAR_RECORD_ID := SUBSTR(STATUS_TIMES_ID,4,length(STATUS_TIMES_ID));
+        UPDATE_COLLECT_DATA_LOG(
+            VAR_RECORD_ID,
+            SYSDATE,
+            NULL,
+            'RUNNING',
+            VAR_RECORD_NUM,
+            VAR_REDO_TIME
+        );
+      END IF;
+
+
+    IF VAR_EVENT_LOG_UPDATE.LASTMODIFIED > VAR_USED_TIME
+          THEN
+
+               SELECT count(*) INTO VAR_COUNT_IN_LOG FROM EVENT_LOG_REAL_GATHER T WHERE T.EVENT_ID = VAR_EVENT_LOG_UPDATE.EVENT_ID
+                       AND T.SHORT_DATE = VAR_EVENT_LOG_UPDATE.SHORT_DATE;
+              if VAR_COUNT_IN_LOG>0 then
+                --查询出EVENT_LOG里的该条数据
+                SELECT * INTO VAR_EVENT_LOG_REAL_GATHER FROM EVENT_LOG_REAL_GATHER T WHERE T.EVENT_ID = VAR_EVENT_LOG_UPDATE.EVENT_ID
+                       AND T.SHORT_DATE = VAR_EVENT_LOG_UPDATE.SHORT_DATE;
+
+                   VAR_CDF_ALL_used:=','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_1||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_2||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_3||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_4||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_5
+                      ||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_6||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_7||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_8||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_9||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_10
+                      ||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_11||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_12||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_13||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_14||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_15
+                      ||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_16||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_17||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_18||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_19||','||VAR_EVENT_LOG_REAL_GATHER.CDF_S_20||',';
+                      VAR_C4_2:=get_vale_from_cd_gnpx(VAR_CDF_ALL_used,'4','4');
+                      VAR_C7_2:=get_vale_from_cd_gnpx(VAR_CDF_ALL_used,'7','4');
+                      VAR_C6_2:=get_vale_from_cd_gnpx(VAR_CDF_ALL_used,'6','4');
+                      VAR_C1_2:=get_vale_from_cd_gnpx(VAR_CDF_ALL_used,'1','4');
+                      VAR_C11_2:=get_vale_from_cd_gnpx(VAR_CDF_ALL_used,'11','5');
+                      VAR_C13_2:=get_vale_from_cd_gnpx(VAR_CDF_ALL_used,'13','5');
+                --存放log表中的自定义字段
+
+                --没有更新前POLICY_ACTION的状态
+              --  VAR_LOG_POLICY_ACTION := VAR_EVENT_LOG_REAL_GATHER.Policy_Action;
+
+                 IF (VAR_EVENT_LOG_REAL_GATHER.RESOLUTION='F' AND VAR_EVENT_LOG_REAL_GATHER.FLAGGED IS NULL)
+                     OR  VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'DENY'
+                     OR  (VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION  = 'CHALLENGE' AND VAR_EVENT_LOG_REAL_GATHER.CHALLENGE_SUCCESSFUL='N')
+
+                  THEN VAR_POLICY_ACT_STA_LOG:='DENY';
+                  END IF;
+
+                  IF VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'ALLOW'
+                     OR  (VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION  = 'CHALLENGE' AND VAR_EVENT_LOG_REAL_GATHER.CHALLENGE_SUCCESSFUL='Y')
+                     OR  (VAR_EVENT_LOG_REAL_GATHER.FLAGGED='Y'   AND  VAR_EVENT_LOG_REAL_GATHER.RESOLUTION = 'G')
+                   THEN VAR_POLICY_ACT_STA_LOG:='ALLOW';
+                   END IF;
+
+            --+1sql
+                SELECT SUBSTR(TO_CHAR(VAR_EVENT_LOG_UPDATE.SYS_CREATION_DATE,'YYYY/MM/DD HH24:MI:SS'),0,16) INTO VAR_SYSDATE FROM DUAL;
+                VAR_ORDER_ID := GET_RULE_ORDER_ID(VAR_EVENT_LOG_REAL_GATHER.ORG_ID,VAR_EVENT_LOG_REAL_GATHER.POLICY_RULE_ID);
+                  VAR_APPEND_RESULT_SQL := 'INSERT INTO RP_TRANS_LOG_MINUTE
+                  (
+                    TRANS_TIME,
+                    TRANS_PROVINCE,
+                    TRANS_TYPE,
+                    SCORE_RANGE,
+                    RULE_NAME,
+                    POLICY_ACTION,--新增
+                    /*新加字段开始*/
+                    CHALLENGE_SUCCESSFUL,
+                    CHALLENGE_AUTH_METHOD,
+                    PRIORITY,---
+                    DESCRIBE,--
+                    IS_USE_DEVICE,--
+                    TRANS_DITCH,
+                    TRANS_OPER_SYSTEM,
+                    TRANS_BROWSER,
+                    FLAGGED,
+                    RESOLUTION,
+                    /*新加字段结束*/
+                    TRANS_NUM,
+                    TRIGGERED_NUM,
+                    TRIGGERED_SUCCESSFUL_NUM,
+                    /*新加字段开始*/
+                    WEB_TRANS_NUM,
+                    MOBILE_TRANS_NUM,
+                    IPAD_TRANS_NUM,
+                    QA_LOGIN_NUM,
+                    SMS_LOGIN_NUM,
+                    CC_LOGIN_NUM,
+                    REGISTRAR_QA_NUM,--***
+                    CREATE_CUSTOMR_FILE_NUM,
+                    ALLOW_TRANS_NUM,
+                    REVIEW_TRANS_NUM,
+                    CHALLENGE_TRANS_NUM,
+                    DENY_TRANS_NUM,
+                    TOTAL_SCORE_RANGE,
+                    TOTAL_AMOUNT
+                    /*新加字段结束*/
+                  )VALUES (
+                  TO_DATE('''||VAR_SYSDATE||''', ''YYYY/MM/DD HH24:MI''),
+                  '''||get_province(VAR_EVENT_LOG_UPDATE.IP_COUNTRY,VAR_EVENT_LOG_UPDATE.IP_CITY,VAR_EVENT_LOG_UPDATE.Ip_Region)||''',
+                  '''||GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(VAR_EVENT_LOG_UPDATE.EVENT_TYPE,VAR_EVENT_LOG_UPDATE.USER_DEFINED_EVENT_TYPE),'eventType')||''',
+                  '''||GET_SCORE_RANGE(VAR_EVENT_LOG_UPDATE.RISK_SCORE) ||''',
+                  '''||NVL(VAR_EVENT_LOG_UPDATE.POLICY_RULE_ID,'FALLBACK_RULE')||''',
+                  '''||VAR_EVENT_LOG_UPDATE.POLICY_ACTION||''',
+                  '''||VAR_EVENT_LOG_UPDATE.CHALLENGE_SUCCESSFUL||''',
+                  '''||VAR_EVENT_LOG_UPDATE.CHALLENGE_AUTH_METHOD||''',
+                  '''||SUBSTR(VAR_ORDER_ID,0,INSTR(VAR_ORDER_ID,'+')-1)||''',--优先级
+                  '''||SUBSTR(VAR_ORDER_ID,INSTR(VAR_ORDER_ID,'-')+1)||''',--描述
+                  '''||NVL(VAR_EVENT_LOG_UPDATE.IS_DEVICE_BOUND,'N')||''',
+                  '''||VAR_EVENT_LOG_UPDATE.CHANNEL_INDICATOR||''',
+                  '''||VAR_EVENT_LOG_UPDATE.OPERATING_SYSTEM||''',
+                  '''||VAR_EVENT_LOG_UPDATE.BROWSER_TYPE||''',
+                  '''||VAR_EVENT_LOG_UPDATE.FLAGGED||''',
+                  '''||VAR_EVENT_LOG_UPDATE.RESOLUTION||''',
+                  '||1||',
+                  '||CASE WHEN VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'CHALLENGE'  THEN 1 ELSE 0 END ||',
+                  '||CASE WHEN VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'CHALLENGE' AND  VAR_EVENT_LOG_UPDATE.CHALLENGE_SUCCESSFUL = 'Y' THEN 1 ELSE 0 END||',
+                  '||case WHEN VAR_EVENT_LOG_UPDATE.CHANNEL_INDICATOR = 'WEB' then 1 else 0 end||',--WEB交易量
+                  '||case WHEN VAR_EVENT_LOG_UPDATE.CHANNEL_INDICATOR = 'MOBILE' then 1 else 0 end||',--Mobile交易量
+                  '||case WHEN VAR_C6 = 'IPAD' then 1 else 0 end ||' ,--Ipad交易量
+                  '||0||',
+                  '||0||',
+                  '||0||',
+                  '||0||',
+                  '||0||',
+                  '||CASE WHEN VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'ALLOW' then 1 else 0 end||',
+                  '||CASE WHEN VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'REVIEW' then 1 else 0 end||',
+                  '||CASE WHEN VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'CHALLENGE' then 1 else 0 end||',
+                  '||CASE WHEN VAR_EVENT_LOG_UPDATE.POLICY_ACTION = 'DENY' then 1 else 0 end||',
+                  '||VAR_EVENT_LOG_UPDATE.RISK_SCORE||',
+                  '||GET_AMT_BY_CURRENCY(VAR_EVENT_LOG_UPDATE.AMOUNT_ORIGINAL,VAR_EVENT_LOG_UPDATE.AMOUNT_CURRENCY)||')'--通过汇率表和币种转换再求和
+                  ;
+                --执行动态SQL
+              --insert into test(test_name) values(VAR_APPEND_RESULT_SQL);
+              --commit;
+               execute immediate VAR_APPEND_RESULT_SQL;
+               --commit;
+               -- -1sql
+                VAR_APPEND_RESULT_SQL := 'INSERT INTO RP_TRANS_LOG_MINUTE
+                  (
+                    TRANS_TIME,
+                    TRANS_PROVINCE,
+                    TRANS_TYPE,
+                    SCORE_RANGE,
+                    RULE_NAME,
+                    POLICY_ACTION,--新增
+                    /*新加字段开始*/
+                    CHALLENGE_SUCCESSFUL,
+                    CHALLENGE_AUTH_METHOD,
+                    PRIORITY,---
+                    DESCRIBE,--
+                    IS_USE_DEVICE,--
+                    TRANS_DITCH,
+                    TRANS_OPER_SYSTEM,
+                    TRANS_BROWSER,
+                    FLAGGED,
+                    RESOLUTION,
+                    /*新加字段结束*/
+                    TRANS_NUM,
+                    TRIGGERED_NUM,
+                    TRIGGERED_SUCCESSFUL_NUM,
+                    /*新加字段开始*/
+                    WEB_TRANS_NUM,
+                    MOBILE_TRANS_NUM,
+                    IPAD_TRANS_NUM,
+                    QA_LOGIN_NUM,
+                    SMS_LOGIN_NUM,
+                    CC_LOGIN_NUM,
+                    REGISTRAR_QA_NUM,--***
+                    CREATE_CUSTOMR_FILE_NUM,
+                    ALLOW_TRANS_NUM,
+                    REVIEW_TRANS_NUM,
+                    CHALLENGE_TRANS_NUM,
+                    DENY_TRANS_NUM,
+                    TOTAL_SCORE_RANGE,
+                    TOTAL_AMOUNT
+                    /*新加字段结束*/
+                  )VALUES (
+                  TO_DATE('''||VAR_SYSDATE||''', ''YYYY/MM/DD HH24:MI''),
+                  '''||get_province(VAR_EVENT_LOG_REAL_GATHER.IP_COUNTRY,VAR_EVENT_LOG_REAL_GATHER.IP_CITY,VAR_EVENT_LOG_REAL_GATHER.Ip_Region)||''',
+                  '''||GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(VAR_EVENT_LOG_REAL_GATHER.EVENT_TYPE,VAR_EVENT_LOG_REAL_GATHER.USER_DEFINED_EVENT_TYPE),'eventType')||''',
+                  '''||GET_SCORE_RANGE(VAR_EVENT_LOG_REAL_GATHER.RISK_SCORE) ||''',
+                  '''||NVL(VAR_EVENT_LOG_REAL_GATHER.POLICY_RULE_ID,'FALLBACK_RULE')||''',
+                  '''||VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION||''',
+                  '''||VAR_EVENT_LOG_REAL_GATHER.CHALLENGE_SUCCESSFUL||''',
+                  '''||VAR_EVENT_LOG_REAL_GATHER.CHALLENGE_AUTH_METHOD||''',
+                  '''||SUBSTR(VAR_ORDER_ID,0,INSTR(VAR_ORDER_ID,'+')-1)||''',--优先级
+                  '''||SUBSTR(VAR_ORDER_ID,INSTR(VAR_ORDER_ID,'-')+1)||''',--描述
+                  '''||NVL(VAR_EVENT_LOG_REAL_GATHER.IS_DEVICE_BOUND,'N')||''',
+                  '''||VAR_EVENT_LOG_REAL_GATHER.CHANNEL_INDICATOR||''',
+                  '''||VAR_EVENT_LOG_REAL_GATHER.OPERATING_SYSTEM||''',
+                  '''||VAR_EVENT_LOG_REAL_GATHER.BROWSER_TYPE||''',
+                  '''||VAR_EVENT_LOG_UPDATE.FLAGGED||''',
+                  '''||VAR_EVENT_LOG_UPDATE.RESOLUTION||''',
+                  '||-1||',
+                  '||CASE WHEN VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'CHALLENGE'  THEN -1 ELSE 0 END ||',
+                  '||CASE WHEN VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'CHALLENGE' AND  VAR_EVENT_LOG_REAL_GATHER.CHALLENGE_SUCCESSFUL = 'Y' THEN -1 ELSE 0 END||',
+                  '||case WHEN VAR_EVENT_LOG_REAL_GATHER.CHANNEL_INDICATOR = 'WEB' then -1 else 0 end||',--WEB交易量
+                  '||case WHEN VAR_EVENT_LOG_REAL_GATHER.CHANNEL_INDICATOR = 'MOBILE' then -1 else 0 end||',--Mobile交易量
+                  '||case WHEN VAR_C6_2 = 'IPAD' then -1 else 0 end ||' ,--Ipad交易量
+                  '||0||',
+                  '||0||',
+                  '||0||',
+                  '||0||',
+                  '||0||',
+                  '||CASE WHEN VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'ALLOW' then -1 else 0 end||' ,
+                  '||CASE WHEN VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'REVIEW' then -1 else 0 end||',
+                  '||CASE WHEN VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'AHALLENGE' then -1 else 0 end||',
+                  '||CASE WHEN VAR_EVENT_LOG_REAL_GATHER.POLICY_ACTION = 'DENY' then -1 else 0 end||' ,
+                  '||'-'||VAR_EVENT_LOG_REAL_GATHER.RISK_SCORE||',
+                  '||'-'||GET_AMT_BY_CURRENCY(VAR_EVENT_LOG_REAL_GATHER.AMOUNT_ORIGINAL,VAR_EVENT_LOG_REAL_GATHER.AMOUNT_CURRENCY)||')'--通过汇率表和币种转换再求和
+                  ;
+                --执行动态SQL
+               -- insert into test(test_name) values(VAR_APPEND_RESULT_SQL);
+               -- commit;
+                 execute immediate VAR_APPEND_RESULT_SQL;
+
+
+
+                --系统或人工判断为非欺诈，从欺诈表中删除
+                  IF VAR_POLICY_ACT_STA_UPD='ALLOW' THEN
+                      DELETE FROM RP_COMFIRMED_EVENT_DETAIL T WHERE T.EVENT_ID = VAR_EVENT_LOG_UPDATE.EVENT_ID;
+                  END IF;
+
+
+                  --先判断该数据是否已经在 错漏报里存在了
+                  --系统判断为正常交易人工改为欺诈的 或者相反 增加到已确认欺诈表里 并在错漏报里增加
+                  --VAR_EVENT_ID :='';
+                  SELECT COUNT(1)
+                  --CASE WHEN T.EVENT_ID IS NULL THEN '####' ELSE T.EVENT_ID END
+                  INTO VAR_EVENT_ID FROM RP_COMFIRMED_EVENT_DETAIL T WHERE T.EVENT_ID = VAR_EVENT_LOG_UPDATE.EVENT_ID;
+                        IF VAR_EVENT_ID = 0 THEN
+
+
+                           IF VAR_POLICY_ACT_STA_LOG='ALLOW' AND VAR_POLICY_ACT_STA_UPD='DENY' THEN
+
+                                --把人工改为欺诈的增加到已确认欺诈表里
+                                        VAR_APPEND_RESULT_SQL := 'INSERT INTO RP_COMFIRMED_EVENT_DETAIL(
+                                        EVENT_ID,--ID
+                                        TRANS_TIME,--交易时间
+                                        TRANS_TYPE,--交易类型
+                                        TRANS_PROVINCE,--开户省份
+                                        CCE_CSTNO,--客户号
+                                        CCE_CERTTYPE,--证件类型
+                                        CCE_CERTNO,--证件号
+                                        CCE_AMT,--交易金额
+                                        CCE_RISK_SCORE,--不处理的风险分值
+                                        CCE_PAY_NODE,--付款人开户行
+                                        CCE_PAYEE_ACC,--付款人账号
+                                        CCE_PAYEE_NAME,--付款人姓名
+                                        CCE_REC_ACC,--收款人账号
+                                        CCE_REC_NAME,--收款人姓名
+                                        RULE_NAME,--规则名称
+                                        CCE_RULE_NOTE,--规则描述
+                                        CCE_RULE_EXPR,--规则表达式
+                                        SCORE_RANGE--处理后的风险分值
+                                      )VALUES('''||VAR_EVENT_LOG_UPDATE.EVENT_ID||''',
+                                              TO_DATE('''||TO_CHAR(VAR_EVENT_LOG_UPDATE.SYS_CREATION_DATE,'YYYY/MM/DD HH24:MI:SS')||''', ''YYYY/MM/DD HH24:MI:SS''),
+                                              '''||GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(VAR_EVENT_LOG_UPDATE.EVENT_TYPE,VAR_EVENT_LOG_UPDATE.USER_DEFINED_EVENT_TYPE),'eventType')||''',
+                                              '''||VAR_C13||''',--开户省份为自定义字段，需要转换成动态SQL
+                                              '||VAR_EVENT_LOG_UPDATE.USER_ID||',
+                                              '''||VAR_C4||''',--证件类型为自定义字段  要转换成动态SQL
+                                              '''||VAR_C7||''',--证件号为自定义字段  要转换成动态SQL
+                                              '||GET_AMT_BY_CURRENCY(VAR_EVENT_LOG_UPDATE.AMOUNT_ORIGINAL,VAR_EVENT_LOG_UPDATE.AMOUNT_CURRENCY)||',--通过汇率和币种转换
+                                              '||VAR_EVENT_LOG_UPDATE.RISK_SCORE||',
+                                              '''||VAR_EVENT_LOG_UPDATE.USER_ACCT_NUMBER||''',
+                                              '''||VAR_C1||''',--付款人姓名
+                                              '''||VAR_C11||''',--收款人开户行 自定义字段 需转换成动态SQL
+                                              '''||VAR_EVENT_LOG_UPDATE.EXT_ACCT_NUMBER||''',
+                                              '''||VAR_EVENT_LOG_UPDATE.EXT_ACCT_OWNER_NAME||''',
+                                              '''||NVL(VAR_EVENT_LOG_UPDATE.POLICY_RULE_ID,'FALLBACK_RULE')||''',
+                                              '''||SUBSTR(VAR_ORDER_ID,INSTR(VAR_ORDER_ID,'-')+1)||''',--描述
+                                              '' '',--表达式
+                                              '||GET_SCORE_RANGE(VAR_EVENT_LOG_UPDATE.RISK_SCORE)||'
+                                      )';
+
+                                --insert into test(test_name) values(VAR_APPEND_RESULT_SQL);
+                              -- commit;
+                                 execute immediate VAR_APPEND_RESULT_SQL;
+
+                            END IF;
+                        END IF;
+
+                  ----------------
+                --如果两种状态不一致同时在错漏报里增加
+
+                IF   (VAR_POLICY_ACT_STA_LOG ='ALLOW' AND VAR_POLICY_ACT_STA_UPD='DENY')
+                  OR (VAR_POLICY_ACT_STA_LOG ='DENY' AND VAR_POLICY_ACT_STA_UPD='ALLOW')
+                    THEN
+                      SELECT COUNT(*) INTO VAR_IS_IN_ERR FROM  RP_ERR_LOST_DETAIL T WHERE T.ERD_TRF_NO = VAR_EVENT_LOG_UPDATE.EVENT_ID;
+
+                         IF VAR_IS_IN_ERR >0 THEN
+                            UPDATE RP_ERR_LOST_DETAIL T SET
+                               T.ERD_BE_STT = VAR_POLICY_ACT_STA_LOG ,
+                               T.ERD_AF_STT = VAR_POLICY_ACT_STA_UPD
+                               WHERE T.ERD_TRF_NO = VAR_EVENT_LOG_UPDATE.EVENT_ID;
+                           ELSE
+
+                                  VAR_APPEND_RESULT_SQL := 'INSERT INTO RP_ERR_LOST_DETAIL
+                                    (TRANS_TYPE,--交易类型
+                                     ERD_TRF_NO,--交易流水号
+                                     ERD_CST_NO,--客户号
+                                     ERD_CERT_TYPE,--证件类型
+                                     ERD_CERT_NO,--证件号
+                                     ERD_CST_NAME,--客户姓名
+                                     ERD_BE_STT,--审核前状态
+                                     ERD_AF_STT,--审核后状态
+                                     TRANS_TIME,--时间
+                                     TRANS_PROVINCE,--交易省份
+                                     RULE_NAME,--规则名称
+                                     SCORE_RANGE--风险分值
+                                    )VALUES(
+                                        '''||GET_NAME_BY_CODE(GET_TOTAL_EVENT_TYPE(VAR_EVENT_LOG_UPDATE.EVENT_TYPE,VAR_EVENT_LOG_UPDATE.USER_DEFINED_EVENT_TYPE),'eventType')||''',
+                                           '''||VAR_EVENT_LOG_UPDATE.EVENT_ID||''',
+                                           '''||VAR_EVENT_LOG_UPDATE.USER_ID||''',
+                                           '''||VAR_C4||''',--证件类型为自定义字段  要转换成动态SQL
+                                          '''||VAR_C7||''',--证件号为自定义字段  要转换成动态SQL
+                                          '''||VAR_C1||''',--付款人姓名
+                                           '''||VAR_POLICY_ACT_STA_LOG||''', --审核前状态
+                                           '''||VAR_POLICY_ACT_STA_UPD||''', --审核后状态
+                                           TO_DATE('''||TO_CHAR(VAR_EVENT_LOG_UPDATE.SYS_CREATION_DATE,'YYYY/MM/DD HH24:MI:SS')||''', ''YYYY/MM/DD HH24:MI:SS''),
+                                           '''||get_province(VAR_EVENT_LOG_UPDATE.IP_COUNTRY, VAR_EVENT_LOG_UPDATE.IP_CITY, VAR_EVENT_LOG_UPDATE.Ip_Region)||''', --交易省份
+                                           '''||VAR_EVENT_LOG_UPDATE.POLICY_RULE_ID||''', --规则名称
+                                           '''||VAR_EVENT_LOG_UPDATE.RISK_SCORE||''' --风险分值
+                                      )';
+
+                                       -- insert into test(test_name) values(VAR_APPEND_RESULT_SQL);
+                                       -- commit;
+                                    execute immediate VAR_APPEND_RESULT_SQL;
+                                    END IF;
+                                END IF;
+
+        ---------------------
+                  end if;
+                      --   '||GET_FACT_INDEX_BY_NAME('customer_full_name')||',--付款人姓名
+            UPDATE  event_log_real_gather T SET
+                  event_id=VAR_EVENT_LOG_UPDATE.EVENT_ID,
+                   event_time=VAR_EVENT_LOG_UPDATE.EVENT_TIME,
+                   ip_address=VAR_EVENT_LOG_UPDATE.IP_ADDRESS,
+                   event_type=VAR_EVENT_LOG_UPDATE.EVENT_TYPE,
+                   user_defined_event_type=VAR_EVENT_LOG_UPDATE.USER_DEFINED_EVENT_TYPE,
+                   risk_score=VAR_EVENT_LOG_UPDATE.RISK_SCORE,
+                   policy_action=VAR_EVENT_LOG_UPDATE.POLICY_ACTION,
+                   challenge_auth_method=VAR_EVENT_LOG_UPDATE.CHALLENGE_AUTH_METHOD,
+                   challenge_successful=VAR_EVENT_LOG_UPDATE.CHALLENGE_SUCCESSFUL,
+                   policy_rule_id=VAR_EVENT_LOG_UPDATE.POLICY_RULE_ID,
+                   short_date=VAR_EVENT_LOG_UPDATE.SHORT_DATE,
+                   sys_creation_date=VAR_EVENT_LOG_UPDATE.SYS_CREATION_DATE,
+                   lastmodified=VAR_EVENT_LOG_UPDATE.LASTMODIFIED,
+                   user_id=VAR_EVENT_LOG_UPDATE.USER_ID,
+                   user_hash=VAR_EVENT_LOG_UPDATE.USER_HASH,
+                   preliminary_score=VAR_EVENT_LOG_UPDATE.PRELIMINARY_SCORE,
+                   has_used=VAR_EVENT_LOG_UPDATE.HAS_USED,
+                   has_used_time=VAR_EVENT_LOG_UPDATE.Lastmodified,
+                   ip_country=VAR_EVENT_LOG_UPDATE.IP_COUNTRY,
+                   ip_city=VAR_EVENT_LOG_UPDATE.IP_CITY,
+                   channel_indicator=VAR_EVENT_LOG_UPDATE.CHANNEL_INDICATOR,
+                   operating_system=VAR_EVENT_LOG_UPDATE.OPERATING_SYSTEM,
+                   browser_type=VAR_EVENT_LOG_UPDATE.BROWSER_TYPE,
+                   amount_original=VAR_EVENT_LOG_UPDATE.AMOUNT_ORIGINAL,
+                   amount_currency=VAR_EVENT_LOG_UPDATE.AMOUNT_CURRENCY,
+                   user_acct_number=VAR_EVENT_LOG_UPDATE.USER_ACCT_NUMBER,
+                   ext_acct_number=VAR_EVENT_LOG_UPDATE.EXT_ACCT_NUMBER,
+                   ext_acct_owner_name=VAR_EVENT_LOG_UPDATE.EXT_ACCT_OWNER_NAME,
+                   flagged=VAR_EVENT_LOG_UPDATE.FLAGGED,
+                   resolution=VAR_EVENT_LOG_UPDATE.RESOLUTION,
+                   cdf_s_1=VAR_EVENT_LOG_UPDATE.CDF_S_1,
+                   cdf_s_2=VAR_EVENT_LOG_UPDATE.CDF_S_2,
+                   cdf_s_3=VAR_EVENT_LOG_UPDATE.CDF_S_3,
+                   cdf_s_4=VAR_EVENT_LOG_UPDATE.CDF_S_4,
+                   cdf_s_5=VAR_EVENT_LOG_UPDATE.CDF_S_5,
+                   cdf_s_6=VAR_EVENT_LOG_UPDATE.CDF_S_6,
+                   cdf_s_7=VAR_EVENT_LOG_UPDATE.CDF_S_7,
+                   cdf_s_8=VAR_EVENT_LOG_UPDATE.CDF_S_8,
+                   cdf_s_9=VAR_EVENT_LOG_UPDATE.CDF_S_9,
+                   cdf_s_10=VAR_EVENT_LOG_UPDATE.CDF_S_10,
+                   cdf_s_11=VAR_EVENT_LOG_UPDATE.CDF_S_11,
+                   cdf_s_12=VAR_EVENT_LOG_UPDATE.CDF_S_12,
+                   cdf_s_13=VAR_EVENT_LOG_UPDATE.CDF_S_13,
+                   cdf_s_14=VAR_EVENT_LOG_UPDATE.CDF_S_14,
+                   cdf_s_15=VAR_EVENT_LOG_UPDATE.CDF_S_15,
+                   cdf_s_16=VAR_EVENT_LOG_UPDATE.CDF_S_16,
+                   cdf_s_17=VAR_EVENT_LOG_UPDATE.CDF_S_17,
+                   cdf_s_18=VAR_EVENT_LOG_UPDATE.CDF_S_18,
+                   cdf_s_19=VAR_EVENT_LOG_UPDATE.CDF_S_19,
+                   cdf_s_20=VAR_EVENT_LOG_UPDATE.CDF_S_20,
+                   org_id=VAR_EVENT_LOG_UPDATE.ORG_ID,
+                   is_device_bound=VAR_EVENT_LOG_UPDATE.IS_DEVICE_BOUND,
+                   cookie=VAR_EVENT_LOG_UPDATE.COOKIE,
+                   ip_region=VAR_EVENT_LOG_UPDATE.IP_REGION
+                   WHERE T.EVENT_ID = VAR_EVENT_LOG_UPDATE.EVENT_ID
+                   AND T.SHORT_DATE = VAR_EVENT_LOG_UPDATE.SHORT_DATE;
+
+       END IF;
+    --并修改更新表记录的状态
+    UPDATE EVENT_LOG_UPDATE SET
+    HAS_USED = 'Y'  WHERE EVENT_ID = VAR_EVENT_LOG_UPDATE.EVENT_ID AND SHORT_DATE = VAR_EVENT_LOG_UPDATE.SHORT_DATE;
+     /*操作成功后修改日志记录*/
+    UPDATE_COLLECT_DATA_LOG(
+      VAR_RECORD_ID,
+      NULL,
+      SYSDATE,
+      'SUCCESSFUL',
+      VAR_RECORD_NUM,
+      0
+    );
+  END IF;
+  COMMIT;
+
+
+
+  END LOOP;
+
+  --关闭游标
+  IF MY_CURSOR%ISOPEN THEN
+     CLOSE MY_CURSOR;
+  END IF;
+
+  EXCEPTION
+     WHEN OTHERS
+     THEN
+        --v_ErrorCode := SQLCODE;
+        --v_ErrorText := SUBSTR(SQLERRM, 1, 200);
+        ROLLBACK;
+        /*操作失败后修改日志记录*/
+         UPDATE_COLLECT_DATA_LOG(
+           VAR_RECORD_ID,
+           NULL,
+           SYSDATE,
+           'FAILED',
+           VAR_RECORD_NUM,
+           VAR_REDO_TIME
+         );
+
+       RETURN;
+
+END APPEND_RESULT_WHEN_UPDATE;

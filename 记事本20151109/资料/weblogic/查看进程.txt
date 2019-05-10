@@ -1,0 +1,4 @@
+﻿1、结合netstat -ntlp看端口和PID
+2、startWeblogic.sh里面有个SERVER_NAME="Name1"可以设置名字的
+3、ps -ef |grep weblogic
+-Dweblogic.Name=${SERVER_NAME}

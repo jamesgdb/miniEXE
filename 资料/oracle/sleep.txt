@@ -1,0 +1,19 @@
+﻿dbms_lock.sleep(5)；
+查看事务个数。
+db2 list application for db catest|grep 192.168.3.219|wc -l
+
+
+
+alter table EDM_DC_CLEAR_LOG
+  add constraint PK_EDM_DC_CLEAR_LOG primary key (DC_ID, RUN_TM)
+  using index 
+  tablespace USERS
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    minextents 1
+    maxextents unlimited
+  );

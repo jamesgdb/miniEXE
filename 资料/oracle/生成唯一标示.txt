@@ -1,0 +1,7 @@
+﻿sys_guid()；
+select dbms_random.value(1,100) from dual;----------生成浮点数
+select round(dbms_random.value(1,100)) f1 from dual ；生成随机的整数
+purge recyclebin ------清空回收站 ；
+select * from user_recyclebin --------查看回收站
+drop table table_name   purge;---------删除表不进入回收站
+

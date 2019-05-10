@@ -1,0 +1,7 @@
+﻿登陆：http://localhost:8080/belink-community/pub/index/home；
+home.jsp
+      head.jsp   头
+            logo.jsp  头上
+            navi.jsp  头下
+ 关于spring中的切面配置：memberpoint-context.xml
+ 关于一些java中hibernate的代码：UserRepositoryImpl.java

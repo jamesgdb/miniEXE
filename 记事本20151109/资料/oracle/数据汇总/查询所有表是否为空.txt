@@ -1,0 +1,33 @@
+﻿select count(*) from rp_CHALLENGE_FAIL_BD_DEVICE_ID;
+select count(*) from rp_BD_DEVICE_ID;
+select count(*) from rp_BD_DEVICE_CUSTOMER_ID;
+select count(*) from rp_TRANS_DITCH_CUSTOMER_ID;
+select count(*) from rp_USERAMOUNT_PROVINCE_DITCH_C;
+select count(*) from rp_ALL_OF_DEVICE_ID;
+select count(*) from rp_DEVICE_ID_IP_TRANS_PRO;
+select count(*) from rp_IP_UNIQUE;
+select count(*) from rp_COUNT_DIVICE_AMOUNT;
+select count(*) from rp_COUNT_USER_AMOUNT;
+select count(*) from rp_CUSTOMER_ID_IP_TRANS_PRO;
+select count(*) from rp_PROVINCE_CUSTOMER_AMOUNT;
+select count(*) from rp_PROVINCE_DITCH_DEVICEID;
+select count(*) from rp_PROVINCE_DEVICEID;
+
+
+select count(*) from rp_comfirmed_event_detail;
+select count(*) from rp_err_lost_detail;
+
+select count(*) from rp_trans_log_day;
+select count(*) from rp_trans_log_halfyear;
+select count(*) from rp_trans_log_hour;
+select count(*) from rp_trans_log_minute;
+select count(*) from rp_trans_log_month;
+select count(*) from rp_trans_log_quarter;
+select count(*) from rp_trans_log_week;
+select count(*) from rp_trans_log_year;
+
+select count(*) from  rp_fixdate_sololine;
+select count(*) from  rp_auth_method_and_result;
+select count(*) from  device_risk_information;
+select count(*) from  rp_client_behave_als;
+select count(*) from  ever_province_information;

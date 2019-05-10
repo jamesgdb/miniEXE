@@ -1,0 +1,6 @@
+﻿show parameter job_queue_process;查看可以跑的job数
+select * from dba_jobs_running ;l查看正在跑的job
+select * from dba_jobs ;
+alter system set job_queue_processes=0 --关闭job进程，等待5--10秒钟 
+
+alter system set job_quene_processes=5 --恢复原来的值 
